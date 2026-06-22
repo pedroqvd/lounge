@@ -3,13 +3,16 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function createEvent(data: { title: string, date: string, description?: string }) {
+export async function createEvent(data: { title: string, date: string, type: string, time?: string, location?: string, description?: string }) {
   try {
     await prisma.event.create({
       data: {
         title: data.title,
         date: new Date(data.date),
-        description: data.description
+        type: data.type,
+        time: data.time || null,
+        location: data.location || null,
+        description: data.description || null
       }
     })
     revalidatePath('/calendario')
