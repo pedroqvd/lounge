@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send } from 'lucide-react'
+import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2 } from 'lucide-react'
 import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
 import * as Dialog from '@radix-ui/react-dialog'

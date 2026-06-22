@@ -74,8 +74,19 @@ export async function seedMembers() {
 export async function getMembers() {
   try {
     const members = await prisma.member.findMany({
-      include: {
-        group: true,
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        status: true,
+        inviteStatus: true,
+        groupId: true,
+        group: {
+          select: {
+            name: true,
+            liderId: true,
+          }
+        }
       },
       orderBy: {
         name: 'asc'
