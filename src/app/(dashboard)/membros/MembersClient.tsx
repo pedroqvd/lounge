@@ -5,6 +5,7 @@ import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Databa
 import { seedMembers, deleteMember, createMember, updateMember } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
 import * as Dialog from '@radix-ui/react-dialog'
+import Link from 'next/link'
 
 type Member = any 
 type Group = any
@@ -225,7 +226,9 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
                     <input type="checkbox" className="rounded border-input text-primary focus:ring-primary" checked={selectedMembers.has(member.id)} onChange={() => toggleSelect(member.id)} />
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium">{member.name}</p>
+                    <Link href={`/membros/${member.id}`} className="font-medium hover:text-primary transition-colors">
+                      {member.name}
+                    </Link>
                     <p className="text-xs text-muted-foreground">{member.phone}</p>
                   </td>
                   <td className="px-4 py-3">

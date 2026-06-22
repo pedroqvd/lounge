@@ -96,3 +96,10 @@ model ContactHistory {
   member     Member    @relation(fields: [memberId], references: [id])
   template   Template? @relation(fields: [templateId], references: [id])
 }
+
+model Settings {
+  id                String   @id @default("global")
+  inactivityDays    Int      @default(20)
+  defaultChurchName String   @default("Lounge For You")
+  updatedAt         DateTime @updatedAt
+}

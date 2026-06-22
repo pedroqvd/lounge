@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { Users, UserPlus, Cake, MessageCircle, AlertCircle } from 'lucide-react'
-import { startOfMonth, subDays, addDays } from 'date-fns'
+import { getSettings } from '@/app/actions/settings'
+import Link from 'next/link'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 const prisma = globalForPrisma.prisma || new PrismaClient()
@@ -9,16 +10,25 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+  const settings = await getSettings()
+  
   const [totalAtivos, visitantes, historicoCount] = await Promise.all([
     prisma.member.count({ where: { status: 'ATIVO' } }),
     prisma.member.count({ where: { status: 'VISITANTE' } }),
     prisma.contactHistory.count()
   ])
   
-  // This is a naive birthday calculation. In a real robust system, we would query by month and day ignoring the year.
-  // For simplicity and speed of deployment, we will fetch all members and filter in JS
+  // Fetch all active/visitor members with their latest contact history
   const allMembers = await prisma.member.findMany({
-    select: { id: true, name: true, birthDate: true, status: true, phone: true }
+    where: { status: { in: ['ATIVO', 'VISITANTE'] } },
+    select: { 
+      id: true, name: true, birthDate: true, status: true, phone: true, createdAt: true,
+      histories: {
+        orderBy: { sentAt: 'desc' },
+        take: 1,
+        select: { sentAt: true }
+      }
+    }
   })
 
   const today = new Date()
@@ -36,11 +46,24 @@ export default async function DashboardPage() {
     return aBday.getTime() - bBday.getTime()
   })
 
+  // Evasion Risk Logic
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - settings.inactivityDays)
+
+  const atRiskMembers = allMembers.filter(m => {
+    // If they have history, check if latest is older than cutoff
+    if (m.histories.length > 0) {
+      return new Date(m.histories[0].sentAt) < cutoffDate
+    }
+    // If no history, check if they were created before cutoff
+    return new Date(m.createdAt) < cutoffDate
+  })
+
   const stats = [
     { name: 'Total de Ativos', value: totalAtivos.toString(), icon: Users, color: 'text-primary' },
     { name: 'Visitantes', value: visitantes.toString(), icon: UserPlus, color: 'text-blue-500' },
     { name: 'Aniversariantes (7 dias)', value: birthdays.length.toString(), icon: Cake, color: 'text-pink-500' },
-    { name: 'Sem contato > 30 dias', value: '0', icon: AlertCircle, color: 'text-destructive' }, // Will implement later
+    { name: `Risco de Evasão (> ${settings.inactivityDays}d)`, value: atRiskMembers.length.toString(), icon: AlertCircle, color: 'text-destructive' },
     { name: 'Mensagens Enviadas', value: historicoCount.toString(), icon: MessageCircle, color: 'text-whatsapp' },
   ]
 
@@ -115,12 +138,45 @@ export default async function DashboardPage() {
             Atenção Necessária
           </h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border border-border rounded-xl bg-secondary/30">
-              <div>
-                <p className="font-bold">Em breve</p>
-                <p className="text-sm text-muted-foreground font-medium">O controle de inatividade será ativado no próximo módulo.</p>
+            {atRiskMembers.length === 0 ? (
+              <div className="p-4 border border-border rounded-xl bg-green-500/10 text-green-700 dark:text-green-400 text-center text-sm font-medium">
+                Parabéns! Nenhum membro está há mais de {settings.inactivityDays} dias sem contato.
               </div>
-            </div>
+            ) : (
+              atRiskMembers.slice(0, 5).map(m => {
+                const daysSince = m.histories.length > 0 
+                  ? Math.floor((new Date().getTime() - new Date(m.histories[0].sentAt).getTime()) / (1000 * 3600 * 24))
+                  : Math.floor((new Date().getTime() - new Date(m.createdAt).getTime()) / (1000 * 3600 * 24));
+                  
+                return (
+                  <div key={m.id} className="group flex items-center justify-between p-4 border border-destructive/20 rounded-xl hover:border-destructive/50 hover:bg-destructive/5 transition-all duration-300">
+                    <div>
+                      <Link href={`/membros/${m.id}`} className="font-bold text-foreground group-hover:text-destructive transition-colors">
+                        {m.name}
+                      </Link>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        {daysSince} dias sem contato
+                      </p>
+                    </div>
+                    {m.phone && (
+                      <a 
+                        href={`https://wa.me/${m.phone.replace(/\D/g, '')}?text=Oi ${m.name}, sentimos sua falta!`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-destructive text-destructive-foreground text-sm font-bold rounded-lg hover:opacity-90 hover:scale-105 transition-all shadow-md shadow-destructive/20"
+                      >
+                        Resgatar
+                      </a>
+                    )}
+                  </div>
+                )
+              })
+            )}
+            {atRiskMembers.length > 5 && (
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                E mais {atRiskMembers.length - 5} pessoas. Acesse a área de Membros.
+              </p>
+            )}
           </div>
         </div>
       </div>

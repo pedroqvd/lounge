@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Sun,
-  Moon
+  Moon,
+  Settings as SettingsIcon
 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 
@@ -76,6 +77,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Visão Geral</p>}
             <div className="flex flex-col gap-1">
               <NavItem href="/" icon={LayoutDashboard} label="Painel" isActive={pathname === '/'} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+              <NavItem href="/configuracoes" icon={SettingsIcon} label="Configurações" isActive={pathname.startsWith('/configuracoes')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
             </div>
           </div>
 
