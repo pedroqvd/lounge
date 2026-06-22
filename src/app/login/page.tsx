@@ -23,7 +23,13 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      const buildUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'vazia';
+      const isFetchError = error.message.includes('Failed to fetch');
+      const extraInfo = isFetchError 
+        ? `\n\nDetalhe Técnico: O build atual da Vercel está usando a URL do Supabase: "${buildUrl}". Se estiver vazia, você precisa fazer um novo Deploy na Vercel (Redeploy).` 
+        : '';
+      
+      setError(`${error.message} ${extraInfo}`);
       setLoading(false)
     } else {
       router.push('/')
