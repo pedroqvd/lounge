@@ -77,7 +77,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Visão Geral</p>}
             <div className="flex flex-col gap-1">
               <NavItem href="/" icon={LayoutDashboard} label="Painel" isActive={pathname === '/'} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
-              <NavItem href="/configuracoes" icon={SettingsIcon} label="Configurações" isActive={pathname.startsWith('/configuracoes')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
             </div>
           </div>
 
@@ -85,8 +84,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="px-4">
             {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Pessoas</p>}
             <div className="flex flex-col gap-1">
-              <NavItem href="/membros" icon={Users} label="Gestão de Membros" isActive={pathname.startsWith('/membros')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
-              <NavItem href="/templates" icon={MessageSquare} label="Templates de Msg" isActive={pathname.startsWith('/templates')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+              <NavItem href="/membros" icon={Users} label="Membros" isActive={pathname.startsWith('/membros')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+              <NavItem href="/templates" icon={MessageSquare} label="Templates" isActive={pathname.startsWith('/templates')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
             </div>
           </div>
 
@@ -101,6 +100,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="p-4 border-t border-border flex flex-col gap-2">
+          {/* Settings Link */}
+          <Link 
+            href="/configuracoes"
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground rounded-xl transition-all duration-200 ${pathname.startsWith('/configuracoes') ? 'bg-secondary text-secondary-foreground font-medium' : ''} ${sidebarMinimized ? 'justify-center' : 'w-full'}`}
+            title="Configurações"
+          >
+            <SettingsIcon className="w-5 h-5" />
+            {!sidebarMinimized && <span className="font-medium">Configurações</span>}
+          </Link>
           {/* Dark Mode Toggle */}
           <button 
             onClick={toggleTheme}

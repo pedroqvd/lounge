@@ -152,3 +152,16 @@ export async function deleteMember(id: string) {
     return { success: false, error: error.message }
   }
 }
+
+export async function updateMemberInviteStatus(id: string, inviteStatus: string) {
+  try {
+    await prisma.member.update({
+      where: { id },
+      data: { inviteStatus: inviteStatus as any }
+    })
+    revalidatePath('/membros')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}

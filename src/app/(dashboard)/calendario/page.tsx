@@ -1,13 +1,19 @@
-export default function CalendarioPage() {
-  return (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-      <div className="w-16 h-16 bg-primary/10 text-primary flex items-center justify-center rounded-2xl mb-4">
-        <span className="text-2xl font-bold">31</span>
-      </div>
-      <h1 className="text-3xl font-bold tracking-tight mb-2">Agenda & Eventos</h1>
-      <p className="text-muted-foreground max-w-md">
-        Em breve! Este módulo permitirá gerenciar células, cultos, reuniões de liderança e organizar todo o calendário do ministério.
-      </p>
-    </div>
-  )
+import { PrismaClient } from '@prisma/client'
+import CalendarClient from './CalendarClient'
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+const prisma = globalForPrisma.prisma || new PrismaClient()
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+export const dynamic = 'force-dynamic'
+
+export default async function CalendarioPage() {
+  const events = await prisma.event.findMany({
+    orderBy: { date: 'asc' },
+    include: {
+      _count: { select: { attendances: true } }
+    }
+  })
+
+  return <CalendarClient initialEvents={events} />
 }

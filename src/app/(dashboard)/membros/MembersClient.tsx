@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send } from 'lucide-react'
-import { seedMembers, deleteMember, createMember, updateMember } from '@/app/actions/members'
+import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
 import * as Dialog from '@radix-ui/react-dialog'
 import Link from 'next/link'
@@ -14,6 +14,7 @@ type Template = any
 export default function MembersClient({ initialMembers, groups, templates }: { initialMembers: Member[], groups: Group[], templates: Template[] }) {
   const [members, setMembers] = useState(initialMembers)
   const [searchTerm, setSearchTerm] = useState('')
+  const [inviteStatusFilter, setInviteStatusFilter] = useState('TODOS')
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
   const [isSeeding, setIsSeeding] = useState(false)
 
@@ -142,10 +143,65 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
     setSelectedMembers(newSet)
   }
 
-  const filteredMembers = members.filter(m => 
-    m.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (m.phone && m.phone.includes(searchTerm))
-  )
+  const filteredMembers = members.filter(m => {
+    const matchSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) || (m.phone && m.phone.includes(searchTerm));
+    const matchInvite = inviteStatusFilter === 'TODOS' || m.inviteStatus === inviteStatusFilter;
+    return matchSearch && matchInvite;
+  })
+
+  // Broadcast Logic
+  const handleMassBroadcast = async () => {
+    if (!selectedTemplateId) return
+    setIsSending(true)
+
+    const selectedMembersList = members.filter(m => selectedMembers.has(m.id))
+    
+    // We open WhatsApp in a new tab for each person sequentially.
+    // However, browser pop-up blockers might block multiple windows at once.
+    // The "semi-automatic" algorithm: we process one by one with a small delay
+    // but ultimately the user will have to click SEND on WhatsApp Web.
+    // For simplicity of this MVP broadcast, we will iterate and open windows.
+    // A better approach for the future is to open one, wait for user to focus back, then open next.
+    
+    for (const member of selectedMembersList) {
+      if (!member.phone) continue
+
+      const template = templates?.find((t: Template) => t.id === selectedTemplateId)
+      let finalMessage = customMessage
+      if (template) {
+        finalMessage = template.content
+          .replace(/{nome}/g, member.name)
+          .replace(/{grupo}/g, member.group?.name || 'sua célula')
+          .replace(/{lider}/g, member.group?.lider?.name || 'sua liderança')
+          .replace(/{data}/g, new Date().toLocaleDateString('pt-BR'))
+      }
+
+      await createContactHistory({
+        memberId: member.id,
+        templateId: selectedTemplateId || undefined,
+        customText: finalMessage,
+      })
+
+      const phoneDigits = member.phone.replace(/\D/g, '')
+      const whatsappUrl = `https://wa.me/55${phoneDigits}?text=${encodeURIComponent(finalMessage)}`
+      
+      // Open tab
+      window.open(whatsappUrl, '_blank')
+      
+      // Update invite status to "FEITO" automatically if they were selected for broadcast
+      if (member.inviteStatus === 'PENDENTE') {
+        await updateMemberInviteStatus(member.id, 'FEITO')
+        setMembers((prev: Member[]) => prev.map((m: Member) => m.id === member.id ? { ...m, inviteStatus: 'FEITO' } : m))
+      }
+
+      // Small delay to allow the browser to process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+    }
+
+    setIsTemplateModalOpen(false)
+    setIsSending(false)
+    setSelectedMembers(new Set())
+  }
 
   const previewTemplate = () => {
     if (!contactingMember) return ''
@@ -203,6 +259,33 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <div className="flex items-center gap-2">
+          <select 
+            value={inviteStatusFilter}
+            onChange={(e) => setInviteStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
+          >
+            <option value="TODOS">Todos Convites</option>
+            <option value="PENDENTE">Pendentes</option>
+            <option value="FEITO">Convite Feito</option>
+            <option value="CONFIRMADO">Confirmados</option>
+            <option value="AUSENTE">Ausentes</option>
+          </select>
+          {selectedMembers.size > 0 && (
+            <button 
+              onClick={() => {
+                setContactingMember(null) // We use null to indicate mass broadcast mode in modal
+                setSelectedTemplateId('')
+                setCustomMessage('')
+                setIsTemplateModalOpen(true)
+              }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-whatsapp text-whatsapp-foreground font-bold rounded-md hover:bg-whatsapp/90 transition-colors shadow-md"
+            >
+              <Send className="w-4 h-4" />
+              Disparar ({selectedMembers.size})
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
@@ -215,6 +298,7 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
                 </th>
                 <th className="px-4 py-3">Nome</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Situação do Convite</th>
                 <th className="px-4 py-3">Responsável</th>
                 <th className="px-4 py-3 text-right">Ações</th>
               </tr>
@@ -239,6 +323,27 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
                     }`}>
                       {member.status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={member.inviteStatus}
+                      onChange={async (e) => {
+                        const newStatus = e.target.value;
+                        setMembers((prev: Member[]) => prev.map((m: Member) => m.id === member.id ? { ...m, inviteStatus: newStatus } : m));
+                        await updateMemberInviteStatus(member.id, newStatus);
+                      }}
+                      className={`px-2 py-1 text-xs font-bold rounded-md border-0 cursor-pointer focus:ring-2 focus:ring-primary ${
+                        member.inviteStatus === 'PENDENTE' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' :
+                        member.inviteStatus === 'FEITO' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' :
+                        member.inviteStatus === 'CONFIRMADO' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
+                        'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                      }`}
+                    >
+                      <option value="PENDENTE">Pendente</option>
+                      <option value="FEITO">Feito</option>
+                      <option value="CONFIRMADO">Confirmado</option>
+                      <option value="AUSENTE">Ausente</option>
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{member.group?.name || '-'}</td>
                   <td className="px-4 py-3 text-right flex items-center justify-end gap-2">
@@ -322,7 +427,7 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
           <Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 z-50" />
           <Dialog.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:rounded-lg">
             <Dialog.Title className="text-lg font-semibold leading-none tracking-tight">
-              Enviar WhatsApp para {contactingMember?.name}
+              {contactingMember ? `Enviar WhatsApp para ${contactingMember.name}` : `Disparo em Massa (${selectedMembers.size} pessoas)`}
             </Dialog.Title>
             
             <div className="space-y-4 mt-4">
@@ -336,10 +441,8 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
                   }} 
                   className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option value="">-- Mensagem Livre --</option>
-                  {templates?.map((t: Template) => (
-                    <option key={t.id} value={t.id}>{t.name} ({t.category})</option>
-                  ))}
+                  <option value="">(Mensagem Livre)</option>
+                  {templates?.map((t: Template) => <option key={t.id} value={t.id}>{t.category} - {t.name}</option>)}
                 </select>
               </div>
 
@@ -349,31 +452,29 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
                   <textarea 
                     value={customMessage}
                     onChange={e => setCustomMessage(e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-input rounded-md bg-transparent resize-none focus:outline-none focus:ring-1 focus:ring-primary text-sm"
-                    placeholder="Digite a mensagem que deseja enviar..."
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Digite a mensagem..."
                   />
                 </div>
               )}
 
               {selectedTemplateId && (
-                <div className="p-4 bg-secondary/50 rounded-lg border border-border">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Pré-visualização de envio:</p>
-                  <p className="text-sm whitespace-pre-wrap">{previewTemplate()}</p>
+                <div className="p-3 bg-secondary/30 rounded-md border border-border text-sm">
+                  <p className="font-semibold mb-1 text-xs text-muted-foreground uppercase">Pré-visualização (exemplo):</p>
+                  <p className="whitespace-pre-wrap">{previewTemplate()}</p>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 mt-6">
+              <div className="flex justify-end gap-2 pt-4">
                 <Dialog.Close asChild>
-                  <button type="button" className="px-4 py-2 border rounded-md hover:bg-secondary transition-colors font-medium">Cancelar</button>
+                  <button className="px-4 py-2 border rounded-md hover:bg-secondary transition-colors">Cancelar</button>
                 </Dialog.Close>
                 <button 
-                  onClick={handleSendMessage}
-                  disabled={isSending || (!selectedTemplateId && !customMessage.trim())} 
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-whatsapp text-whatsapp-foreground rounded-md hover:opacity-90 transition-opacity font-medium disabled:opacity-50"
+                  onClick={contactingMember ? handleSendMessage : handleMassBroadcast} 
+                  disabled={isSending || (!selectedTemplateId && !customMessage)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-whatsapp text-whatsapp-foreground font-bold rounded-md hover:bg-whatsapp/90 transition-colors disabled:opacity-50"
                 >
-                  <Send className="w-4 h-4" />
-                  {isSending ? 'Processando...' : 'Abrir WhatsApp'}
+                  {isSending ? 'Processando...' : contactingMember ? 'Enviar e Registrar' : 'Iniciar Disparo Múltiplo'}
                 </button>
               </div>
             </div>

@@ -13,7 +13,9 @@ export async function getSettings() {
       data: {
         id: 'global',
         inactivityDays: 20,
-        defaultChurchName: 'Lounge For You'
+        defaultChurchName: 'Lounge For You',
+        leaders: [],
+        areas: []
       }
     })
   }
@@ -21,18 +23,22 @@ export async function getSettings() {
   return settings
 }
 
-export async function updateSettings(data: { inactivityDays: number, defaultChurchName: string }) {
+export async function updateSettings(data: { inactivityDays: number, defaultChurchName: string, leaders?: string[], areas?: string[] }) {
   try {
     await prisma.settings.upsert({
       where: { id: 'global' },
       update: {
         inactivityDays: data.inactivityDays,
-        defaultChurchName: data.defaultChurchName
+        defaultChurchName: data.defaultChurchName,
+        leaders: data.leaders,
+        areas: data.areas
       },
       create: {
         id: 'global',
         inactivityDays: data.inactivityDays,
-        defaultChurchName: data.defaultChurchName
+        defaultChurchName: data.defaultChurchName,
+        leaders: data.leaders || [],
+        areas: data.areas || []
       }
     })
     

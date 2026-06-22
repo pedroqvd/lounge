@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateSettings } from '@/app/actions/settings'
-import { Save, AlertTriangle, Building2, Bell } from 'lucide-react'
+import { Save, AlertTriangle, Building2, Bell, X } from 'lucide-react'
 
 export default function SettingsClient({ initialSettings }: { initialSettings: any }) {
   const [formData, setFormData] = useState({
@@ -86,6 +86,95 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
                 Este nome poderá ser usado como variável automática nos seus templates de WhatsApp (ex: {"{igreja}"}).
               </p>
             </div>
+            
+            <div className="space-y-2 pt-4">
+              <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Líderes / Responsáveis</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {formData.leaders.map((leader, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium">
+                    {leader}
+                    <button type="button" onClick={() => setFormData({...formData, leaders: formData.leaders.filter((_, idx) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  id="newLeaderInput"
+                  placeholder="Nome do líder"
+                  className="flex h-11 flex-1 rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      const val = e.currentTarget.value.trim()
+                      if (val && !formData.leaders.includes(val)) {
+                        setFormData({...formData, leaders: [...formData.leaders, val]})
+                        e.currentTarget.value = ''
+                      }
+                    }
+                  }}
+                />
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('newLeaderInput') as HTMLInputElement
+                    const val = input.value.trim()
+                    if (val && !formData.leaders.includes(val)) {
+                      setFormData({...formData, leaders: [...formData.leaders, val]})
+                      input.value = ''
+                    }
+                  }}
+                  className="px-4 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground rounded-xl transition-colors font-bold text-sm"
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-4">
+              <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Áreas de Escolha / Ministérios</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {formData.areas.map((area, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium">
+                    {area}
+                    <button type="button" onClick={() => setFormData({...formData, areas: formData.areas.filter((_, idx) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  id="newAreaInput"
+                  placeholder="Nome da área (Ex: Louvor, Recepção)"
+                  className="flex h-11 flex-1 rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      const val = e.currentTarget.value.trim()
+                      if (val && !formData.areas.includes(val)) {
+                        setFormData({...formData, areas: [...formData.areas, val]})
+                        e.currentTarget.value = ''
+                      }
+                    }
+                  }}
+                />
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('newAreaInput') as HTMLInputElement
+                    const val = input.value.trim()
+                    if (val && !formData.areas.includes(val)) {
+                      setFormData({...formData, areas: [...formData.areas, val]})
+                      input.value = ''
+                    }
+                  }}
+                  className="px-4 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground rounded-xl transition-colors font-bold text-sm"
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
 
