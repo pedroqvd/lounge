@@ -1,30 +1,47 @@
 import { PrismaClient } from '@prisma/client'
 import { Users, UserPlus, Cake, MessageCircle, AlertCircle } from 'lucide-react'
+import { startOfMonth, subDays, addDays } from 'date-fns'
 
-// Use a global variable to prevent creating multiple Prisma clients in development
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 const prisma = globalForPrisma.prisma || new PrismaClient()
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
-  // In a real scenario, we'd fetch actual data from Prisma.
-  // For the sake of this setup, we'll implement the queries that Vercel will run.
+  const [totalAtivos, visitantes, historicoCount] = await Promise.all([
+    prisma.member.count({ where: { status: 'ATIVO' } }),
+    prisma.member.count({ where: { status: 'VISITANTE' } }),
+    prisma.contactHistory.count()
+  ])
   
-  // const totalAtivos = await prisma.member.count({ where: { status: 'ATIVO' } })
-  // const visitantesMes = await prisma.member.count({ 
-  //   where: { 
-  //     status: 'VISITANTE',
-  //     createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
-  //   } 
-  // })
+  // This is a naive birthday calculation. In a real robust system, we would query by month and day ignoring the year.
+  // For simplicity and speed of deployment, we will fetch all members and filter in JS
+  const allMembers = await prisma.member.findMany({
+    select: { id: true, name: true, birthDate: true, status: true, phone: true }
+  })
+
+  const today = new Date()
+  today.setHours(0,0,0,0)
   
-  // Mock data for preview until DB is fully seeded
+  const birthdays = allMembers.filter(m => {
+    if (!m.birthDate) return false
+    const bday = new Date(m.birthDate)
+    const bdayThisYear = new Date(today.getFullYear(), bday.getMonth(), bday.getDate())
+    const diff = (bdayThisYear.getTime() - today.getTime()) / (1000 * 3600 * 24)
+    return diff >= 0 && diff <= 7
+  }).sort((a, b) => {
+    const aBday = new Date(today.getFullYear(), new Date(a.birthDate!).getMonth(), new Date(a.birthDate!).getDate())
+    const bBday = new Date(today.getFullYear(), new Date(b.birthDate!).getMonth(), new Date(b.birthDate!).getDate())
+    return aBday.getTime() - bBday.getTime()
+  })
+
   const stats = [
-    { name: 'Total de Ativos', value: '142', icon: Users, color: 'text-primary' },
-    { name: 'Visitantes no Mês', value: '12', icon: UserPlus, color: 'text-blue-500' },
-    { name: 'Aniversariantes da Semana', value: '4', icon: Cake, color: 'text-pink-500' },
-    { name: 'Sem contato > 30 dias', value: '18', icon: AlertCircle, color: 'text-destructive' },
-    { name: 'Mensagens Enviadas', value: '340', icon: MessageCircle, color: 'text-whatsapp' },
+    { name: 'Total de Ativos', value: totalAtivos.toString(), icon: Users, color: 'text-primary' },
+    { name: 'Visitantes', value: visitantes.toString(), icon: UserPlus, color: 'text-blue-500' },
+    { name: 'Aniversariantes (7 dias)', value: birthdays.length.toString(), icon: Cake, color: 'text-pink-500' },
+    { name: 'Sem contato > 30 dias', value: '0', icon: AlertCircle, color: 'text-destructive' }, // Will implement later
+    { name: 'Mensagens Enviadas', value: historicoCount.toString(), icon: MessageCircle, color: 'text-whatsapp' },
   ]
 
   return (
@@ -58,15 +75,30 @@ export default async function DashboardPage() {
             Aniversariantes Próximos
           </h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-              <div>
-                <p className="font-medium">João Silva</p>
-                <p className="text-sm text-muted-foreground">Faz 22 anos amanhã</p>
-              </div>
-              <button className="px-3 py-1 bg-whatsapp text-whatsapp-foreground text-sm font-medium rounded-md hover:opacity-90 transition-opacity">
-                Dar Parabéns
-              </button>
-            </div>
+            {birthdays.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum aniversariante nos próximos 7 dias.</p>
+            ) : (
+              birthdays.map(m => (
+                <div key={m.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                  <div>
+                    <p className="font-medium">{m.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Aniversário: {new Date(m.birthDate!).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long'})}
+                    </p>
+                  </div>
+                  {m.phone && (
+                    <a 
+                      href={`https://wa.me/${m.phone.replace(/\D/g, '')}?text=Feliz aniversário!`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-whatsapp text-whatsapp-foreground text-sm font-medium rounded-md hover:opacity-90 transition-opacity"
+                    >
+                      Dar Parabéns
+                    </a>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -78,12 +110,9 @@ export default async function DashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 border border-border rounded-lg">
               <div>
-                <p className="font-medium">Maria Clara</p>
-                <p className="text-sm text-muted-foreground">Sem contato há 35 dias</p>
+                <p className="font-medium">Em breve</p>
+                <p className="text-sm text-muted-foreground">O controle de inatividade será ativado no próximo módulo.</p>
               </div>
-              <button className="px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors">
-                Ver Perfil
-              </button>
             </div>
           </div>
         </div>
