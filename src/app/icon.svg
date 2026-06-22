@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Perna Esquerda + Base do U (Violeta) -->
+  <path d="M 10 10 L 40 10 L 40 70 L 90 70 L 90 100 L 10 100 Z" fill="#9B7FFF" />
+  
+  <!-- Perna Direita do U (Profundo) -->
+  <path d="M 60 10 L 90 10 L 90 60 L 60 60 Z" fill="#1A1030" />
+</svg>

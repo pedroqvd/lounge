@@ -51,16 +51,19 @@ export default async function DashboardPage() {
         <p className="text-muted-foreground mt-2">Visão geral do Ministério de Jovens.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat) => (
-          <div key={stat.name} className="p-6 bg-card border border-border rounded-xl shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-lg bg-secondary ${stat.color}`}>
+          <div key={stat.name} className="group relative p-6 bg-card border border-border rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 overflow-hidden cursor-pointer">
+            {/* Efeito de brilho premium no hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            
+            <div className="flex items-center gap-4 relative z-10">
+              <div className={`p-3.5 rounded-xl bg-secondary ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
                 <stat.icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">{stat.name}</p>
-                <h3 className="text-2xl font-bold">{stat.value}</h3>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{stat.name}</p>
+                <h3 className="text-3xl font-extrabold mt-1">{stat.value}</h3>
               </div>
             </div>
           </div>
@@ -69,20 +72,22 @@ export default async function DashboardPage() {
 
       {/* Quick Action / Birthdays */}
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="p-6 bg-card border border-border rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Cake className="w-5 h-5 text-pink-500" />
+        <div className="p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+            <div className="p-2.5 bg-pink-500/10 rounded-xl">
+              <Cake className="w-6 h-6 text-pink-500" />
+            </div>
             Aniversariantes Próximos
           </h2>
           <div className="space-y-4">
             {birthdays.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum aniversariante nos próximos 7 dias.</p>
+              <p className="text-sm text-muted-foreground bg-secondary/30 p-4 rounded-xl text-center">Nenhum aniversariante nos próximos 7 dias.</p>
             ) : (
               birthdays.map(m => (
-                <div key={m.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                <div key={m.id} className="group flex items-center justify-between p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-secondary/20 transition-all duration-300">
                   <div>
-                    <p className="font-medium">{m.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-bold text-foreground group-hover:text-primary transition-colors">{m.name}</p>
+                    <p className="text-sm text-muted-foreground font-medium">
                       Aniversário: {new Date(m.birthDate!).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long'})}
                     </p>
                   </div>
@@ -91,7 +96,7 @@ export default async function DashboardPage() {
                       href={`https://wa.me/${m.phone.replace(/\D/g, '')}?text=Feliz aniversário!`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1 bg-whatsapp text-whatsapp-foreground text-sm font-medium rounded-md hover:opacity-90 transition-opacity"
+                      className="px-4 py-2 bg-whatsapp text-whatsapp-foreground text-sm font-bold rounded-lg hover:opacity-90 hover:scale-105 transition-all shadow-md shadow-whatsapp/20"
                     >
                       Dar Parabéns
                     </a>
@@ -102,16 +107,18 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="p-6 bg-card border border-border rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-destructive" />
+        <div className="p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+            <div className="p-2.5 bg-destructive/10 rounded-xl">
+              <AlertCircle className="w-6 h-6 text-destructive" />
+            </div>
             Atenção Necessária
           </h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 border border-border rounded-lg">
+            <div className="flex items-center justify-between p-4 border border-border rounded-xl bg-secondary/30">
               <div>
-                <p className="font-medium">Em breve</p>
-                <p className="text-sm text-muted-foreground">O controle de inatividade será ativado no próximo módulo.</p>
+                <p className="font-bold">Em breve</p>
+                <p className="text-sm text-muted-foreground font-medium">O controle de inatividade será ativado no próximo módulo.</p>
               </div>
             </div>
           </div>

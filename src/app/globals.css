@@ -49,52 +49,52 @@
 }
 
 :root {
-  /* Light Mode using brand colors */
+  /* LIGHT MODE - PREMIUM BRANDING */
   --background: #F0EDFF; /* Névoa */
-  --foreground: #0D0D14; /* Noite */
+  --foreground: #1A1030; /* Profundo */
   
   --card: #FFFFFF;
-  --card-foreground: #0D0D14; /* Noite */
+  --card-foreground: #1A1030; /* Profundo */
   
   --popover: #FFFFFF;
-  --popover-foreground: #0D0D14;
+  --popover-foreground: #1A1030;
   
   --primary: #4A3AFF; /* Elétrico */
-  --primary-foreground: #F0EDFF; /* Névoa */
+  --primary-foreground: #FFFFFF; /* Branco absoluto pro botão saltar */
   
-  --secondary: #9B7FFF; /* Violeta */
-  --secondary-foreground: #1A1030; /* Profundo */
+  --secondary: #E2DEFC; /* Névoa Escurecida para cards secundários */
+  --secondary-foreground: #4A3AFF; /* Elétrico para contraste */
   
-  --muted: #E2DEFC;
-  --muted-foreground: #1A1030; /* Profundo */
+  --muted: #E2DEFC; 
+  --muted-foreground: #6A6085; /* Cinza arroxeado */
   
-  --accent: #E2DEFC;
-  --accent-foreground: #4A3AFF; /* Elétrico */
+  --accent: #9B7FFF; /* Violeta */
+  --accent-foreground: #FFFFFF;
   
-  --destructive: oklch(0.577 0.245 27);
+  --destructive: #EF4444; /* Vermelho padrão equilibrado */
   --destructive-foreground: #FFFFFF;
   
-  --border: #E2DEFC;
+  --border: #E2DEFC; /* Borda bem sutil para light mode */
   --input: #E2DEFC;
   --ring: #4A3AFF; /* Elétrico */
   
   --whatsapp: #25D366;
   --whatsapp-foreground: #FFFFFF;
 
-  --radius: 0.75rem;
+  --radius: 1rem; /* Mais arredondado = mais premium/suave */
 
-  --sidebar: #F0EDFF; /* Névoa */
-  --sidebar-foreground: #0D0D14; /* Noite */
-  --sidebar-primary: #4A3AFF; /* Elétrico */
-  --sidebar-primary-foreground: #F0EDFF; /* Névoa */
-  --sidebar-accent: #E2DEFC;
-  --sidebar-accent-foreground: #4A3AFF; /* Elétrico */
+  --sidebar: #FFFFFF; /* Sidebar puramente branca contrastando com fundo névoa */
+  --sidebar-foreground: #1A1030; 
+  --sidebar-primary: #4A3AFF; 
+  --sidebar-primary-foreground: #FFFFFF; 
+  --sidebar-accent: #F0EDFF; /* Hover nos botões da sidebar */
+  --sidebar-accent-foreground: #4A3AFF; 
   --sidebar-border: #E2DEFC;
-  --sidebar-ring: #4A3AFF; /* Elétrico */
+  --sidebar-ring: #4A3AFF; 
 }
 
 .dark {
-  /* Dark Mode using brand colors */
+  /* DARK MODE - PREMIUM BRANDING */
   --background: #0D0D14; /* Noite */
   --foreground: #F0EDFF; /* Névoa */
   
@@ -105,23 +105,23 @@
   --popover-foreground: #F0EDFF; /* Névoa */
   
   --primary: #4A3AFF; /* Elétrico */
-  --primary-foreground: #F0EDFF; /* Névoa */
+  --primary-foreground: #FFFFFF;
   
-  --secondary: #9B7FFF; /* Violeta */
-  --secondary-foreground: #0D0D14; /* Noite */
+  --secondary: #2C1F4A; /* Profundo mais claro */
+  --secondary-foreground: #9B7FFF; /* Violeta brilha no escuro */
   
   --muted: #1A1030; /* Profundo */
-  --muted-foreground: #9B7FFF; /* Violeta */
+  --muted-foreground: #8B82A5; /* Cinza arroxeado claro */
   
-  --accent: #1A1030; /* Profundo */
-  --accent-foreground: #9B7FFF; /* Violeta */
+  --accent: #9B7FFF; /* Violeta */
+  --accent-foreground: #0D0D14; /* Noite */
   
-  --destructive: oklch(0.577 0.245 27);
+  --destructive: #EF4444; 
   --destructive-foreground: #FFFFFF;
   
-  --border: #1A1030; /* Profundo */
-  --input: #1A1030; /* Profundo */
-  --ring: #4A3AFF; /* Elétrico */
+  --border: #2C1F4A; /* Borda visível no escuro */
+  --input: #2C1F4A;
+  --ring: #9B7FFF; /* Violeta */
 
   --whatsapp: #25D366;
   --whatsapp-foreground: #FFFFFF;
@@ -129,8 +129,8 @@
   --sidebar: #0D0D14; /* Noite */
   --sidebar-foreground: #F0EDFF; /* Névoa */
   --sidebar-primary: #4A3AFF; /* Elétrico */
-  --sidebar-primary-foreground: #F0EDFF; /* Névoa */
-  --sidebar-accent: #1A1030; /* Profundo */
+  --sidebar-primary-foreground: #FFFFFF; 
+  --sidebar-accent: #1A1030; /* Profundo (Hover nos botões) */
   --sidebar-accent-foreground: #9B7FFF; /* Violeta */
   --sidebar-border: #1A1030; /* Profundo */
   --sidebar-ring: #4A3AFF; /* Elétrico */
@@ -141,7 +141,16 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
