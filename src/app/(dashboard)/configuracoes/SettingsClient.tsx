@@ -5,9 +5,16 @@ import { updateSettings } from '@/app/actions/settings'
 import { Save, AlertTriangle, Building2, Bell, X } from 'lucide-react'
 
 export default function SettingsClient({ initialSettings }: { initialSettings: any }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    inactivityDays: number;
+    defaultChurchName: string;
+    leaders: string[];
+    areas: string[];
+  }>({
     inactivityDays: initialSettings.inactivityDays || 20,
-    defaultChurchName: initialSettings.defaultChurchName || 'Lounge For You'
+    defaultChurchName: initialSettings.defaultChurchName || 'Lounge For You',
+    leaders: initialSettings.leaders || [],
+    areas: initialSettings.areas || []
   })
   const [isSaving, setIsSaving] = useState(false)
 
