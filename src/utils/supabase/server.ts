@@ -4,9 +4,14 @@ import { cookies } from 'next/headers'
 export function createClient() {
   const cookieStore = cookies()
 
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const url = rawUrl.trim() ? rawUrl : 'https://placeholder.supabase.co';
+  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  const key = rawKey.trim() ? rawKey : 'placeholder';
+
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder',
+    url.startsWith('http') ? url : `https://${url}`,
+    key,
     {
       cookies: {
         get(name: string) {
