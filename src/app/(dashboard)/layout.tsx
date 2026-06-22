@@ -57,24 +57,57 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </div>
 
-        <nav className="flex flex-col gap-1 p-4">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`) && item.href !== '/'
-            return (
+        <nav className="flex flex-col gap-6 p-4">
+          <div>
+            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Visão Geral</p>
+            <div className="flex flex-col gap-1">
               <Link
-                key={item.name}
-                href={item.href}
+                href="/"
                 className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground font-medium' 
-                    : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
+                  pathname === '/' ? 'bg-primary text-primary-foreground font-medium' : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
                 }`}
               >
-                <item.icon className="w-5 h-5" />
-                {item.name}
+                <LayoutDashboard className="w-5 h-5" /> Painel
               </Link>
-            )
-          })}
+            </div>
+          </div>
+
+          <div>
+            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Membros</p>
+            <div className="flex flex-col gap-1">
+              <Link
+                href="/membros"
+                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                  pathname.startsWith('/membros') ? 'bg-primary text-primary-foreground font-medium' : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
+                }`}
+              >
+                <Users className="w-5 h-5" /> Gestão de Membros
+              </Link>
+              <Link
+                href="/templates"
+                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                  pathname.startsWith('/templates') ? 'bg-primary text-primary-foreground font-medium' : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
+                }`}
+              >
+                <MessageSquare className="w-5 h-5" /> Templates de Mensagem
+              </Link>
+            </div>
+          </div>
+
+          <div>
+            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Calendário</p>
+            <div className="flex flex-col gap-1">
+              <Link
+                href="/calendario"
+                className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                  pathname.startsWith('/calendario') ? 'bg-primary text-primary-foreground font-medium' : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
+                }`}
+              >
+                <span className="w-5 h-5 flex items-center justify-center border-2 border-current rounded-md text-[10px] font-bold">31</span>
+                Agenda & Eventos
+              </Link>
+            </div>
+          </div>
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 border-t border-border">
