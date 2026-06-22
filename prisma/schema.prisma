@@ -76,6 +76,18 @@ model Member {
   group        Group?           @relation(fields: [groupId], references: [id])
   histories    ContactHistory[]
   attendances  Attendance[]
+  audits       MemberAudit[]
+}
+
+model MemberAudit {
+  id        String   @id @default(uuid())
+  memberId  String
+  userName  String   // Nome de quem editou (via LocalStorage)
+  action    String   @db.Text
+  createdAt DateTime @default(now())
+
+  // Relations
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 model Event {

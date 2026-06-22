@@ -13,6 +13,9 @@ export default async function ProfilePage({ params }: { params: { id: string } }
     where: { id: params.id },
     include: {
       group: true,
+      audits: {
+        orderBy: { createdAt: 'desc' }
+      },
       histories: {
         include: { template: true, user: true },
         orderBy: { sentAt: 'desc' }
@@ -24,14 +27,16 @@ export default async function ProfilePage({ params }: { params: { id: string } }
     notFound()
   }
 
+  const groups = await prisma.group.findMany({ orderBy: { name: 'asc' } })
+
   return (
     <div className="space-y-6">
       <Link href="/membros" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group">
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-        Voltar para Pessoas
+        Voltar para Membros
       </Link>
       
-      <ProfileClient member={member} />
+      <ProfileClient member={member} groups={groups} />
     </div>
   )
 }
