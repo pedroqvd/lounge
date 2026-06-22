@@ -83,7 +83,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
                 className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-primary/50" 
               />
               <p className="text-sm text-muted-foreground mt-2">
-                Este nome poderá ser usado como variável automática nos seus templates de WhatsApp (ex: `{igreja}`).
+                Este nome poderá ser usado como variável automática nos seus templates de WhatsApp (ex: {"{igreja}"}).
               </p>
             </div>
           </div>
