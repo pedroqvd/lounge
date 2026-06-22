@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  LIDER
+  SECRETARIA
+}
+
+enum MemberStatus {
+  ATIVO
+  INATIVO
+  VISITANTE
+  DISCIPULADO
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(LIDER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  sentHistories ContactHistory[]
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  liderId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  members     Member[]
+}
+
+model Member {
+  id           String       @id @default(uuid())
+  name         String
+  birthDate    DateTime?
+  phone        String?      // WhatsApp (+55...)
+  email        String?
+  address      String?
+  city         String?
+  neighborhood String?
+  status       MemberStatus @default(VISITANTE)
+  groupId      String?
+  joinDate     DateTime?
+  isBaptized   Boolean      @default(false)
+  baptizeDate  DateTime?
+  notes        String?
+  photoUrl     String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  group        Group?           @relation(fields: [groupId], references: [id])
+  histories    ContactHistory[]
+}
+
+model Template {
+  id        String   @id @default(uuid())
+  name      String
+  category  String
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  histories ContactHistory[]
+}
+
+model ContactHistory {
+  id         String   @id @default(uuid())
+  userId     String   // Whoever sent the message
+  memberId   String   // Who received
+  templateId String?  // Optional if it was a free text message
+  customText String?  @db.Text
+  sentAt     DateTime @default(now())
+  notes      String?
+
+  // Relations
+  user       User      @relation(fields: [userId], references: [id])
+  member     Member    @relation(fields: [memberId], references: [id])
+  template   Template? @relation(fields: [templateId], references: [id])
+}
