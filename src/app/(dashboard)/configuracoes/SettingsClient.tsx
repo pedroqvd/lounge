@@ -256,7 +256,7 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
                     {formData.areas.map((area: string, i: number) => (
                       <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium border border-border">
                         {area}
-                        <button type="button" onClick={() => setFormData({...formData, areas: formData.areas.filter((_, idx) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
+                        <button type="button" onClick={() => setFormData({...formData, areas: formData.areas.filter((_: string, idx: number) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
                       </span>
                     ))}
                   </div>
@@ -300,7 +300,7 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
                     {formData.leaders.map((leader: string, i: number) => (
                       <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium border border-border">
                         {leader}
-                        <button type="button" onClick={() => setFormData({...formData, leaders: formData.leaders.filter((_, idx) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
+                        <button type="button" onClick={() => setFormData({...formData, leaders: formData.leaders.filter((_: string, idx: number) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
                       </span>
                     ))}
                   </div>
