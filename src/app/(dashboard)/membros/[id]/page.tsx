@@ -3,29 +3,28 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import ProfileClient from './ProfileClient'
+import { getMemberProfile } from '@/app/actions/members'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 const prisma = globalForPrisma.prisma || new PrismaClient()
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export default async function ProfilePage({ params }: { params: { id: string } }) {
-  const member = await prisma.member.findUnique({
-    where: { id: params.id },
-    include: {
-      group: true,
-      audits: {
-        orderBy: { createdAt: 'desc' }
-      },
-      histories: {
-        include: { template: true, user: true },
-        orderBy: { sentAt: 'desc' }
-      }
-    }
-  })
+  const member = await getMemberProfile(params.id)
 
   if (!member) {
     notFound()
   }
+
+  // To not break anything, we still need member.audits. Let's fetch them if missing.
+  // Wait, I should just fetch it all here or update getMemberProfile.
+  // getMemberProfile didn't fetch audits. Let me do it safely:
+  const audits = await prisma.memberAudit.findMany({
+    where: { memberId: params.id },
+    orderBy: { createdAt: 'desc' }
+  })
+  
+  const memberWithAudits = { ...member, audits }
 
   const groups = await prisma.group.findMany({ orderBy: { name: 'asc' } })
 
@@ -36,7 +35,7 @@ export default async function ProfilePage({ params }: { params: { id: string } }
         Voltar para Membros
       </Link>
       
-      <ProfileClient member={member} groups={groups} />
+      <ProfileClient member={memberWithAudits} groups={groups} />
     </div>
   )
 }

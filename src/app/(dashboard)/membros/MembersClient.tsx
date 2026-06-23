@@ -16,6 +16,8 @@ export default function MembersClient({ initialMembers, groups, templates, userR
   const [members, setMembers] = useState(initialMembers)
   const [searchTerm, setSearchTerm] = useState('')
   const [inviteStatusFilter, setInviteStatusFilter] = useState('TODOS')
+  const [statusFilter, setStatusFilter] = useState('TODOS')
+  const [groupFilter, setGroupFilter] = useState('TODOS')
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
   const [isSeeding, setIsSeeding] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
@@ -166,7 +168,10 @@ export default function MembersClient({ initialMembers, groups, templates, userR
   const filteredMembers = members.filter(m => {
     const matchSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) || (m.phone && m.phone.includes(searchTerm));
     const matchInvite = inviteStatusFilter === 'TODOS' || m.inviteStatus === inviteStatusFilter;
-    return matchSearch && matchInvite;
+    const matchStatus = statusFilter === 'TODOS' || m.status === statusFilter;
+    const matchGroup = groupFilter === 'TODOS' || (groupFilter === 'SEM_GRUPO' ? !m.groupId : m.groupId === groupFilter);
+    
+    return matchSearch && matchInvite && matchStatus && matchGroup;
   })
 
   // Broadcast Logic
@@ -287,13 +292,33 @@ export default function MembersClient({ initialMembers, groups, templates, userR
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
+          >
+            <option value="TODOS">Qualquer Status</option>
+            <option value="VISITANTE">Visitantes</option>
+            <option value="ATIVO">Ativos</option>
+            <option value="DISCIPULADO">Discipulado</option>
+            <option value="INATIVO">Inativos</option>
+          </select>
+          <select 
+            value={groupFilter}
+            onChange={(e) => setGroupFilter(e.target.value)}
+            className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium max-w-[150px] truncate"
+          >
+            <option value="TODOS">Todos Grupos</option>
+            <option value="SEM_GRUPO">Sem Grupo</option>
+            {groups.map((g: any) => <option key={g.id} value={g.id}>{g.name}</option>)}
+          </select>
           <select 
             value={inviteStatusFilter}
             onChange={(e) => setInviteStatusFilter(e.target.value)}
             className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
           >
-            <option value="TODOS">Todos Convites</option>
+            <option value="TODOS">Qualquer Convite</option>
             <option value="PENDENTE">Pendentes</option>
             <option value="FEITO">Convite Feito</option>
             <option value="CONFIRMADO">Confirmados</option>
@@ -326,7 +351,8 @@ export default function MembersClient({ initialMembers, groups, templates, userR
                 </th>
                 <th className="px-4 py-3">Nome</th>
                 <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Situação do Convite</th>
+                <th className="px-4 py-3">Assiduidade</th>
+                <th className="px-4 py-3">Convite</th>
                 <th className="px-4 py-3">Responsável</th>
                 <th className="px-4 py-3 text-right">Ações</th>
               </tr>
@@ -351,6 +377,18 @@ export default function MembersClient({ initialMembers, groups, templates, userR
                     }`}>
                       {member.status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1" title="Presença nos últimos 4 cultos">
+                      {member.recentAttendances?.map((isPresent: boolean, i: number) => (
+                        <div 
+                          key={i} 
+                          className={`w-3 h-3 rounded-full ${isPresent ? 'bg-green-500' : 'bg-red-200 dark:bg-red-900/30'}`}
+                        />
+                      )) || (
+                        <span className="text-xs text-muted-foreground">Sem dados</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <select

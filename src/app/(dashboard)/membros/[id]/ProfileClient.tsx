@@ -209,6 +209,12 @@ export default function ProfileClient({ member, groups }: { member: any, groups:
             Contatos WhatsApp
           </button>
           <button 
+            onClick={() => setActiveTab('cultos')}
+            className={`pb-3 font-bold text-sm border-b-2 transition-colors ${activeTab === 'cultos' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          >
+            Histórico de Cultos
+          </button>
+          <button 
             onClick={() => setActiveTab('auditoria')}
             className={`pb-3 font-bold text-sm border-b-2 transition-colors ${activeTab === 'auditoria' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
           >
@@ -239,6 +245,31 @@ export default function ProfileClient({ member, groups }: { member: any, groups:
                     <p className="text-sm font-semibold mb-1">{hist.template ? hist.template.name : 'Mensagem Livre'}</p>
                     <p className="text-xs text-muted-foreground line-clamp-3">
                       {hist.template ? hist.template.content : hist.customText}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )
+          )}
+
+          {activeTab === 'cultos' && (
+            member.attendances?.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center relative z-10 bg-card py-4">Nenhuma presença registrada.</p>
+            ) : (
+              member.attendances?.map((att: any) => (
+                <div key={att.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-green-500 text-white shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-md z-10">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md transition-all">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        {new Date(att.event?.date || att.createdAt).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric'})}
+                      </span>
+                    </div>
+                    <p className="text-sm font-semibold mb-1">{att.event?.title || 'Culto'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Status: {att.isPresent ? 'Presente' : 'Registrado'}
                     </p>
                   </div>
                 </div>

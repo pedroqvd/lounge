@@ -73,6 +73,14 @@ export async function seedMembers() {
 // GET ALL MEMBERS
 export async function getMembers() {
   try {
+    const recentCultos = await prisma.event.findMany({
+      where: { type: 'CULTO', date: { lte: new Date() } },
+      orderBy: { date: 'desc' },
+      take: 4,
+      select: { id: true }
+    });
+    const eventIds = recentCultos.map(e => e.id);
+
     const members = await prisma.member.findMany({
       select: {
         id: true,
@@ -86,15 +94,51 @@ export async function getMembers() {
             name: true,
             liderId: true,
           }
+        },
+        attendances: {
+          where: { eventId: { in: eventIds }, isPresent: true },
+          select: { eventId: true }
         }
       },
       orderBy: {
         name: 'asc'
       }
     })
-    return members
+
+    return members.map(m => {
+      const recentAttendances = eventIds.map(id => m.attendances.some(a => a.eventId === id));
+      return { ...m, recentAttendances };
+    })
   } catch (error: any) {
     return []
+  }
+}
+
+// GET MEMBER PROFILE
+export async function getMemberProfile(id: string) {
+  try {
+    const member = await prisma.member.findUnique({
+      where: { id },
+      include: {
+        group: true,
+        histories: {
+          orderBy: { sentAt: 'desc' },
+          include: {
+            user: { select: { name: true } },
+            template: { select: { name: true } }
+          }
+        },
+        attendances: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            event: true
+          }
+        }
+      }
+    })
+    return member
+  } catch (error) {
+    return null
   }
 }
 

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { Users, UserPlus, Cake, MessageCircle, AlertCircle } from 'lucide-react'
+import { Users, UserPlus, Cake, MessageCircle, AlertCircle, BookOpen, UserCheck } from 'lucide-react'
 import { getSettings } from '@/app/actions/settings'
 import Link from 'next/link'
 
@@ -12,16 +12,30 @@ export const dynamic = 'force-dynamic'
 export default async function DashboardPage() {
   const settings = await getSettings()
   
-  const [totalAtivos, visitantes, historicoCount] = await Promise.all([
+  const [totalAtivos, visitantes, discipulado, batizados, historicoCount] = await Promise.all([
     prisma.member.count({ where: { status: 'ATIVO' } }),
     prisma.member.count({ where: { status: 'VISITANTE' } }),
+    prisma.member.count({ where: { status: 'DISCIPULADO' } }),
+    prisma.member.count({ where: { isBaptized: true } }),
     prisma.contactHistory.count()
   ])
+
+  // Taxa de Retenção de Visitantes
+  const visitantesComPresenca = await prisma.member.findMany({
+    where: { status: 'VISITANTE' },
+    select: { attendances: { select: { id: true } } }
+  })
+  const visitantesRetidos = visitantesComPresenca.filter(m => m.attendances.length > 1).length
+  const taxaRetencao = visitantesComPresenca.length > 0 ? Math.round((visitantesRetidos / visitantesComPresenca.length) * 100) : 0
+
+  // Oportunidades
+  const ativosNaoBatizados = await prisma.member.count({ where: { status: 'ATIVO', isBaptized: false } })
+  const visitantesAssiduos = visitantesComPresenca.filter(m => m.attendances.length >= 3).length
 
   // OTIMIZAÇÃO: Filtrando aniversariantes puxando o mínimo de dados possível
   const membersWithBday = await prisma.member.findMany({
     where: { 
-      status: { in: ['ATIVO', 'VISITANTE'] },
+      status: { in: ['ATIVO', 'VISITANTE', 'DISCIPULADO'] },
       birthDate: { not: null }
     },
     select: { id: true, name: true, birthDate: true, phone: true }
@@ -47,17 +61,15 @@ export default async function DashboardPage() {
 
   const atRiskMembers = await prisma.member.findMany({
     where: {
-      status: { in: ['ATIVO', 'VISITANTE'] },
+      status: { in: ['ATIVO', 'VISITANTE', 'DISCIPULADO'] },
       OR: [
         {
-          // Tem histórico, mas o mais recente é mais velho que a data de corte
           histories: { some: {} },
           NOT: {
             histories: { some: { sentAt: { gte: cutoffDate } } }
           }
         },
         {
-          // Não tem nenhum histórico e foi criado antes da data de corte
           histories: { none: {} },
           createdAt: { lt: cutoffDate }
         }
@@ -73,8 +85,8 @@ export default async function DashboardPage() {
   const stats = [
     { name: 'Total de Ativos', value: totalAtivos.toString(), icon: Users, color: 'text-primary' },
     { name: 'Visitantes', value: visitantes.toString(), icon: UserPlus, color: 'text-blue-500' },
-    { name: 'Aniversariantes (7 dias)', value: birthdays.length.toString(), icon: Cake, color: 'text-pink-500' },
-    { name: `Risco de Evasão (> ${settings.inactivityDays}d)`, value: atRiskMembers.length.toString(), icon: AlertCircle, color: 'text-destructive' },
+    { name: 'Em Discipulado', value: discipulado.toString(), icon: BookOpen, color: 'text-orange-500' },
+    { name: 'Retenção Visitantes', value: `${taxaRetencao}%`, icon: UserCheck, color: 'text-green-500' },
     { name: 'Mensagens Enviadas', value: historicoCount.toString(), icon: MessageCircle, color: 'text-whatsapp' },
   ]
 
@@ -177,91 +189,102 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Action / Birthdays */}
-        <div className="md:col-span-1 p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+        {/* Funil da Jornada */}
+        <div className="md:col-span-1 p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-            <div className="p-2.5 bg-pink-500/10 rounded-xl">
-              <Cake className="w-6 h-6 text-pink-500" />
+            <div className="p-2.5 bg-orange-500/10 rounded-xl">
+              <BookOpen className="w-6 h-6 text-orange-500" />
             </div>
-            Aniversariantes Próximos
+            Jornada do Membro (Funil)
           </h2>
-          <div className="space-y-4">
-            {birthdays.length === 0 ? (
-              <p className="text-sm text-muted-foreground bg-secondary/30 p-4 rounded-xl text-center">Nenhum aniversariante nos próximos 7 dias.</p>
-            ) : (
-              birthdays.map(m => (
-                <div key={m.id} className="group flex items-center justify-between p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-secondary/20 transition-all duration-300">
-                  <div>
-                    <p className="font-bold text-foreground group-hover:text-primary transition-colors">{m.name}</p>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      Aniversário: {new Date(m.birthDate!).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long'})}
-                    </p>
-                  </div>
-                  {m.phone && (
-                    <a 
-                      href={`https://wa.me/${m.phone.replace(/\D/g, '')}?text=Feliz aniversário!`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 bg-whatsapp text-whatsapp-foreground text-sm font-bold rounded-lg hover:opacity-90 hover:scale-105 transition-all shadow-md shadow-whatsapp/20"
-                    >
-                      Parabéns
-                    </a>
-                  )}
-                </div>
-              ))
-            )}
+          <div className="flex-1 flex flex-col gap-3 justify-center">
+            
+            <div className="flex flex-col items-center group relative">
+              <div className="w-full h-12 bg-blue-500/20 rounded-xl flex items-center justify-between px-4 border border-blue-500/30">
+                <span className="font-bold text-blue-700 dark:text-blue-400">Visitantes</span>
+                <span className="font-extrabold text-blue-700 dark:text-blue-400">{visitantes}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center -my-1 relative z-10">
+              <div className="w-px h-4 bg-border"></div>
+            </div>
+
+            <div className="flex flex-col items-center group relative">
+              <div className="w-[90%] h-12 bg-orange-500/20 rounded-xl flex items-center justify-between px-4 border border-orange-500/30">
+                <span className="font-bold text-orange-700 dark:text-orange-400">Em Discipulado</span>
+                <span className="font-extrabold text-orange-700 dark:text-orange-400">{discipulado}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center -my-1 relative z-10">
+              <div className="w-px h-4 bg-border"></div>
+            </div>
+
+            <div className="flex flex-col items-center group relative">
+              <div className="w-[80%] h-12 bg-teal-500/20 rounded-xl flex items-center justify-between px-4 border border-teal-500/30">
+                <span className="font-bold text-teal-700 dark:text-teal-400">Batizados</span>
+                <span className="font-extrabold text-teal-700 dark:text-teal-400">{batizados}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center -my-1 relative z-10">
+              <div className="w-px h-4 bg-border"></div>
+            </div>
+
+            <div className="flex flex-col items-center group relative">
+              <div className="w-[70%] h-12 bg-green-500/20 rounded-xl flex items-center justify-between px-4 border border-green-500/30">
+                <span className="font-bold text-green-700 dark:text-green-400">Membros Ativos</span>
+                <span className="font-extrabold text-green-700 dark:text-green-400">{totalAtivos}</span>
+              </div>
+            </div>
+
           </div>
         </div>
 
+        {/* Demografia e Oportunidades */}
         <div className="md:col-span-1 p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-            <div className="p-2.5 bg-destructive/10 rounded-xl">
-              <AlertCircle className="w-6 h-6 text-destructive" />
+            <div className="p-2.5 bg-yellow-500/10 rounded-xl">
+              <AlertCircle className="w-6 h-6 text-yellow-500" />
             </div>
-            Atenção Necessária
+            Oportunidades & Ações
           </h2>
           <div className="space-y-4">
-            {atRiskMembers.length === 0 ? (
-              <div className="p-4 border border-border rounded-xl bg-green-500/10 text-green-700 dark:text-green-400 text-center text-sm font-medium">
-                Parabéns! Nenhum membro está há mais de {settings.inactivityDays} dias sem contato.
+            
+            <div className="group flex flex-col p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-secondary/20 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-bold text-foreground">Ativos não batizados</p>
+                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 font-bold rounded-full text-xs">
+                  {ativosNaoBatizados} pessoas
+                </span>
               </div>
-            ) : (
-              atRiskMembers.slice(0, 5).map(m => {
-                const daysSince = m.histories.length > 0 
-                  ? Math.floor((new Date().getTime() - new Date(m.histories[0].sentAt).getTime()) / (1000 * 3600 * 24))
-                  : Math.floor((new Date().getTime() - new Date(m.createdAt).getTime()) / (1000 * 3600 * 24));
-                  
-                return (
-                  <div key={m.id} className="group flex items-center justify-between p-4 border border-destructive/20 rounded-xl hover:border-destructive/50 hover:bg-destructive/5 transition-all duration-300">
-                    <div>
-                      <Link href={`/membros/${m.id}`} className="font-bold text-foreground group-hover:text-destructive transition-colors">
-                        {m.name}
-                      </Link>
-                      <p className="text-sm text-muted-foreground font-medium">
-                        {daysSince} dias
-                      </p>
-                    </div>
-                    {m.phone && (
-                      <a 
-                        href={`https://wa.me/${m.phone.replace(/\D/g, '')}?text=Oi ${m.name}, sentimos sua falta!`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-destructive text-destructive-foreground text-sm font-bold rounded-lg hover:opacity-90 hover:scale-105 transition-all shadow-md shadow-destructive/20"
-                      >
-                        Resgatar
-                      </a>
-                    )}
-                  </div>
-                )
-              })
-            )}
-            {atRiskMembers.length > 5 && (
-              <p className="text-center text-sm text-muted-foreground mt-4">
-                E mais {atRiskMembers.length - 5} pessoas. Acesse a área de Membros.
-              </p>
-            )}
+              <p className="text-xs text-muted-foreground">Membros que são ativos na igreja mas ainda não desceram às águas. Oportunidade de classe de batismo.</p>
+            </div>
+
+            <div className="group flex flex-col p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-secondary/20 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-bold text-foreground">Visitantes Assíduos</p>
+                <span className="px-3 py-1 bg-green-500/20 text-green-700 dark:text-green-400 font-bold rounded-full text-xs">
+                  {visitantesAssiduos} pessoas
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">Visitantes que já vieram a 3 ou mais cultos. Excelente momento para convidá-los para uma célula/discipulado.</p>
+            </div>
+
+            <div className="group flex flex-col p-4 border border-border rounded-xl hover:border-primary/50 hover:bg-secondary/20 transition-all duration-300">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-bold text-foreground">Aniversariantes (7d)</p>
+                <span className="px-3 py-1 bg-pink-500/20 text-pink-700 dark:text-pink-400 font-bold rounded-full text-xs">
+                  {birthdays.length} pessoas
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">Pessoas fazendo aniversário nesta semana. Mande uma mensagem de felicitação.</p>
+            </div>
+
           </div>
         </div>
+
       </div>
     </div>
   )
