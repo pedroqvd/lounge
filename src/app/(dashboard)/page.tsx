@@ -78,12 +78,55 @@ export default async function DashboardPage() {
     { name: 'Mensagens Enviadas', value: historicoCount.toString(), icon: MessageCircle, color: 'text-whatsapp' },
   ]
 
+  // Gráfico CSS de Frequência: Buscar últimos 4 eventos do tipo CULTO
+  const recentEvents = await prisma.event.findMany({
+    where: { type: 'CULTO', date: { lte: new Date() } },
+    orderBy: { date: 'desc' },
+    take: 5,
+    select: { id: true, title: true, date: true, attendances: { where: { isPresent: true }, select: { id: true } } }
+  })
+  
+  const chartData = recentEvents.reverse().map(ev => ({
+    name: new Date(ev.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    value: ev.attendances.length
+  }))
+  const maxAttendance = Math.max(...chartData.map(d => d.value), 1) // Prevent division by zero
+
+  const birthdaysToday = birthdays.filter(m => {
+    const bday = new Date(m.birthDate!)
+    return bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()
+  })
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Painel de Resumo</h1>
         <p className="text-muted-foreground mt-2">Visão geral do Ministério de Jovens.</p>
       </div>
+
+      {birthdaysToday.length > 0 && (
+        <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-2xl shadow-lg flex items-center justify-between animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/20 rounded-full animate-bounce">
+              <Cake className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-extrabold">Temos aniversariante hoje! 🎉</h2>
+              <p className="font-medium opacity-90">{birthdaysToday.map(m => m.name).join(', ')}</p>
+            </div>
+          </div>
+          {birthdaysToday[0].phone && (
+            <a 
+              href={`https://wa.me/${birthdaysToday[0].phone.replace(/\D/g, '')}?text=Parabéns pelo seu dia, ${birthdaysToday[0].name}! Deus te abençoe rica e abundantemente!`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-white text-pink-600 font-extrabold rounded-xl hover:scale-105 transition-transform shadow-md"
+            >
+              Mandar Parabéns Agora
+            </a>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat) => (
@@ -104,9 +147,38 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick Action / Birthdays */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* CSS Chart */}
+        <div className="md:col-span-1 p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <Users className="w-6 h-6 text-primary" />
+            </div>
+            Frequência (Últimos Cultos)
+          </h2>
+          
+          <div className="flex-1 flex items-end justify-between gap-2 mt-4 pt-4 border-t border-border/50">
+            {chartData.length === 0 ? (
+              <p className="text-sm text-muted-foreground mx-auto my-auto">Nenhum culto recente com lista de chamada.</p>
+            ) : (
+              chartData.map((d, i) => (
+                <div key={i} className="flex flex-col items-center gap-2 group w-full">
+                  <div className="text-xs font-bold text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{d.value}</div>
+                  <div 
+                    className="w-full bg-primary/20 rounded-t-md relative overflow-hidden group-hover:bg-primary transition-colors"
+                    style={{ height: `${(d.value / maxAttendance) * 150}px`, minHeight: '4px' }}
+                  >
+                    <div className="absolute bottom-0 w-full bg-primary rounded-t-md" style={{ height: '100%' }}></div>
+                  </div>
+                  <div className="text-xs font-bold text-muted-foreground mt-1 truncate">{d.name}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Quick Action / Birthdays */}
+        <div className="md:col-span-1 p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
             <div className="p-2.5 bg-pink-500/10 rounded-xl">
               <Cake className="w-6 h-6 text-pink-500" />
@@ -132,7 +204,7 @@ export default async function DashboardPage() {
                       rel="noopener noreferrer"
                       className="px-4 py-2 bg-whatsapp text-whatsapp-foreground text-sm font-bold rounded-lg hover:opacity-90 hover:scale-105 transition-all shadow-md shadow-whatsapp/20"
                     >
-                      Dar Parabéns
+                      Parabéns
                     </a>
                   )}
                 </div>
@@ -141,7 +213,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+        <div className="md:col-span-1 p-8 bg-card border border-border rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
             <div className="p-2.5 bg-destructive/10 rounded-xl">
               <AlertCircle className="w-6 h-6 text-destructive" />
@@ -166,7 +238,7 @@ export default async function DashboardPage() {
                         {m.name}
                       </Link>
                       <p className="text-sm text-muted-foreground font-medium">
-                        {daysSince} dias sem contato
+                        {daysSince} dias
                       </p>
                     </div>
                     {m.phone && (

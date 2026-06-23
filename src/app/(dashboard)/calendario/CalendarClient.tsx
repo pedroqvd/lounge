@@ -26,7 +26,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
     time: '',
     type: 'CULTO',
     location: '',
-    description: '' 
+    description: '',
+    isRecurring: false,
+    recurrenceType: 'SEMANAL' as 'SEMANAL' | 'MENSAL',
+    recurrenceEnd: ''
   })
 
   // Helpers for Calendar Math
@@ -115,7 +118,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
         </div>
         <button 
           onClick={() => {
-            setFormData({ title: '', date: new Date().toISOString().split('T')[0], time: '', type: 'CULTO', location: '', description: '' })
+            setFormData({ title: '', date: new Date().toISOString().split('T')[0], time: '', type: 'CULTO', location: '', description: '', isRecurring: false, recurrenceType: 'SEMANAL', recurrenceEnd: '' })
             setIsNewEventModalOpen(true)
           }}
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
@@ -175,7 +178,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
                   <button 
                     onClick={(e) => {
                       e.stopPropagation()
-                      setFormData({ title: '', date: date.toISOString().split('T')[0], time: '', type: 'CULTO', location: '', description: '' })
+                      setFormData({ title: '', date: date.toISOString().split('T')[0], time: '', type: 'CULTO', location: '', description: '', isRecurring: false, recurrenceType: 'SEMANAL', recurrenceEnd: '' })
                       setIsNewEventModalOpen(true)
                     }}
                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-opacity"
@@ -218,7 +221,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
               </div>
               <button 
                 onClick={() => {
-                  setFormData({ title: '', date: selectedDateStr, time: '', type: 'CULTO', location: '', description: '' })
+                  setFormData({ title: '', date: selectedDateStr, time: '', type: 'CULTO', location: '', description: '', isRecurring: false, recurrenceType: 'SEMANAL', recurrenceEnd: '' })
                   setIsNewEventModalOpen(true)
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:opacity-90"
@@ -303,6 +306,29 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
                 <label className="text-sm font-bold">Título (Ex: Culto de Jovens)</label>
                 <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold cursor-pointer select-none">
+                  <input type="checkbox" checked={formData.isRecurring} onChange={e => setFormData({...formData, isRecurring: e.target.checked})} className="w-4 h-4 rounded border-input text-primary focus:ring-primary" />
+                  Repetir este evento?
+                </label>
+              </div>
+
+              {formData.isRecurring && (
+                <div className="grid grid-cols-2 gap-4 p-4 bg-secondary/30 rounded-xl border border-border animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-muted-foreground">Frequência</label>
+                    <select value={formData.recurrenceType} onChange={e => setFormData({...formData, recurrenceType: e.target.value as any})} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                      <option value="SEMANAL">Semanalmente</option>
+                      <option value="MENSAL">Mensalmente</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-muted-foreground">Até quando?</label>
+                    <input required={formData.isRecurring} type="date" value={formData.recurrenceEnd} onChange={e => setFormData({...formData, recurrenceEnd: e.target.value})} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
