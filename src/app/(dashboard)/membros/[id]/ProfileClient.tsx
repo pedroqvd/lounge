@@ -53,7 +53,7 @@ export default function ProfileClient({ member, groups }: { member: any, groups:
   const [isSavingMin, setIsSavingMin] = useState(false)
 
   // Timeline Tab State
-  const [activeTab, setActiveTab] = useState<'contatos' | 'auditoria'>('contatos')
+  const [activeTab, setActiveTab] = useState<'contatos' | 'auditoria' | 'cultos'>('contatos')
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
