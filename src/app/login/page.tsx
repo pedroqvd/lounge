@@ -42,14 +42,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8">
-            {/* ESPAÇO RESERVADO PARA A LOGO DO LOGIN */}
-            {/* Coloque a imagem "custom-logo-login.png" dentro da pasta "public" do projeto */}
-            <img 
-              src="/custom-logo-login.png" 
-              alt="Logo Lounge Login" 
-              className="h-16 w-auto object-contain mb-4 mx-auto"
-              title="Coloque sua logo de login na pasta 'public' com o nome 'custom-logo-login.png'"
-            />
+            <h1 className="text-4xl font-bold tracking-tight mb-2">
+              <span className="text-foreground">LO</span>
+              <span className="text-primary bg-primary/10 px-1 rounded">U</span>
+              <span className="text-foreground">NGE</span>
+            </h1>
             <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">For You</p>
             <p className="mt-4 text-sm text-muted-foreground">Faça login para acessar o sistema.</p>
           </div>

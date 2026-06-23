@@ -8,11 +8,6 @@ const montserrat = Montserrat({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Lounge For You',
   description: 'Um site do Ministério de Jovens da Igreja Millenium',
-  icons: {
-    // ESPAÇO RESERVADO PARA O FAVICON (Ícone da aba do navegador)
-    // Coloque a imagem "custom-favicon.png" dentro da pasta "public" do projeto
-    icon: '/custom-favicon.png',
-  }
 }
 
 export default function RootLayout({
