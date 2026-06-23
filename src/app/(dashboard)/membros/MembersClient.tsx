@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send } from 'lucide-react'
+import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud } from 'lucide-react'
 import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
+import { executeImport } from '@/app/actions/importData'
 import * as Dialog from '@radix-ui/react-dialog'
 import Link from 'next/link'
 
@@ -17,6 +18,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
   const [inviteStatusFilter, setInviteStatusFilter] = useState('TODOS')
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
   const [isSeeding, setIsSeeding] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   // Member Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -41,6 +43,24 @@ export default function MembersClient({ initialMembers, groups, templates, userR
       alert('Erro: ' + res.error)
     }
     setIsSeeding(false)
+  }
+
+  const handleImport = async () => {
+    if (!confirm('Deseja importar a lista gigantesca agora?')) return
+    setIsImporting(true)
+    try {
+      const res = await executeImport()
+      if (res.success) {
+        alert(`Importação concluída! ${res.added} adicionados, ${res.skipped} ignorados (já existiam).`)
+        window.location.reload()
+      } else {
+        alert('Erro ao importar.')
+      }
+    } catch (e) {
+      alert('Erro inesperado.')
+    } finally {
+      setIsImporting(false)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -234,9 +254,17 @@ export default function MembersClient({ initialMembers, groups, templates, userR
               className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground font-medium rounded-md hover:bg-secondary/80 transition-colors"
             >
               <Database className="w-5 h-5" />
-              {isSeeding ? 'Importando...' : 'Importar Planilha'}
+              {isSeeding ? 'Importando...' : 'Importar Planilha Inicial'}
             </button>
           )}
+          <button 
+            onClick={handleImport}
+            disabled={isImporting}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-500 text-white font-medium rounded-md hover:bg-purple-600 transition-colors shadow-md"
+          >
+            <UploadCloud className="w-5 h-5" />
+            {isImporting ? 'Inserindo...' : 'Importação em Massa'}
+          </button>
           <button 
             onClick={() => openModal()}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
