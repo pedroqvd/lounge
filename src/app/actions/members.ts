@@ -110,7 +110,7 @@ export async function getGroups() {
 // CREATE MEMBER
 export async function createMember(data: { name: string, phone?: string, status: string, groupId?: string, email?: string, notes?: string }) {
   try {
-    await prisma.member.create({
+    const member = await prisma.member.create({
       data: {
         name: data.name,
         phone: data.phone || null,
@@ -120,6 +120,16 @@ export async function createMember(data: { name: string, phone?: string, status:
         notes: data.notes || null,
       }
     })
+
+    const settings = await prisma.settings.findUnique({ where: { id: 'global' } })
+    if (settings?.webhookUrl) {
+      fetch(settings.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CREATE', member })
+      }).catch(err => console.error('Webhook error:', err))
+    }
+
     revalidatePath('/membros')
     revalidatePath('/')
     return { success: true }
@@ -131,7 +141,7 @@ export async function createMember(data: { name: string, phone?: string, status:
 // UPDATE MEMBER
 export async function updateMember(id: string, data: { name: string, phone?: string, status: string, groupId?: string, email?: string, notes?: string }) {
   try {
-    await prisma.member.update({
+    const member = await prisma.member.update({
       where: { id },
       data: {
         name: data.name,
@@ -142,6 +152,16 @@ export async function updateMember(id: string, data: { name: string, phone?: str
         notes: data.notes || null,
       }
     })
+
+    const settings = await prisma.settings.findUnique({ where: { id: 'global' } })
+    if (settings?.webhookUrl) {
+      fetch(settings.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'UPDATE', member })
+      }).catch(err => console.error('Webhook error:', err))
+    }
+
     revalidatePath('/membros')
     revalidatePath('/')
     return { success: true }

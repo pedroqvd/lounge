@@ -23,7 +23,7 @@ export async function getSettings() {
   return settings
 }
 
-export async function updateSettings(data: { inactivityDays: number, defaultChurchName: string, leaders?: string[], areas?: string[] }) {
+export async function updateSettings(data: { inactivityDays: number, defaultChurchName: string, leaders?: string[], areas?: string[], primaryColor?: string, themeMode?: string, webhookUrl?: string }) {
   try {
     await prisma.settings.upsert({
       where: { id: 'global' },
@@ -31,14 +31,20 @@ export async function updateSettings(data: { inactivityDays: number, defaultChur
         inactivityDays: data.inactivityDays,
         defaultChurchName: data.defaultChurchName,
         leaders: data.leaders,
-        areas: data.areas
+        areas: data.areas,
+        primaryColor: data.primaryColor,
+        themeMode: data.themeMode,
+        webhookUrl: data.webhookUrl
       },
       create: {
         id: 'global',
         inactivityDays: data.inactivityDays,
         defaultChurchName: data.defaultChurchName,
         leaders: data.leaders || [],
-        areas: data.areas || []
+        areas: data.areas || [],
+        primaryColor: data.primaryColor || '#4A3AFF',
+        themeMode: data.themeMode || 'system',
+        webhookUrl: data.webhookUrl || ''
       }
     })
     

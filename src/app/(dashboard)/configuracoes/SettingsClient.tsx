@@ -6,13 +6,16 @@ import { updateUserRole } from '@/app/actions/auth'
 import { Save, AlertTriangle, Building2, Shield, X, UserCog } from 'lucide-react'
 
 export default function SettingsClient({ initialSettings, users, currentUser }: { initialSettings: any, users: any[], currentUser: any }) {
-  const [activeTab, setActiveTab] = useState<'geral' | 'acessos' | 'listas'>('geral')
+  const [activeTab, setActiveTab] = useState<'geral' | 'acessos' | 'listas' | 'integracoes'>('geral')
   const [localUsers, setLocalUsers] = useState(users)
   const [formData, setFormData] = useState({
     inactivityDays: initialSettings.inactivityDays || 20,
     defaultChurchName: initialSettings.defaultChurchName || 'Lounge For You',
     leaders: initialSettings.leaders || [],
-    areas: initialSettings.areas || []
+    areas: initialSettings.areas || [],
+    primaryColor: initialSettings.primaryColor || '#6366f1',
+    themeMode: initialSettings.themeMode || 'system',
+    webhookUrl: initialSettings.webhookUrl || ''
   })
   const [isSaving, setIsSaving] = useState(false)
 
@@ -66,6 +69,12 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
         >
           📋 Listas Dinâmicas
         </button>
+        <button 
+          onClick={() => setActiveTab('integracoes')} 
+          className={`px-4 py-2.5 text-sm font-bold rounded-t-xl transition-colors ${activeTab === 'integracoes' ? 'bg-card border-x border-t border-border text-primary' : 'text-muted-foreground hover:bg-secondary/50'}`}
+        >
+          🔌 Integrações (Webhooks)
+        </button>
       </div>
 
       {/* CONTEÚDO DAS TABS */}
@@ -91,6 +100,50 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
                     className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-primary/50" 
                   />
                   <p className="text-sm text-muted-foreground mt-2">Usado como variável em templates de WhatsApp.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 bg-card border border-border rounded-2xl shadow-sm">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <div className="w-6 h-6 rounded-full" style={{ backgroundColor: formData.primaryColor }} />
+                </div>
+                Aparência Visual
+              </h2>
+              <div className="space-y-6 max-w-xl">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Cor Principal do Sistema (HEX)</label>
+                  <div className="flex items-center gap-4">
+                    <input 
+                      type="color" 
+                      value={formData.primaryColor} 
+                      onChange={e => setFormData({...formData, primaryColor: e.target.value})} 
+                      className="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-0 p-0" 
+                    />
+                    <input 
+                      type="text" 
+                      value={formData.primaryColor} 
+                      onChange={e => setFormData({...formData, primaryColor: e.target.value})} 
+                      className="flex h-12 w-32 rounded-xl border border-input bg-transparent px-4 py-2 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 uppercase" 
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">Mude a cor de todos os botões e detalhes do sistema.</p>
+                </div>
+
+                <hr className="border-border" />
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Modo de Visualização</label>
+                  <select 
+                    value={formData.themeMode} 
+                    onChange={e => setFormData({...formData, themeMode: e.target.value})} 
+                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-primary/50" 
+                  >
+                    <option value="system">Automático (Igual ao celular do Líder)</option>
+                    <option value="light">Forçar Modo Claro</option>
+                    <option value="dark">Forçar Modo Escuro</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -290,6 +343,44 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
               <button type="submit" disabled={isSaving} className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground text-lg font-bold rounded-xl hover:opacity-90 transition-all shadow-md disabled:opacity-50">
                 <Save className="w-5 h-5" />
                 {isSaving ? 'Salvando...' : 'Salvar Listas'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* TAB: INTEGRAÇÕES */}
+        {activeTab === 'integracoes' && (
+          <form onSubmit={handleSave} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="p-8 bg-card border border-border rounded-2xl shadow-sm">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2.5 bg-orange-500/10 rounded-xl">
+                  <span className="text-xl">🔌</span>
+                </div>
+                Webhooks e Automações
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+                Conecte o Lounge a outros aplicativos (como Google Sheets, Zapier, n8n ou Make). Quando um membro for criado ou atualizado, o Lounge enviará os dados automaticamente para a URL especificada abaixo.
+              </p>
+              
+              <div className="space-y-6 max-w-xl">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">URL do Webhook</label>
+                  <input 
+                    type="url" 
+                    placeholder="https://hooks.zapier.com/..." 
+                    value={formData.webhookUrl} 
+                    onChange={e => setFormData({...formData, webhookUrl: e.target.value})} 
+                    className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary/50" 
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">Deixe em branco para desativar. Os envios são feitos via POST com o objeto JSON do membro.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button type="submit" disabled={isSaving} className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground text-lg font-bold rounded-xl hover:opacity-90 transition-all shadow-md disabled:opacity-50">
+                <Save className="w-5 h-5" />
+                {isSaving ? 'Salvando...' : 'Salvar Integrações'}
               </button>
             </div>
           </form>

@@ -153,5 +153,8 @@ model Settings {
   defaultChurchName String   @default("Lounge For You")
   leaders           String[] @default([]) // Array de Responsáveis
   areas             String[] @default([]) // Array de Áreas de Escolha
+  primaryColor      String?  @default("#6366f1")
+  themeMode         String?  @default("system")
+  webhookUrl        String?
   updatedAt         DateTime @updatedAt
 }
