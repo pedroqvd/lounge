@@ -153,6 +153,12 @@ export async function updateMember(id: string, data: { name: string, phone?: str
 // DELETE MEMBER
 export async function deleteMember(id: string) {
   try {
+    const { getCurrentUser } = await import('./auth')
+    const currentUser = await getCurrentUser()
+    if (currentUser?.role !== 'ADMIN') {
+      return { success: false, error: 'Apenas Administradores podem deletar membros.' }
+    }
+
     await prisma.member.delete({
       where: { id }
     })

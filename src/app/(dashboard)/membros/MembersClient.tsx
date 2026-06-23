@@ -11,7 +11,7 @@ type Member = any
 type Group = any
 type Template = any
 
-export default function MembersClient({ initialMembers, groups, templates }: { initialMembers: Member[], groups: Group[], templates: Template[] }) {
+export default function MembersClient({ initialMembers, groups, templates, userRole }: { initialMembers: Member[], groups: Group[], templates: Template[], userRole: string }) {
   const [members, setMembers] = useState(initialMembers)
   const [searchTerm, setSearchTerm] = useState('')
   const [inviteStatusFilter, setInviteStatusFilter] = useState('TODOS')
@@ -355,9 +355,11 @@ export default function MembersClient({ initialMembers, groups, templates }: { i
                     <button onClick={() => openModal(member)} className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(member.id)} className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {userRole === 'ADMIN' && (
+                      <button onClick={() => handleDelete(member.id)} className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

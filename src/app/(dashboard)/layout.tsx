@@ -22,6 +22,8 @@ import {
 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 
+import { getCurrentUser } from '@/app/actions/auth'
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -30,8 +32,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarMinimized, setSidebarMinimized] = useState(false)
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+    getCurrentUser().then(user => {
+      if (user) setUserRole(user.role)
+    })
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -100,16 +108,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="p-4 border-t border-border flex flex-col gap-2">
-          {/* Settings Link */}
-          <Link 
-            href="/configuracoes"
-            onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground rounded-xl transition-all duration-200 ${pathname.startsWith('/configuracoes') ? 'bg-secondary text-secondary-foreground font-medium' : ''} ${sidebarMinimized ? 'justify-center' : 'w-full'}`}
-            title="Configurações"
-          >
-            <SettingsIcon className="w-5 h-5" />
-            {!sidebarMinimized && <span className="font-medium">Configurações</span>}
-          </Link>
+          {/* Settings Link (Apenas para ADMIN) */}
+          {userRole === 'ADMIN' && (
+            <Link 
+              href="/configuracoes"
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2.5 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground rounded-xl transition-all duration-200 ${pathname.startsWith('/configuracoes') ? 'bg-secondary text-secondary-foreground font-medium' : ''} ${sidebarMinimized ? 'justify-center' : 'w-full'}`}
+              title="Configurações"
+            >
+              <SettingsIcon className="w-5 h-5" />
+              {!sidebarMinimized && <span className="font-medium">Configurações</span>}
+            </Link>
+          )}
           {/* Dark Mode Toggle */}
           <button 
             onClick={toggleTheme}
