@@ -17,26 +17,21 @@ export default async function DashboardPage() {
     prisma.member.count({ where: { status: 'VISITANTE' } }),
     prisma.contactHistory.count()
   ])
-  
-  // Fetch all active/visitor members with their latest contact history
-  const allMembers = await prisma.member.findMany({
-    where: { status: { in: ['ATIVO', 'VISITANTE'] } },
-    select: { 
-      id: true, name: true, birthDate: true, status: true, phone: true, createdAt: true,
-      histories: {
-        orderBy: { sentAt: 'desc' },
-        take: 1,
-        select: { sentAt: true }
-      }
-    }
+
+  // OTIMIZAÇÃO: Filtrando aniversariantes puxando o mínimo de dados possível
+  const membersWithBday = await prisma.member.findMany({
+    where: { 
+      status: { in: ['ATIVO', 'VISITANTE'] },
+      birthDate: { not: null }
+    },
+    select: { id: true, name: true, birthDate: true, phone: true }
   })
 
   const today = new Date()
   today.setHours(0,0,0,0)
   
-  const birthdays = allMembers.filter(m => {
-    if (!m.birthDate) return false
-    const bday = new Date(m.birthDate)
+  const birthdays = membersWithBday.filter(m => {
+    const bday = new Date(m.birthDate!)
     const bdayThisYear = new Date(today.getFullYear(), bday.getMonth(), bday.getDate())
     const diff = (bdayThisYear.getTime() - today.getTime()) / (1000 * 3600 * 24)
     return diff >= 0 && diff <= 7
@@ -46,17 +41,33 @@ export default async function DashboardPage() {
     return aBday.getTime() - bBday.getTime()
   })
 
-  // Evasion Risk Logic
+  // OTIMIZAÇÃO: Filtrar Risco de Evasão DIRETAMENTE no banco de dados
   const cutoffDate = new Date()
   cutoffDate.setDate(cutoffDate.getDate() - settings.inactivityDays)
 
-  const atRiskMembers = allMembers.filter(m => {
-    // If they have history, check if latest is older than cutoff
-    if (m.histories.length > 0) {
-      return new Date(m.histories[0].sentAt) < cutoffDate
-    }
-    // If no history, check if they were created before cutoff
-    return new Date(m.createdAt) < cutoffDate
+  const atRiskMembers = await prisma.member.findMany({
+    where: {
+      status: { in: ['ATIVO', 'VISITANTE'] },
+      OR: [
+        {
+          // Tem histórico, mas o mais recente é mais velho que a data de corte
+          histories: { some: {} },
+          NOT: {
+            histories: { some: { sentAt: { gte: cutoffDate } } }
+          }
+        },
+        {
+          // Não tem nenhum histórico e foi criado antes da data de corte
+          histories: { none: {} },
+          createdAt: { lt: cutoffDate }
+        }
+      ]
+    },
+    select: {
+      id: true, name: true, phone: true, createdAt: true,
+      histories: { orderBy: { sentAt: 'desc' }, take: 1, select: { sentAt: true } }
+    },
+    orderBy: { createdAt: 'asc' }
   })
 
   const stats = [
