@@ -99,14 +99,26 @@ Mauricio	61993973901
 Jess (amiga Manu) 	61 9155-7685`
 
 export async function executeImport() {
-  const lines = rawData.split('\\n')
+  // CLEANUP: If there was a giant bad block imported previously, remove it
+  const badMembers = await prisma.member.findMany({
+    where: {
+      name: { contains: '\n' }
+    }
+  })
+  for (const b of badMembers) {
+    await prisma.contactHistory.deleteMany({ where: { memberId: b.id } })
+    await prisma.attendance.deleteMany({ where: { memberId: b.id } })
+    await prisma.member.delete({ where: { id: b.id } })
+  }
+
+  const lines = rawData.split('\n')
   let added = 0
   let skipped = 0
 
   for (const line of lines) {
     if (!line.trim()) continue
 
-    const parts = line.split('\\t')
+    const parts = line.split('\t')
     const name = parts[0]?.trim()
     let phone = parts.length > 1 ? parts[1]?.trim() : null
 
