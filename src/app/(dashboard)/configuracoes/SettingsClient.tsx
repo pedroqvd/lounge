@@ -253,7 +253,7 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
                   <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Áreas de Serviço / Ministérios</label>
                   <p className="text-sm text-muted-foreground mb-2">Usado no cadastro de membros para saber onde eles servem.</p>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {formData.areas.map((area, i) => (
+                    {formData.areas.map((area: string, i: number) => (
                       <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium border border-border">
                         {area}
                         <button type="button" onClick={() => setFormData({...formData, areas: formData.areas.filter((_, idx) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
@@ -297,7 +297,7 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Líderes de Referência</label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {formData.leaders.map((leader, i) => (
+                    {formData.leaders.map((leader: string, i: number) => (
                       <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium border border-border">
                         {leader}
                         <button type="button" onClick={() => setFormData({...formData, leaders: formData.leaders.filter((_, idx) => idx !== i)})} className="hover:text-destructive"><X className="w-3 h-3" /></button>
