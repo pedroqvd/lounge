@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { z } from 'zod'
@@ -57,7 +58,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8 flex flex-col items-center">
-            <Image src="/custom-logo-login.PNG" alt="Lounge For You" width={200} height={100} className="w-48 h-auto object-contain mb-4" priority />
+            <Link href="/" className="transition-transform hover:scale-105 active:scale-95">
+              <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge For You" width={200} height={100} className="w-48 h-auto object-contain mb-4 dark:brightness-200" priority />
+            </Link>
             <p className="mt-4 text-sm text-muted-foreground">Faça login para acessar o sistema.</p>
           </div>
 
