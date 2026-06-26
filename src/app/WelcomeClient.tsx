@@ -75,7 +75,13 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-500" style={{ background: `linear-gradient(135deg, ${primaryColor}08, ${primaryColor}15)` }}>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-500 relative" style={{ background: `linear-gradient(135deg, ${primaryColor}08, ${primaryColor}15)` }}>
+        <button 
+          onClick={() => setIsSuccess(false)}
+          className="absolute top-6 right-6 p-3 rounded-full bg-background/50 backdrop-blur-md border border-border/50 text-muted-foreground hover:text-foreground hover:bg-background shadow-sm transition-all hover:scale-110"
+        >
+          <X className="w-6 h-6" />
+        </button>
         <div className="w-28 h-28 rounded-full flex items-center justify-center mb-8 shadow-2xl animate-bounce" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}>
           <CheckCircle2 className="w-14 h-14" />
         </div>
