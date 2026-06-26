@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { Music, DoorOpen, Baby, Camera, Heart, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Sparkles } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Music, DoorOpen, Baby, Camera, Heart, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Sparkles, Download } from 'lucide-react'
 import Link from 'next/link'
+import html2canvas from 'html2canvas'
 
 const MINISTRY_ICONS: Record<string, any> = {
   music: Music, 'door-open': DoorOpen, baby: Baby, camera: Camera, heart: Heart, users: Users, mic: Mic2, sparkles: Sparkles
@@ -10,6 +11,8 @@ const MINISTRY_ICONS: Record<string, any> = {
 
 export default function VoluntariosClient({ ministries, events }: { ministries: any[], events: any[] }) {
   const [selectedMinistryId, setSelectedMinistryId] = useState<string | null>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
+  const captureRef = useRef<HTMLDivElement>(null)
 
   const selectedMinistry = ministries.find(m => m.id === selectedMinistryId)
 
@@ -17,6 +20,28 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
   const ministryEvents = selectedMinistryId 
     ? events.filter(e => e.scheduleSlots.some((slot: any) => slot.ministryId === selectedMinistryId))
     : []
+
+  const handleDownloadImage = async () => {
+    if (!captureRef.current || !selectedMinistry) return
+    try {
+      setIsDownloading(true)
+      const canvas = await html2canvas(captureRef.current, {
+        scale: 2, // Melhor qualidade
+        backgroundColor: '#ffffff',
+        useCORS: true
+      })
+      const url = canvas.toDataURL('image/png')
+      const link = document.createElement('a')
+      link.download = `escala-${selectedMinistry.name.toLowerCase().replace(/\s+/g, '-')}.png`
+      link.href = url
+      link.click()
+    } catch (error) {
+      console.error('Erro ao gerar imagem da escala:', error)
+      alert('Não foi possível gerar a imagem da escala.')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,19 +100,37 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                   <p className="text-sm text-muted-foreground">Escalas de Serviço</p>
                 </div>
               </div>
+              {ministryEvents.length > 0 && (
+                <button
+                  onClick={handleDownloadImage}
+                  disabled={isDownloading}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90 disabled:opacity-50 shadow-sm"
+                  style={{ backgroundColor: selectedMinistry?.color || '#000' }}
+                >
+                  <Download className="w-4 h-4" />
+                  {isDownloading ? 'Gerando...' : 'Salvar Escala'}
+                </button>
+              )}
             </div>
 
-            {ministryEvents.length === 0 ? (
-              <div className="bg-card border border-border rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Nenhuma escala programada</h3>
-                <p className="text-muted-foreground">Não há eventos futuros com voluntários escalados para este ministério.</p>
+            <div ref={captureRef} className="bg-background p-4 rounded-3xl">
+              {/* Cabeçalho visível apenas na imagem exportada (opcional, mas bom para contexto) */}
+              <div className="hidden print:block mb-6 text-center">
+                <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: selectedMinistry?.color }}>Escala: {selectedMinistry?.name}</h2>
+                <p className="text-muted-foreground">Gerado pelo Lounge</p>
               </div>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {ministryEvents.map(event => {
+
+              {ministryEvents.length === 0 ? (
+                <div className="bg-card border border-border rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Nenhuma escala programada</h3>
+                  <p className="text-muted-foreground">Não há eventos futuros com voluntários escalados para este ministério.</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {ministryEvents.map(event => {
                   const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
                   return (
                     <div key={event.id} className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
@@ -128,6 +171,7 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                 })}
               </div>
             )}
+            </div>
           </div>
         )}
       </main>
