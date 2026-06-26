@@ -55,8 +55,11 @@ export default function CheckinClient({ event }: { event: any }) {
         </div>
         <span className="text-xs font-black uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">{event.type}</span>
         <h1 className="text-3xl font-extrabold mt-4 text-foreground">{event.title}</h1>
-        <p className="text-muted-foreground font-medium mt-2 capitalize">
-          {new Date(event.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+        <p className="text-muted-foreground font-medium mt-2">
+          {(() => {
+            const rawDate = new Date(event.date).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })
+            return rawDate.charAt(0).toUpperCase() + rawDate.slice(1)
+          })()}
         </p>
       </div>
 

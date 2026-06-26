@@ -124,7 +124,8 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
     } else toast.error(res.error || 'Erro')
   }
 
-  const monthName = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+  const rawMonthName = currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+  const monthName = rawMonthName.charAt(0).toUpperCase() + rawMonthName.slice(1)
 
   const upcomingListEvents = useMemo(() => {
     return [...events]
@@ -163,7 +164,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: any[]
         <button onClick={goToToday} className="px-4 py-2 text-sm font-bold bg-secondary rounded-xl hover:bg-secondary/80 transition-colors">Hoje</button>
         <div className="flex items-center gap-3">
           <button onClick={viewMode === 'week' ? prevWeek : prevMonth} className="p-2 rounded-xl hover:bg-secondary transition-colors"><ChevronLeft className="w-5 h-5" /></button>
-          <h2 className="text-lg font-extrabold capitalize min-w-[200px] text-center">
+          <h2 className="text-lg font-extrabold min-w-[200px] text-center">
             {viewMode === 'week'
               ? `${weekDays[0].toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} – ${weekDays[6].toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
               : monthName

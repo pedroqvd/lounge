@@ -195,14 +195,15 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                       const [year, month] = m.split('-')
                       const date = new Date(parseInt(year), parseInt(month) - 1, 1)
                       const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                      const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
                       return (
                         <button
                           key={m}
                           onClick={() => setSelectedMonth(m)}
-                          className={`px-4 py-2 rounded-xl text-sm font-bold capitalize whitespace-nowrap transition-colors ${selectedMonth === m ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted hover:bg-muted/80'}`}
+                          className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${selectedMonth === m ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted hover:bg-muted/80'}`}
                           style={selectedMonth === m ? { backgroundColor: selectedMinistry?.color } : {}}
                         >
-                          {label}
+                          {capitalizedLabel}
                         </button>
                       )
                     })}
