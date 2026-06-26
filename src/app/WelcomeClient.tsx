@@ -469,15 +469,23 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             {/* Conteúdo Aba SEDE */}
             {mapTab === 'SEDE' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex justify-center mb-8">
-                  <div className="bg-card border border-border shadow-sm rounded-2xl p-6 max-w-sm w-full text-center hover:shadow-md transition-shadow relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: primaryColor }} />
-                    <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center bg-background border border-border shadow-inner">
-                      <MapPin className="w-5 h-5" style={{ color: primaryColor }} />
+                <div className="flex justify-center mb-10 px-4">
+                  <div className="bg-card/60 backdrop-blur-xl border border-border shadow-2xl rounded-3xl p-6 sm:p-8 max-w-2xl w-full flex flex-col sm:flex-row items-center sm:items-start gap-6 hover:shadow-primary/5 transition-all duration-500 relative overflow-hidden group">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `linear-gradient(135deg, ${primaryColor}10, transparent)` }} />
+                    
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.25rem] flex items-center justify-center shrink-0 shadow-inner relative z-10 transform group-hover:scale-110 transition-transform duration-500" style={{ backgroundColor: primaryColor + '15', color: primaryColor }}>
+                      <MapPin className="w-8 h-8 sm:w-10 sm:h-10" />
                     </div>
-                    <h3 className="font-bold text-xl mb-1">Brasília</h3>
-                    <p className="text-sm font-bold mb-3" style={{ color: primaryColor }}>Brasília — DF (Sede)</p>
-                    <p className="text-sm text-muted-foreground">Quadra CRS 503, Bloco C<br/>Asa Sul, Brasília</p>
+                    
+                    <div className="text-center sm:text-left relative z-10 flex-1">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-3 border" style={{ backgroundColor: primaryColor + '10', color: primaryColor, borderColor: primaryColor + '30' }}>
+                        Sede Principal
+                      </div>
+                      <h3 className="font-black text-2xl sm:text-3xl mb-2 text-foreground">Igreja Millenium</h3>
+                      <p className="text-muted-foreground text-base sm:text-lg leading-relaxed font-medium">
+                        {settings?.address || 'SGAS I SGAS 906 - Asa Sul, Brasília - DF, 70390-060'}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
