@@ -1,5 +1,6 @@
-﻿import { getSettings, getHubSettings } from '@/app/actions/settings'
+import { getSettings, getHubSettings } from '@/app/actions/settings'
 import { getCurrentUser, getAllUsers } from '@/app/actions/auth'
+import { getGroups } from '@/app/actions/members'
 import { redirect } from 'next/navigation'
 import SettingsClient from './SettingsClient'
 
@@ -14,6 +15,7 @@ export default async function SettingsPage() {
   const settings = await getSettings()
   const hubSettings = await getHubSettings()
   const users = await getAllUsers()
+  const groups = await getGroups()
   
-  return <SettingsClient initialSettings={settings} initialHubSettings={hubSettings} users={users} currentUser={currentUser} />
+  return <SettingsClient initialSettings={settings} initialHubSettings={hubSettings} users={users} currentUser={currentUser} groups={groups} />
 }

@@ -28,7 +28,7 @@ function AnimatedSection({ children, className = '', delay = 0, id }: any) {
 const TYPE_LABELS: Record<string, string> = { CULTO: 'Culto', CELULA: 'Célula', REUNIAO: 'Reunião', OUTRO: 'Evento' }
 const TYPE_COLORS: Record<string, string> = { CULTO: '#8b5cf6', CELULA: '#10b981', REUNIAO: '#f59e0b', OUTRO: '#3b82f6' }
 
-export default function WelcomeClient({ settings, globalSettings, upcomingEvents }: { settings: any, globalSettings: any, upcomingEvents?: any[] }) {
+export default function WelcomeClient({ settings, globalSettings, upcomingEvents, hhs = [] }: { settings: any, globalSettings: any, upcomingEvents?: any[], hhs?: any[] }) {
   const primaryColor = globalSettings?.primaryColor || '#6366f1'
   const churchName = globalSettings?.defaultChurchName || 'Nossa Igreja'
 
@@ -37,6 +37,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [mapTab, setMapTab] = useState<'SEDE' | 'HH'>('SEDE')
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -415,7 +416,123 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               </div>
             </div>
           </div>
+        {/* NOSSAS UNIDADES & MAPA */}
+        <AnimatedSection className="py-24 bg-background">
+          <div className="container mx-auto px-6 max-w-5xl">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+                Nossas <span style={{ color: primaryColor }}>Unidades</span>
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Encontre a unidade mais próxima de você.
+              </p>
+            </div>
+
+            {/* Abas */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-secondary/50 p-1.5 rounded-2xl inline-flex shadow-inner">
+                <button 
+                  onClick={() => setMapTab('SEDE')}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${mapTab === 'SEDE' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                >
+                  Sede
+                </button>
+                <button 
+                  onClick={() => setMapTab('HH')}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${mapTab === 'HH' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                >
+                  Holy Homes (Células)
+                </button>
+              </div>
+            </div>
+
+            {/* Conteúdo Aba SEDE */}
+            {mapTab === 'SEDE' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-center mb-8">
+                  <div className="bg-card border border-border shadow-sm rounded-2xl p-6 max-w-sm w-full text-center hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: primaryColor }} />
+                    <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center bg-background border border-border shadow-inner">
+                      <MapPin className="w-5 h-5" style={{ color: primaryColor }} />
+                    </div>
+                    <h3 className="font-bold text-xl mb-1">Brasília</h3>
+                    <p className="text-sm font-bold mb-3" style={{ color: primaryColor }}>Brasília — DF (Sede)</p>
+                    <p className="text-sm text-muted-foreground">Quadra CRS 503, Bloco C<br/>Asa Sul, Brasília</p>
+                  </div>
+                </div>
+
+                <div className="w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-background ring-1 ring-border/50 relative">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3838.7494488346617!2d-47.90487442398555!3d-15.817140084824707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935a3b2b8c54db0b%3A0xc3b83c51ef67e2a4!2sIgreja%20Millenium!5e0!3m2!1spt-BR!2sbr!4v1719280000000!5m2!1spt-BR!2sbr" 
+                    width="100%" 
+                    height="100%" 
+                    style={{ border: 0 }} 
+                    allowFullScreen 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Conteúdo Aba HH */}
+            {mapTab === 'HH' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {(!hhs || hhs.length === 0) ? (
+                  <div className="text-center py-20 bg-secondary/20 rounded-3xl border border-dashed border-border/60">
+                    <MapPin className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold mb-2">Nenhum HH com mapa cadastrado</h3>
+                    <p className="text-muted-foreground">Em breve teremos os locais mapeados aqui.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {hhs.map((hh, idx) => (
+                        <div key={idx} className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col h-full">
+                          <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: primaryColor }} />
+                          <h3 className="font-bold text-xl mb-1">{hh.name}</h3>
+                          {hh.neighborhood && (
+                            <p className="text-sm font-bold mb-3" style={{ color: primaryColor }}>{hh.neighborhood}</p>
+                          )}
+                          {hh.address && (
+                            <p className="text-sm text-muted-foreground mb-4 flex-1">{hh.address}</p>
+                          )}
+                          
+                          <div className="mt-auto space-y-3 pt-4 border-t border-border/50">
+                            {hh.mapUrl && (
+                              <a 
+                                href={hh.mapUrl} 
+                                target="_blank" 
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm bg-secondary hover:bg-secondary/80 text-foreground transition-colors"
+                              >
+                                <MapPin className="w-4 h-4" />
+                                Abrir no Mapa
+                              </a>
+                            )}
+                            {hh.contactPhone && (
+                              <div className="text-center">
+                                <p className="text-xs text-muted-foreground mb-2">Quer saber mais sobre o HH?</p>
+                                <a 
+                                  href={`https://wa.me/55${hh.contactPhone.replace(/\D/g, '')}?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20o%20HH%20${encodeURIComponent(hh.name)}`}
+                                  target="_blank"
+                                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-bold text-sm bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] transition-colors"
+                                >
+                                  <MessageCircle className="w-4 h-4" />
+                                  {hh.contactPhone}
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </AnimatedSection>
+
         {/* GALLERY */}
         {settings?.galleryUrls && settings.galleryUrls.length > 0 && (
           <AnimatedSection className="bg-secondary/10 border-y border-border/30">

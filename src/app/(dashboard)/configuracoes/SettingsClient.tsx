@@ -1,13 +1,15 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { updateSettings, updateHubSettings } from '@/app/actions/settings'
 import { updateUserRole, preRegisterUser } from '@/app/actions/auth'
-import { Save, Building2, Shield, X, UserCog, Settings2, Link2, ListPlus, Activity, Webhook, Globe } from 'lucide-react'
+import { updateGroup } from '@/app/actions/members'
+import { Save, Building2, Shield, X, UserCog, Settings2, Link2, ListPlus, Activity, Webhook, Globe, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import * as Tabs from '@radix-ui/react-tabs'
 
-export default function SettingsClient({ initialSettings, initialHubSettings, users, currentUser }: { initialSettings: any, initialHubSettings: any, users: any[], currentUser: any }) {
+export default function SettingsClient({ initialSettings, initialHubSettings, users, currentUser, groups = [] }: { initialSettings: any, initialHubSettings: any, users: any[], currentUser: any, groups?: any[] }) {
+  const [localGroups, setLocalGroups] = useState(groups)
   const [localUsers, setLocalUsers] = useState(users)
   const [formData, setFormData] = useState({
     inactivityDays: initialSettings.inactivityDays || 20,
@@ -125,11 +127,14 @@ export default function SettingsClient({ initialSettings, initialHubSettings, us
           <Tabs.Trigger value="listas" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
             <ListPlus className="w-4 h-4" /> Listas Dinâmicas
           </Tabs.Trigger>
-                      <Tabs.Trigger value="hub" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
-              <Globe className="w-4 h-4" /> Hub Público
-            </Tabs.Trigger>
-<Tabs.Trigger value="integracoes" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
+          <Tabs.Trigger value="hub" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
+            <Globe className="w-4 h-4" /> Hub Público
+          </Tabs.Trigger>
+          <Tabs.Trigger value="integracoes" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
             <Link2 className="w-4 h-4" /> Integrações (Webhooks)
+          </Tabs.Trigger>
+          <Tabs.Trigger value="hhs" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
+            <MapPin className="w-4 h-4" /> Grupos e HHs
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -544,6 +549,95 @@ export default function SettingsClient({ initialSettings, initialHubSettings, us
           </div>
         </Tabs.Content>
 
+        <Tabs.Content value="hhs" className="space-y-6 mt-6 outline-none animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Endereços dos HHs / Grupos</h2>
+              <p className="text-muted-foreground">Cadastre o mapa dos grupos ativos para que eles apareçam na página pública de visitantes.</p>
+            </div>
+          </div>
+
+          <div className="grid gap-6">
+            {localGroups.map((group: any) => (
+              <div key={group.id} className="p-6 bg-card border border-border rounded-2xl shadow-sm flex flex-col md:flex-row gap-6">
+                <div className="md:w-1/3">
+                  <h3 className="text-lg font-bold flex items-center gap-2"><Building2 className="w-5 h-5 text-primary" /> {group.name}</h3>
+                  {group.description && <p className="text-sm text-muted-foreground mt-1">{group.description}</p>}
+                </div>
+                <div className="md:w-2/3 space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-foreground">Bairro / Região</label>
+                      <input 
+                        type="text" 
+                        placeholder="Ex: Asa Sul"
+                        value={group.neighborhood || ''} 
+                        onChange={e => setLocalGroups(prev => prev.map((g: any) => g.id === group.id ? { ...g, neighborhood: e.target.value } : g))}
+                        className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-foreground">Endereço (opcional)</label>
+                      <input 
+                        type="text" 
+                        placeholder="Ex: Quadra 300, Lote 10"
+                        value={group.address || ''} 
+                        onChange={e => setLocalGroups(prev => prev.map((g: any) => g.id === group.id ? { ...g, address: e.target.value } : g))}
+                        className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-foreground">Link do Google Maps</label>
+                      <input 
+                        type="url" 
+                        placeholder="https://maps.app.goo.gl/..."
+                        value={group.mapUrl || ''} 
+                        onChange={e => setLocalGroups(prev => prev.map((g: any) => g.id === group.id ? { ...g, mapUrl: e.target.value } : g))}
+                        className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-foreground">Telefone p/ Contato</label>
+                      <input 
+                        type="text" 
+                        placeholder="(61) 99999-9999"
+                        value={group.contactPhone || ''} 
+                        onChange={e => setLocalGroups(prev => prev.map((g: any) => g.id === group.id ? { ...g, contactPhone: e.target.value } : g))}
+                        className="flex h-10 w-full rounded-xl border border-input bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end pt-2">
+                    <button 
+                      onClick={async () => {
+                        const loadingToast = toast.loading('Salvando endereço...')
+                        const res = await updateGroup(group.id, {
+                          neighborhood: group.neighborhood,
+                          address: group.address,
+                          mapUrl: group.mapUrl,
+                          contactPhone: group.contactPhone
+                        })
+                        toast.dismiss(loadingToast)
+                        if (res.success) toast.success('Endereço salvo com sucesso!')
+                        else toast.error('Erro ao salvar endereço.')
+                      }}
+                      className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground text-sm font-bold rounded-xl transition-all"
+                    >
+                      Salvar Endereço
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {localGroups.length === 0 && (
+              <div className="text-center p-8 text-muted-foreground border border-dashed rounded-xl">
+                Nenhum grupo cadastrado ainda. Grupos são criados automaticamente ao cadastrar membros.
+              </div>
+            )}
+          </div>
+        </Tabs.Content>
       </Tabs.Root>
     </div>
   )

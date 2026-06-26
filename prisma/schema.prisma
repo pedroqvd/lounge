@@ -43,12 +43,16 @@ model User {
 }
 
 model Group {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  liderId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  liderId      String?
+  address      String?
+  neighborhood String?
+  mapUrl       String?
+  contactPhone String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
   members Member[]

@@ -1,4 +1,4 @@
-﻿import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 import WelcomeClient from './WelcomeClient'
 
 export const dynamic = 'force-dynamic'
@@ -15,5 +15,10 @@ export default async function WelcomePage() {
     where: { id: 'global' }
   })
 
-  return <WelcomeClient settings={settings} globalSettings={globalSettings} />
+  const hhs = await prisma.group.findMany({
+    where: { mapUrl: { not: null } },
+    select: { name: true, address: true, neighborhood: true, mapUrl: true, contactPhone: true }
+  })
+
+  return <WelcomeClient settings={settings} globalSettings={globalSettings} hhs={hhs} />
 }

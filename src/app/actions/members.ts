@@ -232,3 +232,16 @@ export async function seedMembers() {
     return { success: true, count }
   } catch (error: any) { return { success: false, error: error.message } }
 }
+export async function updateGroup(id: string, data: { address?: string; neighborhood?: string; mapUrl?: string; contactPhone?: string }) {
+  try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) return { success: false, error: 'Não autorizado' }
+
+    await prisma.group.update({ where: { id }, data })
+    revalidatePath('/configuracoes')
+    revalidatePath('/')
+    return { success: true }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
