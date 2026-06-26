@@ -31,6 +31,7 @@ export default async function RootLayout({
         <ThemeInjector primaryColor={primaryColor} />
         <ThemeProvider attribute="class" defaultTheme={themeMode} enableSystem={themeMode === 'system'} forcedTheme={themeMode !== 'system' ? themeMode : undefined} disableTransitionOnChange>
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
