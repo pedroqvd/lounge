@@ -5,6 +5,7 @@ import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Check }
 import { createScheduleSlot, removeScheduleSlot, removeMemberFromMinistry } from '@/app/actions/ministries'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 type Ministry = any
 type Member = any
@@ -20,6 +21,7 @@ const STATUS_CONFIG = {
 }
 
 export default function MinistryDetailClient({ ministry, members, upcomingEvents }: { ministry: Ministry, members: Member[], upcomingEvents: any[] }) {
+  const router = useRouter()
   const [isScaleOpen, setIsScaleOpen] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState('')
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
@@ -59,13 +61,13 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
       toast.success('Voluntário escalado!')
     }
     setIsSaving(false)
-    window.location.reload()
+    router.refresh()
   }
 
   const handleRemoveVolunteer = async (ministryMemberId: string) => {
     if (!confirm('Remover este voluntário do ministério?')) return
     const res = await removeMemberFromMinistry(ministryMemberId)
-    if (res.success) { toast.success('Removido!'); window.location.reload() }
+    if (res.success) { toast.success('Removido!'); router.refresh() }
     else toast.error(res.error || 'Erro')
   }
 
