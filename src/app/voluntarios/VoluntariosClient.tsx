@@ -20,9 +20,28 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
   const selectedMinistry = ministries.find(m => m.id === selectedMinistryId)
 
   // Filtra eventos que tem Pelo Menos 1 escalado deste ministério
-  const ministryEvents = selectedMinistryId 
+  const allMinistryEvents = selectedMinistryId 
     ? events.filter(e => e.scheduleSlots.some((slot: any) => slot.ministryId === selectedMinistryId))
     : []
+
+  // Compute available months
+  const months = Array.from(new Set(allMinistryEvents.map(e => {
+    const d = new Date(e.date)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  }))).sort()
+
+  const [selectedMonth, setSelectedMonth] = useState<string>('')
+
+  React.useEffect(() => {
+    if (!selectedMonth && months.length > 0) {
+      setSelectedMonth(months[0])
+    }
+  }, [months, selectedMonth])
+
+  const ministryEvents = allMinistryEvents.filter(e => {
+    const d = new Date(e.date)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth
+  })
 
   const handleDownloadImage = async () => {
     if (!captureRef.current || !selectedMinistry) return
@@ -169,6 +188,25 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                     <Download className="w-5 h-5" />
                     {isDownloading ? 'Gerando Imagem...' : 'Salvar Escala'}
                   </button>
+                )}
+                {months.length > 1 && (
+                  <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                    {months.map(m => {
+                      const [year, month] = m.split('-')
+                      const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+                      const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                      return (
+                        <button
+                          key={m}
+                          onClick={() => setSelectedMonth(m)}
+                          className={`px-4 py-2 rounded-xl text-sm font-bold capitalize whitespace-nowrap transition-colors ${selectedMonth === m ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted hover:bg-muted/80'}`}
+                          style={selectedMonth === m ? { backgroundColor: selectedMinistry?.color } : {}}
+                        >
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
                 )}
               </div>
 

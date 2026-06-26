@@ -24,7 +24,19 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
   const [selectedEventId, setSelectedEventId] = useState('')
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
-  const [events, setEvents] = useState(upcomingEvents)
+
+  // Compute available months
+  const months = Array.from(new Set(upcomingEvents.map(e => {
+    const d = new Date(e.date)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  }))).sort()
+
+  const [selectedMonth, setSelectedMonth] = useState<string>(months.length > 0 ? months[0] : '')
+
+  const events = upcomingEvents.filter(e => {
+    const d = new Date(e.date)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === selectedMonth
+  })
 
   const IconComp = MINISTRY_ICONS[ministry.icon] || Users
   const ministryMembers = ministry.members || []
@@ -94,13 +106,32 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
               <p className="text-sm text-muted-foreground">{ministry.description}</p>
             </div>
           </div>
-          {events.length === 0 && (
+          {events.length === 0 && upcomingEvents.length === 0 && (
             <Link href="/calendario" className="text-sm font-semibold text-primary hover:underline bg-primary/10 px-4 py-2 rounded-xl">
               + Criar Evento no Calendário
             </Link>
           )}
         </div>
       </div>
+
+      {months.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {months.map(m => {
+            const [year, month] = m.split('-')
+            const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+            const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+            return (
+              <button
+                key={m}
+                onClick={() => setSelectedMonth(m)}
+                className={`px-4 py-2 rounded-xl text-sm font-bold capitalize whitespace-nowrap transition-colors ${selectedMonth === m ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'}`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {events.length > 0 ? (
         <div className="bg-card rounded-2xl border border-border shadow-sm overflow-x-auto">
