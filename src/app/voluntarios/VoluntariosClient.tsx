@@ -202,72 +202,91 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                     <p className="text-muted-foreground text-lg max-w-md">Não há eventos futuros com voluntários escalados para este ministério no momento.</p>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 gap-6 relative z-10">
-                    {ministryEvents.map((event, idx) => {
-                      const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
-                      const eventDate = new Date(event.date)
-                      
-                      return (
-                        <motion.div 
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1, duration: 0.4 }}
-                          key={event.id} 
-                          className="bg-card rounded-[2rem] overflow-hidden border border-border/50 shadow-sm print:shadow-none print:border-border"
-                        >
-                          <div className="p-6 border-b border-border/50 bg-muted/30 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-foreground/5 to-transparent rounded-bl-full pointer-events-none" />
-                            
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="bg-background shadow-sm border border-border/50 px-3 py-2 rounded-xl flex flex-col items-center justify-center min-w-[3.5rem]">
-                                <span className="text-xs font-bold text-muted-foreground uppercase">{eventDate.toLocaleDateString('pt-BR', { month: 'short' })}</span>
-                                <span className="text-xl font-black leading-none" style={{ color: selectedMinistry?.color }}>{eventDate.getDate()}</span>
-                              </div>
-                              <div>
-                                <span className="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-lg" style={{ backgroundColor: selectedMinistry?.color + '15', color: selectedMinistry?.color }}>
-                                  {event.type}
-                                </span>
-                                <p className="text-sm font-semibold text-muted-foreground mt-1 capitalize">
-                                  {eventDate.toLocaleDateString('pt-BR', { weekday: 'long' })}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <h3 className="font-black text-xl mb-3">{event.title}</h3>
-                            
-                            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-muted-foreground">
-                              {event.time && (
-                                <span className="flex items-center gap-1.5 bg-background/50 px-2.5 py-1 rounded-lg border border-border/50"><Clock className="w-3.5 h-3.5"/> {event.time}</span>
-                              )}
-                              {event.location && (
-                                <span className="flex items-center gap-1.5 bg-background/50 px-2.5 py-1 rounded-lg border border-border/50"><MapPin className="w-3.5 h-3.5"/> {event.location}</span>
-                              )}
-                            </div>
-                          </div>
+                  <div className="relative z-10 overflow-x-auto rounded-xl border-2 border-[#1e3a8a] bg-white">
+                    <table className="w-full text-center border-collapse">
+                      <thead>
+                        <tr>
+                          <th colSpan={ministryEvents.length + 1} className="bg-[#1e3a8a] text-white py-3 text-2xl font-bold uppercase tracking-widest border-b-2 border-white">
+                            Escala {selectedMinistry?.name} - {new Date(ministryEvents[0].date).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                          </th>
+                        </tr>
+                        <tr className="bg-[#1e3a8a] text-white">
+                          <th className="py-3 px-4 font-bold border-r-2 border-white w-1/5 text-lg">Data</th>
+                          {ministryEvents.map((event) => {
+                            const d = new Date(event.date)
+                            return (
+                              <th key={event.id} className="py-3 px-4 font-bold border-r-2 border-white last:border-r-0 text-lg">
+                                {String(d.getDate()).padStart(2, '0')}/{d.toLocaleDateString('pt-BR', { month: 'short' })}
+                              </th>
+                            )
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody className="text-black bg-white">
+                        {(() => {
+                          // Extract all unique positions from the members of this ministry
+                          const allPositions = new Set<string>()
+                          selectedMinistry?.members?.forEach((mm: any) => {
+                            if (mm.position) {
+                              mm.position.split(',').forEach((p: string) => allPositions.add(p.trim()))
+                            }
+                          })
                           
-                          <div className="p-6">
-                            <div className="flex items-center justify-between mb-4">
-                              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Voluntários Escalados</p>
-                              <span className="text-xs font-bold bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{slots.length}</span>
-                            </div>
-                            
-                            <div className="flex flex-col gap-2.5">
-                              {slots.map((slot: any) => (
-                                <div key={slot.id} className="flex items-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors rounded-2xl p-2.5 border border-transparent hover:border-border/50 group">
-                                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shadow-sm group-hover:scale-105 transition-transform" style={{ backgroundColor: selectedMinistry?.color }}>
-                                    {slot.member.name.charAt(0)}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <span className="font-bold text-sm block truncate">{slot.member.name}</span>
-                                    {/* Caso no futuro a gente queira exibir o instrumento/função aqui, tem espaço */}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )
-                    })}
+                          let positionsArray = Array.from(allPositions).filter(Boolean)
+                          if (positionsArray.length === 0) positionsArray = ['Equipe'] // Fallback if no positions
+
+                          // Order positions based on standard Louvor order if applicable
+                          const standardOrder = ['Vocal', 'Teclado', 'Violão', 'Guitarra', 'Baixo', 'Bateria']
+                          positionsArray.sort((a, b) => {
+                            const idxA = standardOrder.indexOf(a)
+                            const idxB = standardOrder.indexOf(b)
+                            if (idxA !== -1 && idxB !== -1) return idxA - idxB
+                            if (idxA !== -1) return -1
+                            if (idxB !== -1) return 1
+                            return a.localeCompare(b)
+                          })
+
+                          return positionsArray.map((position, idx) => {
+                            return (
+                              <tr key={position} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                <td className="py-4 px-4 border-2 border-[#1e3a8a] bg-[#1e3a8a] text-white font-bold text-lg align-middle">
+                                  {position}
+                                </td>
+                                {ministryEvents.map((event) => {
+                                  // Find members scheduled for this event
+                                  const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
+                                  
+                                  // Filter members who have this position
+                                  const scheduledMembersForPosition = slots.filter((slot: any) => {
+                                    const minMember = selectedMinistry?.members?.find((mm: any) => mm.memberId === slot.member.id)
+                                    if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true // Show all if no positions defined
+                                    if (!minMember || !minMember.position) return false
+                                    const memberPositions = minMember.position.split(',').map((p: string) => p.trim())
+                                    return memberPositions.includes(position)
+                                  })
+
+                                  return (
+                                    <td key={event.id} className="py-2 px-2 border-2 border-[#1e3a8a] align-top">
+                                      {scheduledMembersForPosition.length > 0 ? (
+                                        <div className="flex flex-col gap-1">
+                                          {scheduledMembersForPosition.map((slot: any) => (
+                                            <div key={slot.id} className="font-semibold text-base py-1 border-b border-gray-200 last:border-0">
+                                              {slot.member.name.split(' ')[0]} {slot.member.name.split(' ').length > 1 ? slot.member.name.split(' ').pop()?.charAt(0) + '.' : ''}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <span className="text-gray-400 font-bold">-</span>
+                                      )}
+                                    </td>
+                                  )
+                                })}
+                              </tr>
+                            )
+                          })
+                        })()}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
