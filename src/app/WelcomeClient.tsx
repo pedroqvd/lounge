@@ -108,7 +108,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
     { label: 'Nossa Igreja', href: '#dna' },
     { label: 'Células', href: '#celulas' },
     { label: 'Próximos Eventos', href: '#eventos' },
-    { label: 'Escalas', href: '/voluntarios' },
     { label: 'Conectar', href: '#cadastro' },
   ]
   return (
