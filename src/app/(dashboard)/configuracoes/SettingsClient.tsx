@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { updateSettings } from '@/app/actions/settings'
-import { updateUserRole } from '@/app/actions/auth'
+import { updateUserRole, preRegisterUser } from '@/app/actions/auth'
 import { Save, AlertTriangle, Building2, Shield, X, UserCog } from 'lucide-react'
 
 export default function SettingsClient({ initialSettings, users, currentUser }: { initialSettings: any, users: any[], currentUser: any }) {
@@ -17,7 +17,24 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
     themeMode: initialSettings.themeMode || 'system',
     webhookUrl: initialSettings.webhookUrl || ''
   })
-  const [isSaving, setIsSaving] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'LIDER' as 'ADMIN'|'LIDER' })
+  const [isAddingUser, setIsAddingUser] = useState(false)
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsAddingUser(true)
+    const res = await preRegisterUser(newUser.name, newUser.email, newUser.role)
+    if (res.success) {
+      alert('Acesso criado! A pessoa j� pode entrar no sistema.')
+      setLocalUsers([{ id: Date.now().toString(), name: newUser.name, email: newUser.email, role: newUser.role, createdAt: new Date() }, ...localUsers])
+      setNewUser({ name: '', email: '', role: 'LIDER' })
+    } else {
+      alert(res.error || 'Erro ao adicionar usu�rio.')
+    }
+    setIsAddingUser(false)
+  }
+
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -194,6 +211,27 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
               <p className="text-sm text-muted-foreground mb-6 max-w-3xl">
                 Controle quem pode acessar o sistema. <strong className="text-primary">ADMIN</strong> tem poder total (inclusive de apagar pessoas). <strong className="text-foreground">LIDER</strong> pode apenas visualizar, cadastrar e enviar mensagens. Para adicionar alguém novo, peça para a pessoa fazer login no site; depois, venha aqui para aprovar e alterar a patente dela.
               </p>
+
+              <form onSubmit={handleAddUser} className="mb-8 p-6 bg-secondary/30 border border-border rounded-xl flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 space-y-2 w-full">
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Nome da Pessoa</label>
+                  <input required type="text" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50" placeholder="Ex: Jo�o" />
+                </div>
+                <div className="flex-1 space-y-2 w-full">
+                  <label className="text-xs font-bold uppercase text-muted-foreground">E-mail</label>
+                  <input required type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50" placeholder="nome@email.com" />
+                </div>
+                <div className="w-full md:w-40 space-y-2">
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Permiss�o</label>
+                  <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as 'ADMIN'|'LIDER'})} className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50">
+                    <option value="LIDER">L�der</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={isAddingUser} className="h-10 px-6 bg-primary text-primary-foreground font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 whitespace-nowrap">
+                  {isAddingUser ? 'Adicionando...' : 'Adicionar Acesso'}
+                </button>
+              </form>
 
               <div className="border border-border rounded-xl overflow-hidden bg-background">
                 <table className="w-full text-sm text-left">

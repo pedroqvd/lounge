@@ -59,3 +59,26 @@ export async function updateUserRole(userId: string, role: 'ADMIN' | 'LIDER') {
   })
   return { success: true }
 }
+
+import { v4 as uuidv4 } from 'uuid';
+
+export async function preRegisterUser(name: string, email: string, role: 'ADMIN' | 'LIDER') {
+  const currentUser = await getCurrentUser()
+  if (currentUser?.role !== 'ADMIN') throw new Error('Unauthorized')
+
+  const existing = await prisma.user.findUnique({ where: { email } })
+  if (existing) {
+    return { success: false, error: 'Este e-mail j� possui acesso. Altere a permiss�o na tabela.' }
+  }
+  
+  await prisma.user.create({
+    data: {
+      id: uuidv4(),
+      email,
+      name,
+      role
+    }
+  })
+  
+  return { success: true }
+}
