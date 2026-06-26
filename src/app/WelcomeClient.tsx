@@ -163,17 +163,26 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
         {/* HERO */}
         <section id="inicio" className="relative overflow-hidden min-h-[92vh] flex items-center">
-          {/* Background */}
-          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 70% at 50% -20%, ${primaryColor}25, transparent)` }} />
+          {/* Video Background */}
+          <div className="absolute inset-0 w-full h-full">
+            <video 
+              src="/bg-hero.mp4" 
+              autoPlay 
+              loop 
+              muted 
+              playsInline 
+              className="w-full h-full object-cover opacity-50 dark:opacity-30 mix-blend-screen dark:mix-blend-lighten" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent" />
+          </div>
+
+          {/* Background color accents */}
+          <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 70% at 50% -20%, ${primaryColor}15, transparent)` }} />
           <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-30" style={{ backgroundColor: primaryColor }} />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full blur-[80px] pointer-events-none opacity-20" style={{ backgroundColor: primaryColor }} />
 
-          {/* Floating dots decoration */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="absolute rounded-full opacity-20 animate-pulse" style={{ width: [8, 12, 6, 10, 8, 14][i], height: [8, 12, 6, 10, 8, 14][i], backgroundColor: primaryColor, top: [`15%`, `40%`, `70%`, `25%`, `60%`, `80%`][i], left: [`10%`, `85%`, `5%`, `75%`, `90%`, `15%`][i], animationDelay: `${i * 0.5}s`, animationDuration: `${3 + i}s` }} />
-            ))}
-          </div>
+
 
           <div className="container mx-auto px-6 py-24 md:py-32 relative z-10 text-center">
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-[1.05] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
@@ -416,8 +425,15 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         </AnimatedSection>
 
         {/* NOSSAS UNIDADES & MAPA */}
-        <AnimatedSection className="py-24 bg-background">
-          <div className="container mx-auto px-6 max-w-5xl">
+        <AnimatedSection className="py-24 bg-background relative overflow-hidden">
+          {/* Floating dots decoration */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="absolute rounded-full opacity-20 animate-pulse" style={{ width: [8, 12, 6, 10, 8, 14][i], height: [8, 12, 6, 10, 8, 14][i], backgroundColor: primaryColor, top: [`15%`, `40%`, `70%`, `25%`, `60%`, `80%`][i], left: [`10%`, `85%`, `5%`, `75%`, `90%`, `15%`][i], animationDelay: `${i * 0.5}s`, animationDuration: `${3 + i}s` }} />
+            ))}
+          </div>
+          
+          <div className="container mx-auto px-6 max-w-5xl relative z-10">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
                 Nossas <span style={{ color: primaryColor }}>Unidades</span>
