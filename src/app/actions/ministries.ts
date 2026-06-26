@@ -144,3 +144,41 @@ export async function seedMinistries() {
     return { success: true }
   } catch (e: any) { return { success: false, error: e.message } }
 }
+export async function bulkUpdateScheduleSlots(
+  ministryId: string,
+  additions: { eventId: string; memberId: string; position: string }[],
+  removals: string[]
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) return { success: false, error: 'Não autorizado' }
+
+    await prisma.$transaction(async (tx) => {
+      if (removals.length > 0) {
+        await tx.scheduleSlot.deleteMany({
+          where: { id: { in: removals } }
+        })
+      }
+
+      if (additions.length > 0) {
+        await tx.scheduleSlot.createMany({
+          data: additions.map(add => ({
+            eventId: add.eventId,
+            memberId: add.memberId,
+            ministryId,
+            position: add.position,
+            status: 'CONFIRMADO',
+            notified: false
+          }))
+        })
+      }
+    })
+
+    revalidatePath('/escalas')
+    revalidatePath(`/escalas/${ministryId}`)
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error in bulk update:', error)
+    return { success: false, error: error.message }
+  }
+}

@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Check } from 'lucide-react'
-import { createScheduleSlot, removeScheduleSlot, removeMemberFromMinistry } from '@/app/actions/ministries'
+import React, { useState, useEffect } from 'react'
+import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Check, Save } from 'lucide-react'
+import { removeMemberFromMinistry, bulkUpdateScheduleSlots } from '@/app/actions/ministries'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -20,12 +20,57 @@ const STATUS_CONFIG = {
   RECUSADO: { label: 'Recusado', color: 'text-red-500 bg-red-500/10 border-red-500/20' },
 }
 
+type SlotEdit = { eventId: string, memberId: string, position: string, currentSlotId?: string, isRemoved?: boolean }
+
 export default function MinistryDetailClient({ ministry, members, upcomingEvents }: { ministry: Ministry, members: Member[], upcomingEvents: any[] }) {
   const router = useRouter()
   const [isScaleOpen, setIsScaleOpen] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState('')
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [edits, setEdits] = useState<Record<string, SlotEdit>>({})
+
+  const hasUnsavedChanges = Object.keys(edits).length > 0
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [hasUnsavedChanges])
+
+  const handleSaveScale = async () => {
+    setIsSaving(true)
+    const additions: any[] = []
+    const removals: string[] = []
+
+    Object.values(edits).forEach(edit => {
+      if (edit.currentSlotId) {
+        removals.push(edit.currentSlotId)
+        if (!edit.isRemoved) {
+          additions.push({ eventId: edit.eventId, memberId: edit.memberId, position: edit.position })
+        }
+      } else {
+        if (!edit.isRemoved) {
+          additions.push({ eventId: edit.eventId, memberId: edit.memberId, position: edit.position })
+        }
+      }
+    })
+
+    const res = await bulkUpdateScheduleSlots(ministry.id, additions, removals)
+    if (res.success) {
+      toast.success('Escala salva com sucesso!')
+      setEdits({})
+      router.refresh()
+    } else {
+      toast.error(res.error || 'Erro ao salvar escala')
+    }
+    setIsSaving(false)
+  }
 
   // Compute available months
   const months = Array.from(new Set(upcomingEvents.map(e => {
@@ -51,20 +96,49 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
     setIsScaleOpen(true)
   }
 
-  const handleToggleScale = async (eventId: string, memberId: string, position: string, isCurrentlyScheduled: boolean, currentSlotId?: string) => {
-    setIsSaving(true)
-    if (isCurrentlyScheduled && currentSlotId) {
-      await removeScheduleSlot(currentSlotId)
-      toast.success('Voluntário removido da escala!')
-    } else {
-      await createScheduleSlot(ministry.id, eventId, memberId, position)
-      toast.success('Voluntário escalado!')
-    }
-    setIsSaving(false)
-    router.refresh()
+  const handleToggleLocal = (eventId: string, memberId: string, category: string, currentSlot: any | null, specificPosition?: string) => {
+    const key = `${eventId}-${memberId}-${category}`
+    const posToSave = specificPosition || category
+    
+    setEdits(prev => {
+      const newEdits = { ...prev }
+      const existingEdit = newEdits[key]
+      
+      if (existingEdit) {
+        if (!existingEdit.isRemoved) {
+          if (specificPosition && existingEdit.position !== specificPosition) {
+            newEdits[key] = { ...existingEdit, position: posToSave }
+          } else {
+            if (currentSlot) {
+              newEdits[key] = { ...existingEdit, isRemoved: true }
+            } else {
+              delete newEdits[key]
+            }
+          }
+        } else {
+          if (currentSlot && currentSlot.position === posToSave) {
+            delete newEdits[key]
+          } else {
+            newEdits[key] = { ...existingEdit, isRemoved: false, position: posToSave }
+          }
+        }
+      } else {
+        if (currentSlot) {
+          if (specificPosition && currentSlot.position !== specificPosition) {
+            newEdits[key] = { eventId, memberId, position: posToSave, currentSlotId: currentSlot.id, isRemoved: false }
+          } else {
+            newEdits[key] = { eventId, memberId, position: posToSave, currentSlotId: currentSlot.id, isRemoved: true }
+          }
+        } else {
+          newEdits[key] = { eventId, memberId, position: posToSave, isRemoved: false }
+        }
+      }
+      return newEdits
+    })
   }
 
   const handleRemoveVolunteer = async (ministryMemberId: string) => {
+    if (hasUnsavedChanges && !confirm('Você tem alterações não salvas. Deseja remover o voluntário mesmo assim? (As escalas não salvas serão perdidas)')) return
     if (!confirm('Remover este voluntário do ministério?')) return
     const res = await removeMemberFromMinistry(ministryMemberId)
     if (res.success) { toast.success('Removido!'); router.refresh() }
@@ -127,6 +201,27 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
           )}
         </div>
       </div>
+
+      {events.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            disabled={!hasUnsavedChanges || isSaving}
+            onClick={handleSaveScale}
+            className={`flex items-center gap-2 px-6 py-4 rounded-full font-extrabold text-white shadow-2xl transition-all ${
+              hasUnsavedChanges 
+                ? 'bg-[#8b5cf6] hover:bg-[#7c3aed] scale-100 opacity-100 hover:scale-105 active:scale-95' 
+                : 'bg-muted scale-95 opacity-0 pointer-events-none'
+            }`}
+          >
+            {isSaving ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Save className="w-5 h-5" />
+            )}
+            Salvar Escala
+          </button>
+        </div>
+      )}
 
       {months.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-2">
@@ -225,32 +320,77 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
                             </div>
                           </td>
                           {events.map((event: any) => {
-                            // Encontra as slots marcadas
                             const slots = event.scheduleSlots?.filter((s: any) => s.memberId === mm.memberId) || []
                             const slot = slots.find((s: any) => s.position ? (LOUVOR_MAPPING[s.position] || s.position) === category : true)
-                            const isScheduled = !!slot
-                            const isPending = isScheduled && slot.status === 'PENDENTE'
-                            const isConfirmed = isScheduled && slot.status === 'CONFIRMADO'
-                            const isRefused = isScheduled && slot.status === 'RECUSADO'
                             
+                            const editKey = `${event.id}-${mm.memberId}-${category}`
+                            const edit = edits[editKey]
+                            
+                            let isScheduled = false
+                            let scheduledPosition = ''
+                            let isConfirmed = false
+                            let isRefused = false
+
+                            if (edit) {
+                              isScheduled = !edit.isRemoved
+                              scheduledPosition = edit.position
+                              isConfirmed = true // Edições locais não confirmadas no DB ainda, mas vamos renderizar verde.
+                            } else {
+                              isScheduled = !!slot
+                              scheduledPosition = slot?.position || category
+                              isConfirmed = isScheduled && slot.status === 'CONFIRMADO'
+                              isRefused = isScheduled && slot.status === 'RECUSADO'
+                            }
+                            
+                            const isVocal = category === 'Vocal'
+
                             return (
                               <td key={`${event.id}-${mm.id}`} className={`p-1.5 text-center ${!isLastInPosition ? 'border-b border-border' : ''}`}>
-                                <button 
-                                  disabled={isSaving}
-                                  onClick={() => handleToggleScale(event.id, mm.memberId, category, isScheduled, slot?.id)}
-                                  className={`w-full h-10 rounded-xl flex items-center justify-center transition-all ${
-                                    isScheduled 
-                                      ? isConfirmed 
-                                        ? 'bg-emerald-500 text-white shadow-md' 
-                                        : isRefused
-                                          ? 'bg-red-500 text-white shadow-md'
-                                          : 'bg-primary text-primary-foreground shadow-md'
-                                      : 'bg-muted/30 hover:bg-muted border border-transparent hover:border-border text-transparent hover:text-muted-foreground'
-                                  }`}
-                                  style={isScheduled && !isConfirmed && !isRefused ? { backgroundColor: ministry.color } : {}}
-                                >
-                                  {isScheduled ? <Check className="w-5 h-5" /> : <Plus className="w-4 h-4" />}
-                                </button>
+                                {isVocal ? (
+                                  <div className="flex gap-1 h-10 w-full min-w-[70px]">
+                                    <button 
+                                      disabled={isSaving}
+                                      onClick={() => handleToggleLocal(event.id, mm.memberId, category, slot, 'Ministro(a) de Louvor')}
+                                      className={`flex-1 rounded-xl flex items-center justify-center font-bold text-xs transition-all ${
+                                        isScheduled && scheduledPosition.includes('Ministro') 
+                                          ? 'bg-emerald-500 text-white shadow-md' 
+                                          : 'bg-muted/30 hover:bg-muted text-muted-foreground'
+                                      }`}
+                                      title="Ministro(a) de Louvor"
+                                    >
+                                      M
+                                    </button>
+                                    <button 
+                                      disabled={isSaving}
+                                      onClick={() => handleToggleLocal(event.id, mm.memberId, category, slot, 'Back-vocal')}
+                                      className={`flex-1 rounded-xl flex items-center justify-center font-bold text-xs transition-all ${
+                                        isScheduled && !scheduledPosition.includes('Ministro') 
+                                          ? 'bg-emerald-500 text-white shadow-md' 
+                                          : 'bg-muted/30 hover:bg-muted text-muted-foreground'
+                                      }`}
+                                      title="Back-vocal"
+                                    >
+                                      B
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button 
+                                    disabled={isSaving}
+                                    onClick={() => handleToggleLocal(event.id, mm.memberId, category, slot)}
+                                    className={`w-full h-10 rounded-xl flex items-center justify-center transition-all ${
+                                      isScheduled 
+                                        ? isConfirmed 
+                                          ? 'bg-emerald-500 text-white shadow-md' 
+                                          : isRefused
+                                            ? 'bg-red-500 text-white shadow-md'
+                                            : 'bg-primary text-primary-foreground shadow-md'
+                                        : 'bg-muted/30 hover:bg-muted border border-transparent hover:border-border text-transparent hover:text-muted-foreground'
+                                    }`}
+                                    style={isScheduled && !isConfirmed && !isRefused ? { backgroundColor: ministry.color } : {}}
+                                  >
+                                    {isScheduled ? <Check className="w-5 h-5" /> : <Plus className="w-4 h-4" />}
+                                  </button>
+                                )}
                               </td>
                             )
                           })}
