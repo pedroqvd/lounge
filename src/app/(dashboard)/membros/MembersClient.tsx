@@ -10,6 +10,7 @@ import * as Avatar from '@radix-ui/react-avatar'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { MoreVertical } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 type Member = any 
 type Group = any
@@ -40,6 +41,54 @@ export default function MembersClient({ initialMembers, groups, templates, userR
 
   // Template Modal State
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
+    const [feedbackState, setFeedbackState] = useState<{
+    isOpen: boolean;
+    member: Member | null;
+    message: string;
+    templateId?: string;
+    isMass: boolean;
+    selectedIds?: Set<string>;
+  }>({ isOpen: false, member: null, message: '', isMass: false })
+  const [feedbackText, setFeedbackText] = useState('Convidei para o Culto/Agenda')
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmittingFeedback(true)
+    try {
+      if (feedbackState.isMass && feedbackState.selectedIds) {
+        // Mass feedback
+        const promises = Array.from(feedbackState.selectedIds).map(async (id) => {
+          const m = members.find(x => x.id === id)
+          if (!m) return
+          await createContactHistory({
+            memberId: id,
+            templateId: feedbackState.templateId,
+            customText: `[Feedback]: ${feedbackText}\n[Mensagem]: ${feedbackState.message}`
+          })
+          await updateMemberInviteStatus(id, 'FEITO')
+        })
+        await Promise.all(promises)
+        setMembers(prev => prev.map(m => feedbackState.selectedIds!.has(m.id) ? { ...m, inviteStatus: 'FEITO' } : m))
+        toast.success('Feedbacks em massa registrados!')
+      } else if (feedbackState.member) {
+        // Single feedback
+        await createContactHistory({
+          memberId: feedbackState.member.id,
+          templateId: feedbackState.templateId,
+          customText: `[Feedback]: ${feedbackText}\n[Mensagem]: ${feedbackState.message}`
+        })
+        await updateMemberInviteStatus(feedbackState.member.id, 'FEITO')
+        setMembers(prev => prev.map(m => m.id === feedbackState.member.id ? { ...m, inviteStatus: 'FEITO' } : m))
+        toast.success('Feedback de contato registrado com sucesso!')
+      }
+    } catch (err) {
+      toast.error('Erro ao salvar feedback.')
+    }
+    setIsSubmittingFeedback(false)
+    setFeedbackState(prev => ({ ...prev, isOpen: false }))
+  }
+
   const [contactingMember, setContactingMember] = useState<Member | null>(null)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [customMessage, setCustomMessage] = useState('')
@@ -225,7 +274,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
       
       // Update invite status to "FEITO" automatically if they were selected for broadcast
       if (member.inviteStatus === 'PENDENTE') {
-        await updateMemberInviteStatus(member.id, 'FEITO')
+        
         setMembers((prev: Member[]) => prev.map((m: Member) => m.id === member.id ? { ...m, inviteStatus: 'FEITO' } : m))
       }
 
@@ -553,6 +602,45 @@ export default function MembersClient({ initialMembers, groups, templates, userR
         </Dialog.Portal>
       </Dialog.Root>
 
-    </div>
+    
+      {/* MODAL DE FEEDBACK DE CONTATO */}
+      <Dialog.Root open={feedbackState.isOpen} onOpenChange={(open) => !open && setFeedbackState(prev => ({...prev, isOpen: false}))}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-card border border-border p-6 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95">
+            <Dialog.Title className="text-xl font-bold mb-4">Feedback do Contato</Dialog.Title>
+            <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                O WhatsApp foi aberto! Para garantir a transparência do sistema, por favor, descreva o que foi feito com {feedbackState.isMass ? 'os membros selecionados' : feedbackState.member?.name}.
+              </p>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Relatório / Resultado:</label>
+                <input
+                  autoFocus
+                  required
+                  type="text"
+                  value={feedbackText}
+                  onChange={e => setFeedbackText(e.target.value)}
+                  className="flex h-12 w-full rounded-xl border border-input bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Ex: Convidei para o culto, Tirei dúvidas, etc."
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Dialog.Close asChild>
+                  <button type="button" className="px-5 py-2.5 text-sm font-bold text-muted-foreground hover:bg-secondary rounded-xl transition-colors">
+                    Não Enviei / Cancelar
+                  </button>
+                </Dialog.Close>
+                <button type="submit" disabled={isSubmittingFeedback} className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md">
+                  {isSubmittingFeedback ? 'Salvando...' : 'Confirmar Registro'}
+                </button>
+              </div>
+            </form>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+</div>
   )
 }
