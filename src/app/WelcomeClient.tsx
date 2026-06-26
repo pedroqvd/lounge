@@ -595,6 +595,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </div>
           </AnimatedSection>
         )}
+        </div> {/* End bg-background cover */}
       </main>
 
       {/* FOOTER */}
@@ -683,7 +684,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </a>
           </div>
         </div>
-        </div> {/* End bg-background cover */}
+        </div>
       </footer>
     </div>
   )
