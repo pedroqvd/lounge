@@ -161,9 +161,9 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
       <main className="flex-1">
 
-        {/* HERO */}
-        <section id="inicio" className="relative overflow-hidden min-h-[92vh] flex items-center">
-          {/* Video Background */}
+        {/* HERO & DNA CONTAINER (Video Background spans both) */}
+        <div className="relative overflow-hidden">
+          {/* Shared Video Background */}
           <div className="absolute inset-0 w-full h-full z-0">
             <video 
               src="/bg-hero.mp4" 
@@ -173,14 +173,19 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               playsInline 
               className="w-full h-full object-cover opacity-30 dark:opacity-40" 
             />
+            {/* Top Fade (Hero top) */}
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 h-[30vh] bg-gradient-to-t from-background via-background/90 to-transparent" />
+            {/* Bottom Fade (DNA bottom) */}
+            <div className="absolute inset-x-0 bottom-0 h-[40vh] bg-gradient-to-t from-background via-background/90 to-transparent" />
           </div>
 
-          {/* Background color accents */}
+          {/* Background color accents (shared) */}
           <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 70% at 50% -20%, ${primaryColor}15, transparent)` }} />
           <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-30" style={{ backgroundColor: primaryColor }} />
           <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full blur-[80px] pointer-events-none opacity-20" style={{ backgroundColor: primaryColor }} />
+
+          {/* HERO */}
+          <section id="inicio" className="relative min-h-[92vh] flex items-center z-10">
 
 
 
@@ -245,7 +250,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
         {/* DNA SECTION */}
         {(settings?.mission || settings?.vision || settings?.values) && (
-          <AnimatedSection id="dna" className="container mx-auto px-6 py-24 md:py-32">
+          <AnimatedSection id="dna" className="container mx-auto px-6 py-24 md:py-32 relative z-10">
             <div className="text-center mb-20">
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Nossa Essência</span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">O que nos move</h2>
@@ -273,6 +278,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </div>
           </AnimatedSection>
         )}
+        </div>
         {/* UPCOMING EVENTS */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <AnimatedSection id="eventos" className="bg-secondary/20 border-y border-border/30">
