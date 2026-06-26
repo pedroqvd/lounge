@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud, User as UserIcon, Phone, Activity, Users } from 'lucide-react'
-import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus } from '@/app/actions/members'
+import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud, User as UserIcon, Phone, Activity, Users, LayoutGrid, AlignLeft, Trash, RotateCcw, Clock, ArrowRight, UserPlus } from 'lucide-react'
+import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus, restoreMember, hardDeleteMember } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
 import { executeImport } from '@/app/actions/importData'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -303,8 +303,48 @@ export default function MembersClient({ initialMembers, groups, templates, userR
     return ''
   }
 
+  
+  const [viewMode, setViewMode] = useState<'table' | 'pipeline' | 'trash'>('table')
+  const [deletedMembers, setDeletedMembers] = useState<Member[]>([])
+  const [isLoadingTrash, setIsLoadingTrash] = useState(false)
+
+  useEffect(() => {
+    if (viewMode === 'trash' && userRole === 'ADMIN') {
+      setIsLoadingTrash(true)
+      import('@/app/actions/members').then(m => m.getDeletedMembers()).then(data => {
+        setDeletedMembers(data)
+        setIsLoadingTrash(false)
+      })
+    }
+  }, [viewMode, userRole])
+
+  const handleRestore = async (id: string) => {
+    await restoreMember(id)
+    toast.success('Restaurado com sucesso!')
+    setDeletedMembers(prev => prev.filter(m => m.id !== id))
+  }
+  const handleHardDelete = async (id: string) => {
+    if(!confirm('Tem certeza? Isso não pode ser desfeito.')) return;
+    await hardDeleteMember(id)
+    toast.success('Excluído permanentemente!')
+    setDeletedMembers(prev => prev.filter(m => m.id !== id))
+  }
+
+  const movePipelineStage = async (member: Member, newStatus: string) => {
+    const oldMembers = [...members]
+    setMembers(prev => prev.map(m => m.id === member.id ? { ...m, status: newStatus } : m))
+    const res = await updateMember(member.id, { ...member, status: newStatus })
+    if(!res.success) {
+       toast.error('Erro ao mover membro')
+       setMembers(oldMembers)
+    } else {
+       toast.success('Status alterado!')
+    }
+  }
+
   return (
     <div className="space-y-6">
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Membros</h1>
@@ -332,7 +372,16 @@ export default function MembersClient({ initialMembers, groups, templates, userR
         </div>
       </div>
 
-      {/* Search and Filters */}
+      
+      <div className="flex items-center gap-2 p-1 bg-card border border-border rounded-xl w-fit mb-4">
+        <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><AlignLeft className="w-4 h-4"/> Tabela</button>
+        <button onClick={() => setViewMode('pipeline')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'pipeline' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><LayoutGrid className="w-4 h-4"/> Funil CRM</button>
+        {userRole === 'ADMIN' && <button onClick={() => setViewMode('trash')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'trash' ? 'bg-destructive text-destructive-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><Trash className="w-4 h-4"/> Lixeira</button>}
+      </div>
+
+      {viewMode === 'table' && (
+        <>
+          {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-card border border-border rounded-xl shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -493,6 +542,83 @@ export default function MembersClient({ initialMembers, groups, templates, userR
         </div>
       </div>
 
+            </>
+      )}
+
+      {/* Pipeline View */}
+      {viewMode === 'pipeline' && (
+        <div className="flex gap-6 overflow-x-auto pb-4 snap-x">
+          {['VISITANTE', 'DISCIPULADO', 'ATIVO', 'INATIVO'].map(colStatus => (
+            <div key={colStatus} className="min-w-[320px] max-w-[320px] bg-muted/30 rounded-2xl p-4 flex flex-col gap-4 border border-border/50 snap-center">
+              <div className="flex items-center justify-between px-2">
+                <h3 className="font-bold text-sm text-muted-foreground">{colStatus}</h3>
+                <span className="text-xs font-bold px-2 py-1 bg-background rounded-full border border-border">{filteredMembers.filter(m => m.status === colStatus).length}</span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {filteredMembers.filter(m => m.status === colStatus).map(m => (
+                  <div key={m.id} className="bg-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-all group relative cursor-pointer" onClick={() => openModal(m)}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-bold text-foreground line-clamp-1">{m.name}</div>
+                      <div onClick={e => e.stopPropagation()}>
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger asChild>
+                            <button className="text-muted-foreground hover:text-primary"><ArrowRight className="w-4 h-4"/></button>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Portal>
+                            <DropdownMenu.Content className="bg-popover text-popover-foreground rounded-xl shadow-lg border border-border p-2 z-50">
+                              {['VISITANTE', 'DISCIPULADO', 'ATIVO', 'INATIVO'].filter(s => s !== colStatus).map(s => (
+                                <DropdownMenu.Item key={s} onSelect={() => movePipelineStage(m, s)} className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-md cursor-pointer outline-none">
+                                  Mover para {s}
+                                </DropdownMenu.Item>
+                              ))}
+                            </DropdownMenu.Content>
+                          </DropdownMenu.Portal>
+                        </DropdownMenu.Root>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-2 mb-2"><Phone className="w-3 h-3"/> {m.phone || 'Sem número'}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-2"><Users className="w-3 h-3"/> {m.group?.name || 'Sem grupo'}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Lixeira View */}
+      {viewMode === 'trash' && userRole === 'ADMIN' && (
+        <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+          {isLoadingTrash ? (
+            <div className="p-8 text-center text-muted-foreground">Carregando Lixeira...</div>
+          ) : deletedMembers.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">A lixeira está vazia.</div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border bg-muted/20 text-sm">
+                  <th className="px-4 py-3 font-semibold text-muted-foreground">Nome</th>
+                  <th className="px-4 py-3 font-semibold text-muted-foreground">Excluído em</th>
+                  <th className="px-4 py-3 font-semibold text-muted-foreground w-[100px]">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {deletedMembers.map(m => (
+                  <tr key={m.id} className="border-b border-border hover:bg-muted/10 transition-colors">
+                    <td className="px-4 py-4 font-semibold text-foreground">{m.name}</td>
+                    <td className="px-4 py-4 text-muted-foreground">{m.deletedAt ? new Date(m.deletedAt).toLocaleString('pt-BR') : ''}</td>
+                    <td className="px-4 py-4 flex gap-2">
+                      <button onClick={() => handleRestore(m.id)} className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-primary-foreground" title="Restaurar"><RotateCcw className="w-4 h-4" /></button>
+                      <button onClick={() => handleHardDelete(m.id)} className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground" title="Excluir Definitivamente"><Trash className="w-4 h-4" /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
       {/* Member Modal */}
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
         <Dialog.Portal>
@@ -537,6 +663,26 @@ export default function MembersClient({ initialMembers, groups, templates, userR
                 </button>
               </div>
             </form>
+          
+          {/* Member Audit Timeline */}
+          {editingMember && editingMember.audits && editingMember.audits.length > 0 && (
+            <div className="mt-8 border-t border-border pt-6">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Clock className="w-5 h-5 text-primary"/> Histórico de Atividades</h3>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                {editingMember.audits.map((audit: any) => (
+                  <div key={audit.id} className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <UserPlus className="w-4 h-4 text-muted-foreground"/>
+                    </div>
+                    <div>
+                      <p className="text-sm text-foreground"><span className="font-bold">{audit.userName}</span> {audit.action}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(audit.createdAt).toLocaleString('pt-BR')}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

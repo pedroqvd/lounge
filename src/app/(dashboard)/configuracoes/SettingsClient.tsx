@@ -319,6 +319,9 @@ export default function SettingsClient({ initialSettings, initialHubSettings, us
                           <td className="px-4 py-4 text-muted-foreground">
                             {new Date(user.createdAt).toLocaleDateString('pt-BR')}
                           </td>
+                            <td className="px-4 py-4 text-muted-foreground">
+                              {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Nunca'}
+                            </td>
                         </tr>
                       ))}
                     </tbody>

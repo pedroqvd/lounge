@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -29,13 +29,14 @@ enum InviteStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  role      Role     @default(LIDER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String
+  role        Role      @default(LIDER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
   // Relations
   sentHistories ContactHistory[]
   tasks         Task[]
@@ -48,16 +49,16 @@ model Group {
   liderId     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
-  members     Member[]
+  members Member[]
 }
 
 model Member {
   id           String       @id @default(uuid())
   name         String
   birthDate    DateTime?
-  phone        String?      // WhatsApp (+55...)
+  phone        String? // WhatsApp (+55...)
   email        String?
   address      String?
   city         String?
@@ -69,40 +70,42 @@ model Member {
   isBaptized   Boolean      @default(false)
   baptizeDate  DateTime?
   notes        String?
-  source       String?      // Como conheceu (ex: Instagram, Amigo: Joao)
+  source       String? // Como conheceu (ex: Instagram, Amigo: Joao)
   photoUrl     String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  isDeleted    Boolean      @default(false)
+  deletedAt    DateTime?
 
   // Relations
-  group        Group?           @relation(fields: [groupId], references: [id])
-  histories    ContactHistory[]
-  attendances  Attendance[]
-  audits       MemberAudit[]
-  tasks        Task[]
+  group       Group?           @relation(fields: [groupId], references: [id])
+  histories   ContactHistory[]
+  attendances Attendance[]
+  audits      MemberAudit[]
+  tasks       Task[]
 }
 
 model MemberAudit {
   id        String   @id @default(uuid())
   memberId  String
-  userName  String   // Nome de quem editou (via LocalStorage)
+  userName  String // Nome de quem editou (via LocalStorage)
   action    String   @db.Text
   createdAt DateTime @default(now())
 
   // Relations
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
 
 model Event {
-  id          String       @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   date        DateTime
-  time        String?      // HH:MM
-  type        String       @default("OUTRO") // CULTO, CELULA, REUNIAO, OUTRO
+  time        String? // HH:MM
+  type        String   @default("OUTRO") // CULTO, CELULA, REUNIAO, OUTRO
   location    String?
   description String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   attendances Attendance[]
@@ -116,8 +119,8 @@ model Attendance {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, memberId])
 }
@@ -130,38 +133,37 @@ model Template {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   // Relations
   histories ContactHistory[]
 }
 
 model ContactHistory {
   id         String   @id @default(uuid())
-  userId     String   // Whoever sent the message
-  memberId   String   // Who received
-  templateId String?  // Optional if it was a free text message
+  userId     String // Whoever sent the message
+  memberId   String // Who received
+  templateId String? // Optional if it was a free text message
   customText String?  @db.Text
   sentAt     DateTime @default(now())
   notes      String?
 
   // Relations
-  user       User      @relation(fields: [userId], references: [id])
-  member     Member    @relation(fields: [memberId], references: [id])
-  template   Template? @relation(fields: [templateId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  member   Member    @relation(fields: [memberId], references: [id])
+  template Template? @relation(fields: [templateId], references: [id])
 }
 
 model Settings {
   id                String   @id @default("global")
   inactivityDays    Int      @default(20)
   defaultChurchName String   @default("Lounge For You")
-  leaders           String[] @default([]) // Array de Responsáveis
-  areas             String[] @default([]) // Array de Áreas de Escolha
+  leaders           String[] @default([]) // Array de ResponsÃ¡veis
+  areas             String[] @default([]) // Array de Ãreas de Escolha
   primaryColor      String?  @default("#6366f1")
   themeMode         String?  @default("system")
   webhookUrl        String?
   updatedAt         DateTime @updatedAt
 }
-
 
 enum TaskType {
   BIRTHDAY
@@ -184,23 +186,22 @@ model Task {
   status      TaskStatus @default(PENDING)
   dueDate     DateTime?
   memberId    String?
-  assignedTo  String?    
+  assignedTo  String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  member      Member?    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  user        User?      @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+  member Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
 }
-
 
 model HubSettings {
   id               String   @id @default("global")
   title            String   @default("Bem-vindo!")
-  heroSubtitle     String   @default("Estamos muito felizes em ter você aqui. Queremos te conhecer melhor!")
-  mission          String   @default("Preencha a Missão da Igreja nas configurações.") @db.Text
-  vision           String   @default("Preencha a Visão da Igreja nas configurações.") @db.Text
-  values           String   @default("Preencha os Valores nas configurações.") @db.Text
-  hhsInfo          String   @default("Informações sobre as Células / HHs.") @db.Text
+  heroSubtitle     String   @default("Estamos muito felizes em ter vocÃª aqui. Queremos te conhecer melhor!")
+  mission          String   @default("Preencha a MissÃ£o da Igreja nas configuraÃ§Ãµes.") @db.Text
+  vision           String   @default("Preencha a VisÃ£o da Igreja nas configuraÃ§Ãµes.") @db.Text
+  values           String   @default("Preencha os Valores nas configuraÃ§Ãµes.") @db.Text
+  hhsInfo          String   @default("InformaÃ§Ãµes sobre as CÃ©lulas / HHs.") @db.Text
   whatsappGroupUrl String?
   instagramUrl     String?
   updatedAt        DateTime @updatedAt
