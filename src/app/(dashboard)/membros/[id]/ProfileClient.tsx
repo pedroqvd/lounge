@@ -5,7 +5,7 @@ import { updateMemberNotes, updateMemberMinisterial, updateMemberProfile } from 
 import { User as UserIcon, Calendar, MapPin, Save, MessageCircle, Clock, BookOpen, Edit2, History, Camera } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 
-export default function ProfileClient({ member, groups }: { member: any, groups: any[] }) {
+export default function ProfileClient({ member, groups, currentUser }: { member: any, groups: any[], currentUser?: any }) {
   const [userName, setUserName] = useState<string>('')
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [tempUserName, setTempUserName] = useState('')
@@ -305,33 +305,7 @@ export default function ProfileClient({ member, groups }: { member: any, groups:
         </div>
       </div>
 
-      {/* MODAL: IDENTIFICAÇÃO DO USUÁRIO */}
-      <Dialog.Root open={isAuthModalOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50" />
-          <Dialog.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-8 shadow-2xl rounded-2xl">
-            <Dialog.Title className="text-2xl font-extrabold tracking-tight text-center">
-              Identifique-se
-            </Dialog.Title>
-            <p className="text-center text-muted-foreground text-sm mb-4">
-              Para acessar e editar perfis, precisamos saber quem é você para o registro de auditoria do sistema.
-            </p>
-            <form onSubmit={handleSaveAuth} className="space-y-4">
-              <input 
-                autoFocus
-                required
-                placeholder="Seu nome completo..."
-                value={tempUserName}
-                onChange={e => setTempUserName(e.target.value)}
-                className="flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <button type="submit" className="w-full h-12 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors">
-                Entrar no Sistema
-              </button>
-            </form>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      
 
       {/* MODAL: EDITAR PERFIL */}
       <Dialog.Root open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>

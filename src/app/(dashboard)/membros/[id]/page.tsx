@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import ProfileClient from './ProfileClient'
 import { getMemberProfile } from '@/app/actions/members'
+import { getCurrentUser } from '@/app/actions/auth'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 const prisma = globalForPrisma.prisma || new PrismaClient()
@@ -11,6 +12,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export default async function ProfilePage({ params }: { params: { id: string } }) {
   const member = await getMemberProfile(params.id)
+  const currentUser = await getCurrentUser()
 
   if (!member) {
     notFound()
@@ -35,7 +37,7 @@ export default async function ProfilePage({ params }: { params: { id: string } }
         Voltar para Membros
       </Link>
       
-      <ProfileClient member={memberWithAudits} groups={groups} />
+      <ProfileClient member={memberWithAudits} groups={groups} currentUser={currentUser} />
     </div>
   )
 }
