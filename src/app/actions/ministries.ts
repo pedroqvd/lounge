@@ -150,8 +150,7 @@ export async function bulkUpdateScheduleSlots(
   removals: string[]
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) return { success: false, error: 'Não autorizado' }
+
 
     await prisma.$transaction(async (tx) => {
       if (removals.length > 0) {
