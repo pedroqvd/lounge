@@ -168,8 +168,25 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
       <main className="flex-1">
 
+        {/* Video Background - fixed to viewport, behind everything */}
+        <div className="fixed inset-0 w-full h-full z-0 pointer-events-none">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover opacity-30 dark:opacity-40"
+          >
+            <source src="/bg-hero.mp4" type="video/mp4" />
+          </video>
+        </div>
+
         {/* HERO & DNA CONTAINER */}
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden z-10">
+          {/* Smooth fade to background at the very bottom of the DNA section */}
+          <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent z-[1] pointer-events-none" />
+
           {/* Background color accents (shared) */}
           <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 70% at 50% -20%, ${primaryColor}15, transparent)` }} />
           <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-30" style={{ backgroundColor: primaryColor }} />
@@ -178,20 +195,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
           {/* HERO */}
           <section id="inicio" className="relative min-h-[92vh] flex items-center">
-            {/* Video Background - absolute inside hero */}
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline
-              preload="auto"
-              className="absolute inset-0 w-full h-full object-cover opacity-30 dark:opacity-40 pointer-events-none"
-            >
-              <source src="/bg-hero.mp4" type="video/mp4" />
-            </video>
-            {/* Fade overlays */}
-            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background to-transparent z-[1]" />
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent z-[1]" />
 
             <div className="container mx-auto px-4 md:px-6 py-16 md:py-32 relative z-10 text-center">
               <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-4 md:mb-6 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
