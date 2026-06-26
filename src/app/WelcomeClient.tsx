@@ -684,7 +684,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </a>
           </div>
         </div>
-        </div>
       </footer>
     </div>
   )
