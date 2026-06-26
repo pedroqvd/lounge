@@ -116,7 +116,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain dark:brightness-200" priority />
           </div>
@@ -143,7 +143,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           </button>
         </div>
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-xl p-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
+          <div className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-xl p-4 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
             {navItems.map(item => (
               <a key={item.href} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className="font-semibold text-foreground hover:text-primary transition-colors text-lg">{item.label}</a>
             ))}
@@ -188,13 +188,11 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           {/* HERO */}
           <section id="inicio" className="relative min-h-[92vh] flex items-center z-10">
 
-
-
-          <div className="container mx-auto px-6 py-24 md:py-32 relative z-10 text-center">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-[1.05] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-              {settings?.title || `Bem-vindo à ${churchName}`}
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+            <div className="container mx-auto px-4 md:px-6 py-16 md:py-32 relative z-10 text-center">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-4 md:mb-6 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                {settings?.title || `Bem-vindo à ${churchName}`}
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
               {settings?.heroSubtitle || 'Estamos felizes em ter você aqui. Uma comunidade que ama, acolhe e transforma vidas.'}
             </p>
 
@@ -226,17 +224,17 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
-              <a href="#cadastro" className="flex items-center justify-center gap-2 px-8 py-4 text-white font-bold rounded-2xl shadow-2xl transition-all hover:scale-105 hover:shadow-primary/40 text-lg" style={{ backgroundColor: primaryColor }}>
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400 px-4 sm:px-0">
+              <a href="#cadastro" className="flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 text-white font-bold rounded-2xl shadow-2xl transition-all hover:scale-105 hover:shadow-primary/40 text-base md:text-lg w-full sm:w-auto" style={{ backgroundColor: primaryColor }}>
                 Quero Me Conectar <ArrowRight className="w-5 h-5" />
               </a>
               {settings?.whatsappGroupUrl && (
-                <a href={settings.whatsappGroupUrl} target="_blank" className="flex items-center justify-center gap-2 px-6 py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#25D366]/20">
+                <a href={settings.whatsappGroupUrl} target="_blank" className="flex items-center justify-center gap-2 px-6 py-3.5 md:py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#25D366]/20 text-base w-full sm:w-auto">
                   <MessageCircle className="w-5 h-5" /> Grupo de Avisos
                 </a>
               )}
               {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#dc2743]/20">
+                <a href={settings.instagramUrl} target="_blank" className="flex items-center justify-center gap-2 px-6 py-3.5 md:py-4 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#dc2743]/20 text-base w-full sm:w-auto">
                   <Instagram className="w-5 h-5" /> Instagram
                 </a>
               )}
@@ -251,8 +249,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
         {/* DNA SECTION */}
         {(settings?.mission || settings?.vision || settings?.values) && (
-          <AnimatedSection id="dna" className="container mx-auto px-6 py-24 md:py-32 relative z-10">
-            <div className="text-center mb-20">
+          <AnimatedSection id="dna" className="container mx-auto px-4 md:px-6 py-16 md:py-32 relative z-10">
+            <div className="text-center mb-12 md:mb-20">
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Nossa Essência</span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">O que nos move</h2>
               <p className="text-muted-foreground text-lg max-w-xl mx-auto">Conheça os pilares que sustentam a nossa visão do Reino.</p>
@@ -283,8 +281,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         {/* UPCOMING EVENTS */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <AnimatedSection id="eventos" className="bg-secondary/20 border-y border-border/30">
-            <div className="container mx-auto px-6 py-24">
-              <div className="text-center mb-16">
+            <div className="container mx-auto px-4 md:px-6 py-16 md:py-24">
+              <div className="text-center mb-10 md:mb-16">
                 <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Agenda</span>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Próximos Eventos</h2>
                 <p className="text-muted-foreground text-lg">Venha participar! Todos são bem-vindos.</p>
@@ -320,9 +318,9 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         )}
 
         {/* CÉLULAS / HHs + FORM */}
-        <AnimatedSection id="celulas" className="container mx-auto px-6 py-24">
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
-            <div className="space-y-8">
+        <AnimatedSection id="celulas" className="container mx-auto px-4 md:px-6 py-16 md:py-24">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-start">
+            <div className="space-y-6 md:space-y-8">
               <div>
                 <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Comunidade</span>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Onde nos encontramos</h2>
@@ -359,7 +357,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </div>
 
             {/* FORM */}
-            <div id="cadastro" className="p-8 md:p-10 bg-card border border-border rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+            <div id="cadastro" className="p-6 sm:p-8 md:p-10 bg-card border border-border rounded-[2.5rem] shadow-2xl relative overflow-hidden">
               <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-50" style={{ backgroundColor: primaryColor }} />
               <div className="relative z-10">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg" style={{ backgroundColor: primaryColor + '20', color: primaryColor }}>
@@ -432,7 +430,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         </AnimatedSection>
 
         {/* NOSSAS UNIDADES & MAPA */}
-        <AnimatedSection className="py-24 bg-background relative overflow-hidden">
+        <AnimatedSection className="py-16 md:py-24 bg-background relative overflow-hidden">
           {/* Floating dots decoration */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {[...Array(6)].map((_, i) => (
@@ -440,8 +438,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             ))}
           </div>
           
-          <div className="container mx-auto px-6 max-w-5xl relative z-10">
-            <div className="text-center mb-12">
+          <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
+            <div className="text-center mb-8 md:mb-12">
               <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
                 Nossas <span style={{ color: primaryColor }}>Unidades</span>
               </h2>
@@ -451,17 +449,17 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </div>
 
             {/* Abas */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-secondary/50 p-1.5 rounded-2xl inline-flex shadow-inner">
+            <div className="flex justify-center mb-8 w-full">
+              <div className="bg-secondary/50 p-1.5 rounded-2xl flex flex-col sm:flex-row w-full sm:w-auto shadow-inner">
                 <button 
                   onClick={() => setMapTab('SEDE')}
-                  className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${mapTab === 'SEDE' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                  className={`px-6 py-3 sm:py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto ${mapTab === 'SEDE' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                 >
                   Sede
                 </button>
                 <button 
                   onClick={() => setMapTab('HH')}
-                  className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${mapTab === 'HH' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+                  className={`px-6 py-3 sm:py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto ${mapTab === 'HH' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                 >
                   Happy Hours (Células)
                 </button>
@@ -558,8 +556,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         {/* GALLERY */}
         {settings?.galleryUrls && settings.galleryUrls.length > 0 && (
           <AnimatedSection className="bg-secondary/10 border-y border-border/30">
-            <div className="container mx-auto px-6 py-24">
-              <div className="text-center mb-12">
+            <div className="container mx-auto px-4 md:px-6 py-16 md:py-24">
+              <div className="text-center mb-10 md:mb-12">
                 <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Momentos da nossa família</h2>
                 <p className="text-muted-foreground">Registros dos encontros e celebrações</p>
               </div>
@@ -577,8 +575,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
       {/* FOOTER */}
       <footer className="bg-card border-t border-border mt-auto">
-        <div className="container mx-auto px-6 py-16">
-          <div className="grid md:grid-cols-4 gap-10 mb-12">
+        <div className="container mx-auto px-4 md:px-6 py-12 md:py-16">
+          <div className="grid md:grid-cols-4 gap-10 mb-10 md:mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain dark:brightness-200" priority />
