@@ -54,3 +54,48 @@ export async function updateSettings(data: { inactivityDays: number, defaultChur
     return { success: false, error: error.message }
   }
 }
+
+export async function getHubSettings() {
+  let settings = await prisma.hubSettings.findUnique({
+    where: { id: 'global' }
+  })
+  if (!settings) {
+    settings = await prisma.hubSettings.create({
+      data: { id: 'global' }
+    })
+  }
+  return settings
+}
+
+export async function updateHubSettings(data: any) {
+  try {
+    await prisma.hubSettings.upsert({
+      where: { id: 'global' },
+      update: {
+        title: data.title,
+        heroSubtitle: data.heroSubtitle,
+        mission: data.mission,
+        vision: data.vision,
+        values: data.values,
+        hhsInfo: data.hhsInfo,
+        whatsappGroupUrl: data.whatsappGroupUrl,
+        instagramUrl: data.instagramUrl
+      },
+      create: {
+        id: 'global',
+        title: data.title || "Bem-vindo!",
+        heroSubtitle: data.heroSubtitle || "",
+        mission: data.mission || "",
+        vision: data.vision || "",
+        values: data.values || "",
+        hhsInfo: data.hhsInfo || "",
+        whatsappGroupUrl: data.whatsappGroupUrl,
+        instagramUrl: data.instagramUrl
+      }
+    })
+    revalidatePath('/')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}

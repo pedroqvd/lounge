@@ -1,13 +1,13 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { updateSettings } from '@/app/actions/settings'
+import { updateSettings, updateHubSettings } from '@/app/actions/settings'
 import { updateUserRole, preRegisterUser } from '@/app/actions/auth'
-import { Save, Building2, Shield, X, UserCog, Settings2, Link2, ListPlus, Activity, Webhook } from 'lucide-react'
+import { Save, Building2, Shield, X, UserCog, Settings2, Link2, ListPlus, Activity, Webhook, Globe } from 'lucide-react'
 import { toast } from 'sonner'
 import * as Tabs from '@radix-ui/react-tabs'
 
-export default function SettingsClient({ initialSettings, users, currentUser }: { initialSettings: any, users: any[], currentUser: any }) {
+export default function SettingsClient({ initialSettings, initialHubSettings, users, currentUser }: { initialSettings: any, initialHubSettings: any, users: any[], currentUser: any }) {
   const [localUsers, setLocalUsers] = useState(users)
   const [formData, setFormData] = useState({
     inactivityDays: initialSettings.inactivityDays || 20,
@@ -20,6 +20,25 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
   })
   
   const [isSaving, setIsSaving] = useState(false)
+  const [hubData, setHubData] = useState({
+    title: initialHubSettings.title || "Bem-vindo!",
+    heroSubtitle: initialHubSettings.heroSubtitle || "",
+    mission: initialHubSettings.mission || "",
+    vision: initialHubSettings.vision || "",
+    values: initialHubSettings.values || "",
+    hhsInfo: initialHubSettings.hhsInfo || "",
+    whatsappGroupUrl: initialHubSettings.whatsappGroupUrl || "",
+    instagramUrl: initialHubSettings.instagramUrl || ""
+  })
+
+  const handleSaveHub = async () => {
+    setIsSaving(true)
+    const res = await updateHubSettings(hubData)
+    if (res.success) toast.success("Configurações do Hub salvas!")
+    else toast.error("Erro: " + res.error)
+    setIsSaving(false)
+  }
+
   
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'LIDER' as 'ADMIN'|'LIDER' })
   const [isAddingUser, setIsAddingUser] = useState(false)
@@ -106,7 +125,10 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
           <Tabs.Trigger value="listas" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
             <ListPlus className="w-4 h-4" /> Listas Dinâmicas
           </Tabs.Trigger>
-          <Tabs.Trigger value="integracoes" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
+                      <Tabs.Trigger value="hub" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
+              <Globe className="w-4 h-4" /> Hub Público
+            </Tabs.Trigger>
+<Tabs.Trigger value="integracoes" className="flex items-center gap-2 px-5 py-3 text-sm font-bold rounded-t-xl transition-all data-[state=active]:bg-card data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:text-primary text-muted-foreground hover:bg-secondary/50 data-[state=inactive]:border-b-transparent">
             <Link2 className="w-4 h-4" /> Integrações (Webhooks)
           </Tabs.Trigger>
         </Tabs.List>
@@ -470,6 +492,55 @@ export default function SettingsClient({ initialSettings, users, currentUser }: 
             </button>
           </div>
         </Tabs.Content>
+
+        <Tabs.Content value="hub" className="space-y-6 mt-6 outline-none animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight">Hub Público (Portal do Visitante)</h2>
+              <p className="text-muted-foreground">Preencha as informações institucionais para a Landing Page de visitantes.</p>
+            </div>
+            <button onClick={handleSaveHub} disabled={isSaving} className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md">
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Salvando...' : 'Salvar Hub'}
+            </button>
+          </div>
+
+          <div className="p-8 bg-card border border-border rounded-2xl shadow-sm space-y-6">
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Título de Boas-vindas</label>
+                <input type="text" value={hubData.title} onChange={e => setHubData({...hubData, title: e.target.value})} className="flex h-12 w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Subtítulo</label>
+                <input type="text" value={hubData.heroSubtitle} onChange={e => setHubData({...hubData, heroSubtitle: e.target.value})} className="flex h-12 w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Missão</label>
+                <textarea value={hubData.mission} onChange={e => setHubData({...hubData, mission: e.target.value})} className="flex w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px]" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Visão</label>
+                <textarea value={hubData.vision} onChange={e => setHubData({...hubData, vision: e.target.value})} className="flex w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px]" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Valores</label>
+                <textarea value={hubData.values} onChange={e => setHubData({...hubData, values: e.target.value})} className="flex w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px]" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Informações sobre HHs (Células)</label>
+                <textarea value={hubData.hhsInfo} onChange={e => setHubData({...hubData, hhsInfo: e.target.value})} className="flex w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px]" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Link Grupo do WhatsApp (Opcional)</label>
+                <input type="text" value={hubData.whatsappGroupUrl || ''} onChange={e => setHubData({...hubData, whatsappGroupUrl: e.target.value})} className="flex h-12 w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground">Link do Instagram (Opcional)</label>
+                <input type="text" value={hubData.instagramUrl || ''} onChange={e => setHubData({...hubData, instagramUrl: e.target.value})} className="flex h-12 w-full rounded-xl border-2 border-input bg-background/50 px-4 py-2 focus:border-primary focus:ring-1 focus:ring-primary" />
+             </div>
+          </div>
+        </Tabs.Content>
+
       </Tabs.Root>
     </div>
   )
