@@ -236,7 +236,7 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                           if (positionsArray.length === 0) positionsArray = ['Equipe'] // Fallback if no positions
 
                           // Order positions based on standard Louvor order if applicable
-                          const standardOrder = ['Vocal', 'Teclado', 'Violão', 'Guitarra', 'Baixo', 'Bateria']
+                          const standardOrder = ['Vocal', 'Teclado', 'Teclado 1', 'Teclado 2', 'Violão', 'Guitarra', 'Guitarra 1', 'Guitarra 2', 'Baixo', 'Bateria']
                           positionsArray.sort((a, b) => {
                             const idxA = standardOrder.indexOf(a)
                             const idxB = standardOrder.indexOf(b)
@@ -251,8 +251,13 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                             const scheduledPerEvent = ministryEvents.map(event => {
                               const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
                               return slots.filter((slot: any) => {
-                                const minMember = selectedMinistry?.members?.find((mm: any) => mm.memberId === slot.member.id)
                                 if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true
+                                
+                                // Use explicit slot position if available
+                                if (slot.position) return slot.position === position
+                                
+                                // Fallback for old data
+                                const minMember = selectedMinistry?.members?.find((mm: any) => mm.memberId === slot.member.id)
                                 if (!minMember || !minMember.position) return false
                                 const memberPositions = minMember.position.split(',').map((p: string) => p.trim())
                                 return memberPositions.includes(position)

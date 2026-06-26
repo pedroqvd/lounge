@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Crown, Check, X, Clock, MapPin, Trash2 } from 'lucide-react'
-import { createScheduleSlot, updateSlotStatus, removeScheduleSlot, removeMemberFromMinistry } from '@/app/actions/ministries'
-import * as Dialog from '@radix-ui/react-dialog'
+import React, { useState } from 'react'
+import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Check } from 'lucide-react'
+import { createScheduleSlot, removeScheduleSlot, removeMemberFromMinistry } from '@/app/actions/ministries'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -38,37 +37,16 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
     setIsScaleOpen(true)
   }
 
-  const toggleMember = (memberId: string) => {
-    setSelectedMemberIds(prev => prev.includes(memberId) ? prev.filter(id => id !== memberId) : [...prev, memberId])
-  }
-
-  const handleSaveScale = async () => {
-    if (!selectedEventId) return
+  const handleToggleScale = async (eventId: string, memberId: string, position: string, isCurrentlyScheduled: boolean, currentSlotId?: string) => {
     setIsSaving(true)
-    const event = events.find(e => e.id === selectedEventId)
-    const currentScaled = event?.scheduleSlots.map((s: any) => s.memberId) || []
-    
-    // Add new ones
-    for (const memberId of selectedMemberIds) {
-      if (!currentScaled.includes(memberId)) {
-        await createScheduleSlot(ministry.id, selectedEventId, memberId)
-      }
+    if (isCurrentlyScheduled && currentSlotId) {
+      await removeScheduleSlot(currentSlotId)
+      toast.success('Voluntário removido da escala!')
+    } else {
+      await createScheduleSlot(ministry.id, eventId, memberId, position)
+      toast.success('Voluntário escalado!')
     }
-    // Remove unchecked ones
-    for (const slot of (event?.scheduleSlots || [])) {
-      if (!selectedMemberIds.includes(slot.memberId)) {
-        await removeScheduleSlot(slot.id)
-      }
-    }
-
-    toast.success('Escala salva!')
-    setIsScaleOpen(false)
-    window.location.reload()
-  }
-
-  const handleStatusChange = async (slotId: string, status: 'PENDENTE' | 'CONFIRMADO' | 'RECUSADO') => {
-    await updateSlotStatus(slotId, status)
-    toast.success('Status atualizado!')
+    setIsSaving(false)
     window.location.reload()
   }
 
@@ -79,146 +57,160 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
     else toast.error(res.error || 'Erro')
   }
 
+  // Obter todas as funções únicas do ministério
+  const allPositions = new Set<string>()
+  ministryMembers.forEach((mm: any) => {
+    if (mm.position) {
+      mm.position.split(',').forEach((p: string) => allPositions.add(p.trim()))
+    }
+  })
+  let positionsArray = Array.from(allPositions).filter(Boolean)
+  if (positionsArray.length === 0) positionsArray = ['Equipe'] // Fallback if no positions
+
+  const standardOrder = ['Vocal', 'Teclado', 'Teclado 1', 'Teclado 2', 'Violão', 'Guitarra', 'Guitarra 1', 'Guitarra 2', 'Baixo', 'Bateria']
+  positionsArray.sort((a, b) => {
+    const idxA = standardOrder.indexOf(a)
+    const idxB = standardOrder.indexOf(b)
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB
+    if (idxA !== -1) return -1
+    if (idxB !== -1) return 1
+    return a.localeCompare(b)
+  })
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <Link href="/escalas" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
           <ChevronLeft className="w-4 h-4" /> Todos os Ministérios
         </Link>
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: ministry.color + '20', color: ministry.color }}>
-            <IconComp className="w-8 h-8" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">{ministry.name}</h1>
-            <p className="text-muted-foreground">{ministry.description}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-5 gap-8">
-
-        {/* Voluntários do Ministério */}
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-lg font-bold flex items-center gap-2"><Users className="w-5 h-5" /> Voluntários ({ministryMembers.length})</h2>
-          <div className="space-y-2">
-            {ministryMembers.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground text-sm bg-card border border-border rounded-xl">Nenhum voluntário ainda. Adicione na página de escalas.</div>
-            ) : ministryMembers.map((mm: any) => (
-              <div key={mm.id} className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl group hover:shadow-sm transition-all">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm" style={{ backgroundColor: ministry.color }}>
-                  {mm.member.name.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm truncate">{mm.member.name}</p>
-                    {mm.role === 'LIDER_MINISTERIO' && <span title="Líder"><Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" /></span>}
-                  </div>
-                  {(mm.position || mm.instrument) && (
-                    <p className="text-xs text-muted-foreground truncate">{mm.position || mm.instrument}</p>
-                  )}
-                </div>
-                <button onClick={() => handleRemoveVolunteer(mm.id)} className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Próximos Eventos e Escalas */}
-        <div className="lg:col-span-3 space-y-4">
-          <h2 className="text-lg font-bold flex items-center gap-2"><Clock className="w-5 h-5" /> Próximos Eventos</h2>
-          {events.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground text-sm bg-card border border-border rounded-xl">
-              Nenhum evento próximo cadastrado.<br />
-              <Link href="/calendario" className="text-primary font-semibold hover:underline">Criar evento no Calendário</Link>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: ministry.color + '20', color: ministry.color }}>
+              <IconComp className="w-7 h-7" />
             </div>
-          ) : (
-            <div className="space-y-3">
-              {events.map((event: any) => {
-                const slots = event.scheduleSlots || []
-                const hasSlots = slots.length > 0
-                return (
-                  <div key={event.id} className="bg-card border border-border rounded-xl overflow-hidden">
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-bold uppercase px-2 py-0.5 rounded-md" style={{ backgroundColor: ministry.color + '20', color: ministry.color }}>{event.type}</span>
-                          <span className="text-xs text-muted-foreground">{new Date(event.date).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })}</span>
-                          {event.time && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/>{event.time}</span>}
-                        </div>
-                        <p className="font-bold truncate">{event.title}</p>
-                        {event.location && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3"/>{event.location}</p>}
-                      </div>
-                      <button onClick={() => openScale(event.id)} className="ml-3 flex items-center gap-1.5 px-3 py-2 text-sm font-bold rounded-xl text-white transition-all hover:opacity-90 shrink-0" style={{ backgroundColor: ministry.color }}>
-                        <Plus className="w-3.5 h-3.5" /> Escalar
-                      </button>
-                    </div>
-
-                    {hasSlots && (
-                      <div className="border-t border-border px-4 pb-3 pt-2">
-                        <p className="text-xs font-bold text-muted-foreground mb-2">ESCALADOS ({slots.length})</p>
-                        <div className="flex flex-wrap gap-2">
-                          {slots.map((slot: any) => {
-                            const cfg = STATUS_CONFIG[slot.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.PENDENTE
-                            return (
-                              <div key={slot.id} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.color}`}>
-                                {slot.member.name}
-                                <div className="flex gap-0.5 ml-1">
-                                  {slot.status !== 'CONFIRMADO' && <button onClick={() => handleStatusChange(slot.id, 'CONFIRMADO')} className="hover:scale-110 transition-transform" title="Confirmar"><Check className="w-3 h-3" /></button>}
-                                  {slot.status !== 'RECUSADO' && <button onClick={() => handleStatusChange(slot.id, 'RECUSADO')} className="hover:scale-110 transition-transform" title="Recusar"><X className="w-3 h-3" /></button>}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">Escalas: {ministry.name}</h1>
+              <p className="text-sm text-muted-foreground">{ministry.description}</p>
             </div>
+          </div>
+          {events.length === 0 && (
+            <Link href="/calendario" className="text-sm font-semibold text-primary hover:underline bg-primary/10 px-4 py-2 rounded-xl">
+              + Criar Evento no Calendário
+            </Link>
           )}
         </div>
       </div>
 
-      {/* Scale Modal */}
-      <Dialog.Root open={isScaleOpen} onOpenChange={setIsScaleOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-          <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-sm translate-x-[-50%] translate-y-[-50%] bg-background border border-border rounded-2xl p-6 shadow-2xl max-h-[80vh] overflow-y-auto">
-            <Dialog.Title className="text-xl font-extrabold mb-1">Escalar Voluntários</Dialog.Title>
-            <p className="text-sm text-muted-foreground mb-4">Selecione quem serve neste evento</p>
-            <div className="space-y-2 mb-6">
-              {ministryMembers.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">Adicione voluntários ao ministério primeiro.</p>
-              ) : ministryMembers.map((mm: any) => (
-                <label key={mm.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedMemberIds.includes(mm.memberId) ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'}`}>
-                  <input type="checkbox" checked={selectedMemberIds.includes(mm.memberId)} onChange={() => toggleMember(mm.memberId)} className="sr-only" />
-                  <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${selectedMemberIds.includes(mm.memberId) ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
-                    {selectedMemberIds.includes(mm.memberId) && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: ministry.color }}>
-                    {mm.member.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{mm.member.name}</p>
-                    {(mm.position || mm.instrument) && <p className="text-xs text-muted-foreground">{mm.position || mm.instrument}</p>}
-                  </div>
-                </label>
-              ))}
-            </div>
-            <div className="flex gap-3">
-              <Dialog.Close asChild><button className="flex-1 h-11 font-bold text-sm bg-secondary rounded-xl hover:bg-secondary/80">Cancelar</button></Dialog.Close>
-              <button onClick={handleSaveScale} disabled={isSaving} className="flex-1 h-11 text-white font-bold rounded-xl transition-all hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: ministry.color }}>
-                {isSaving ? 'Salvando...' : 'Salvar Escala'}
-              </button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      {events.length > 0 ? (
+        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr>
+                <th className="py-4 px-4 font-bold border-b border-r border-border bg-muted/30 sticky left-0 z-10 w-64 shadow-[1px_0_0_0_var(--border)]">
+                  Função / Voluntário
+                </th>
+                {events.map((event: any) => {
+                  const d = new Date(event.date)
+                  return (
+                    <th key={event.id} className="py-3 px-3 font-semibold border-b border-border bg-muted/10 text-center min-w-[140px] align-top">
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: ministry.color + '15', color: ministry.color }}>
+                          {event.type}
+                        </span>
+                        <span className="text-lg font-black leading-none mt-1">
+                          {String(d.getDate()).padStart(2, '0')}/{d.toLocaleDateString('pt-BR', { month: 'short' })}
+                        </span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          {d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}
+                          {event.time && ` • ${event.time}`}
+                        </span>
+                        <span className="text-xs font-bold truncate max-w-full px-2" title={event.title}>
+                          {event.title}
+                        </span>
+                      </div>
+                    </th>
+                  )
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {positionsArray.map((position, pIdx) => {
+                // Find all members that have this position
+                const membersWithPosition = ministryMembers.filter((mm: any) => {
+                  if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true
+                  if (!mm.position) return false
+                  const pArr = mm.position.split(',').map((p: string) => p.trim())
+                  return pArr.includes(position)
+                })
+
+                if (membersWithPosition.length === 0) return null
+
+                return (
+                  <React.Fragment key={position}>
+                    {/* Position Header Row */}
+                    <tr>
+                      <td colSpan={events.length + 1} className="py-2 px-4 font-bold text-sm bg-muted/40 border-y border-border" style={{ color: ministry.color }}>
+                        {position}
+                      </td>
+                    </tr>
+                    
+                    {/* Member Rows for this position */}
+                    {membersWithPosition.map((mm: any, mIdx: number) => {
+                      const isLastInPosition = mIdx === membersWithPosition.length - 1
+                      return (
+                        <tr key={`${position}-${mm.id}`} className="hover:bg-muted/10 transition-colors">
+                          <td className={`py-2 px-4 border-r border-border bg-background sticky left-0 z-10 shadow-[1px_0_0_0_var(--border)] ${!isLastInPosition ? 'border-b' : ''}`}>
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: ministry.color }}>
+                                {mm.member.name.charAt(0)}
+                              </div>
+                              <span className="text-sm font-semibold truncate" title={mm.member.name}>{mm.member.name}</span>
+                            </div>
+                          </td>
+                          {events.map((event: any) => {
+                            // Find if this specific member is scheduled for this specific position in this event
+                            const slot = event.scheduleSlots?.find((s: any) => s.memberId === mm.memberId && s.position === position)
+                            const isScheduled = !!slot
+                            const isPending = isScheduled && slot.status === 'PENDENTE'
+                            const isConfirmed = isScheduled && slot.status === 'CONFIRMADO'
+                            const isRefused = isScheduled && slot.status === 'RECUSADO'
+                            
+                            return (
+                              <td key={`${event.id}-${mm.id}`} className={`p-1.5 text-center ${!isLastInPosition ? 'border-b border-border' : ''}`}>
+                                <button 
+                                  disabled={isSaving}
+                                  onClick={() => handleToggleScale(event.id, mm.memberId, position, isScheduled, slot?.id)}
+                                  className={`w-full h-10 rounded-xl flex items-center justify-center transition-all ${
+                                    isScheduled 
+                                      ? isConfirmed 
+                                        ? 'bg-emerald-500 text-white shadow-md' 
+                                        : isRefused
+                                          ? 'bg-red-500 text-white shadow-md'
+                                          : 'bg-primary text-primary-foreground shadow-md'
+                                      : 'bg-muted/30 hover:bg-muted border border-transparent hover:border-border text-transparent hover:text-muted-foreground'
+                                  }`}
+                                  style={isScheduled && !isConfirmed && !isRefused ? { backgroundColor: ministry.color } : {}}
+                                >
+                                  {isScheduled ? <Check className="w-5 h-5" /> : <Plus className="w-4 h-4" />}
+                                </button>
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      )
+                    })}
+                  </React.Fragment>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="p-12 text-center text-muted-foreground bg-card border border-border rounded-2xl">
+          Nenhum evento futuro cadastrado no calendário.
+        </div>
+      )}
     </div>
   )
 }

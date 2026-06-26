@@ -27,7 +27,7 @@ const COLOR_PRESETS = ['#8b5cf6', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#
 
 // Positions per ministry
 const POSITION_OPTIONS: Record<string, string[]> = {
-  'Louvor': ['Ministro(a) de Louvor', 'Guitarrista', 'Baixista', 'Baterista', 'Tecladista', 'Violinista', 'Vocalista', 'Back-vocal', 'Violonista', 'Trompetista', 'Saxofonista'],
+  'Louvor': ['Vocal', 'Teclado', 'Teclado 1', 'Teclado 2', 'Violão', 'Guitarra', 'Guitarra 1', 'Guitarra 2', 'Baixo', 'Bateria'],
   'Recepção': ['Porteiro(a)', 'Recepcionista', 'Estacionamento', 'Coordenador(a)'],
   'Kids': ['Professor(a)', 'Auxiliar', 'Coordenador(a)', 'Narrador(a)'],
   'Mídia': ['Câmera', 'Transmissão ao Vivo', 'Fotógrafo(a)', 'Editor(a)', 'Redes Sociais', 'Iluminação', 'Som/Áudio'],

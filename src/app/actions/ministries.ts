@@ -91,9 +91,9 @@ export async function removeMemberFromMinistry(ministryMemberId: string) {
   } catch (e: any) { return { success: false, error: e.message } }
 }
 
-export async function createScheduleSlot(ministryId: string, eventId: string, memberId: string, notes?: string) {
+export async function createScheduleSlot(ministryId: string, eventId: string, memberId: string, position?: string, notes?: string) {
   try {
-    await prisma.scheduleSlot.create({ data: { ministryId, eventId, memberId, notes } })
+    await prisma.scheduleSlot.create({ data: { ministryId, eventId, memberId, position, notes } })
     revalidatePath('/escalas')
     revalidatePath('/calendario')
     return { success: true }

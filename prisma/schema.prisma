@@ -261,6 +261,7 @@ model ScheduleSlot {
   eventId    String
   memberId   String
   status     SlotStatus @default(PENDENTE)
+  position   String?
   notes      String?
   createdAt  DateTime   @default(now())
 
