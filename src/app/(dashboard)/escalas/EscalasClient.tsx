@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Plus, Users, ChevronRight, Trash2, Crown, Mic2, Settings2, ClipboardList, Compass, Sparkles } from 'lucide-react'
-import { createMinistry, deleteMinistry, seedMinistries, addMemberToMinistry, removeMemberFromMinistry, updateMinistryMember } from '@/app/actions/ministries'
+import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Plus, Users, ChevronRight, Trash2, Crown, Mic2, Settings2, ClipboardList, Compass, Sparkles, Pencil } from 'lucide-react'
+import { createMinistry, deleteMinistry, seedMinistries, addMemberToMinistry, removeMemberFromMinistry, updateMinistryMember, updateMinistry } from '@/app/actions/ministries'
 import * as Dialog from '@radix-ui/react-dialog'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -34,9 +34,11 @@ const POSITION_OPTIONS: Record<string, string[]> = {
   'Intercessão': ['Intercessor(a)', 'Líder de Oração'],
 }
 
-export default function EscalasClient({ initialMinistries, members, events }: { initialMinistries: Ministry[], members: Member[], events: any[] }) {
+export default function EscalasClient({ initialMinistries, members, events, currentUserEmail }: { initialMinistries: Ministry[], members: Member[], events: any[], currentUserEmail?: string | null }) {
   const [ministries, setMinistries] = useState(initialMinistries)
   const [isNewMinistryOpen, setIsNewMinistryOpen] = useState(false)
+  const [isEditMinistryMode, setIsEditMinistryMode] = useState(false)
+  const [editingMinistryId, setEditingMinistryId] = useState<string | null>(null)
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
   const [isManageMembersOpen, setIsManageMembersOpen] = useState(false)
   const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null)
@@ -58,12 +60,18 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
     setIsSeeding(false)
   }
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSaveMinistry = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
-    const res = await createMinistry(newForm)
-    if (res.success) { toast.success('Ministério criado!'); window.location.reload() }
-    else toast.error(res.error || 'Erro ao criar')
+    if (isEditMinistryMode && editingMinistryId) {
+      const res = await updateMinistry(editingMinistryId, newForm)
+      if (res.success) { toast.success('Ministério atualizado!'); window.location.reload() }
+      else toast.error(res.error || 'Erro ao atualizar')
+    } else {
+      const res = await createMinistry(newForm)
+      if (res.success) { toast.success('Ministério criado!'); window.location.reload() }
+      else toast.error(res.error || 'Erro ao criar')
+    }
     setIsSaving(false)
   }
 
@@ -146,15 +154,15 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
           )}
           <Dialog.Root open={isNewMinistryOpen} onOpenChange={setIsNewMinistryOpen}>
             <Dialog.Trigger asChild>
-              <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+              <button onClick={() => { setIsEditMinistryMode(false); setNewForm({ name: '', description: '', color: '#6366f1', icon: 'music' }); }} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 <Plus className="w-4 h-4" /> Novo Ministério
               </button>
             </Dialog.Trigger>
             <Dialog.Portal>
               <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
               <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-background border border-border rounded-2xl p-6 shadow-2xl">
-                <Dialog.Title className="text-xl font-extrabold mb-4">Novo Ministério</Dialog.Title>
-                <form onSubmit={handleCreate} className="space-y-4">
+                <Dialog.Title className="text-xl font-extrabold mb-4">{isEditMinistryMode ? 'Editar Ministério' : 'Novo Ministério'}</Dialog.Title>
+                <form onSubmit={handleSaveMinistry} className="space-y-4">
                   <div className="space-y-1">
                     <label className="text-sm font-bold">Nome *</label>
                     <input required value={newForm.name} onChange={e => setNewForm({...newForm, name: e.target.value})} placeholder="Ex: Louvor, Kids, Recepção..." className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
@@ -182,7 +190,7 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
                   <div className="flex gap-3 pt-2 border-t border-border">
                     <Dialog.Close asChild><button type="button" className="flex-1 h-11 font-bold text-sm bg-secondary rounded-xl hover:bg-secondary/80">Cancelar</button></Dialog.Close>
                     <button type="submit" disabled={isSaving} className="flex-1 h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50">
-                      {isSaving ? 'Criando...' : 'Criar Ministério'}
+                      {isSaving ? 'Salvando...' : (isEditMinistryMode ? 'Salvar Alterações' : 'Criar Ministério')}
                     </button>
                   </div>
                 </form>
@@ -222,9 +230,21 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
                         <p className="text-xs text-muted-foreground">{ministry.description}</p>
                       </div>
                     </div>
-                    <button onClick={() => handleDelete(ministry.id)} className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center">
+                      {currentUserEmail === 'pquevedo2011.ph@gmail.com' && (
+                        <button onClick={() => {
+                          setIsEditMinistryMode(true);
+                          setEditingMinistryId(ministry.id);
+                          setNewForm({ name: ministry.name, description: ministry.description || '', color: ministry.color, icon: ministry.icon });
+                          setIsNewMinistryOpen(true);
+                        }} className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all mr-1" title="Editar Ministério">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button onClick={() => handleDelete(ministry.id)} className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all" title="Excluir Ministério">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
