@@ -113,8 +113,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           <div className="flex items-center gap-2">
             <Image src="/custom-logo-login.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain" priority />
           </div>
-            {churchName}
-          </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
             {navItems.map(item => (
               <a key={item.href} href={item.href} className="hover:text-foreground transition-colors hover:scale-105 transform">{item.label}</a>
@@ -440,8 +438,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               <div className="flex items-center gap-2">
             <Image src="/custom-logo-login.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain" priority />
           </div>
-                {churchName}
-              </div>
               <p className="text-muted-foreground max-w-sm leading-relaxed mb-6">Uma igreja apaixonada por Jesus e focada em amar as pessoas. Seja muito bem-vindo à nossa família.</p>
               <div className="flex items-center gap-3">
                 {settings?.whatsappGroupUrl && (
