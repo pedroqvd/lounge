@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Compass, Download } from 'lucide-react'
+import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Compass, Download, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import html2canvas from 'html2canvas'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTheme } from 'next-themes'
 
 const MINISTRY_ICONS: Record<string, any> = {
   music: AudioWaveform, 'door-open': UserCheck, baby: BookOpen, camera: Aperture, heart: Flame, users: Users, mic: Mic2, sparkles: Compass
 }
 
 export default function VoluntariosClient({ ministries, events }: { ministries: any[], events: any[] }) {
+  const { theme, setTheme } = useTheme()
   const [selectedMinistryId, setSelectedMinistryId] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const captureRef = useRef<HTMLDivElement>(null)
@@ -77,6 +79,13 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
               <p className="text-xs text-muted-foreground font-medium hidden sm:block">Acompanhe suas escalas de serviço</p>
             </div>
           </div>
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
         </div>
       </header>
 
@@ -92,9 +101,6 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
               className="space-y-8"
             >
               <div className="text-center py-8">
-                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1, type: 'spring' }} className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3">
-                  <Users className="w-10 h-10 text-primary" />
-                </motion.div>
                 <h2 className="text-4xl font-black tracking-tighter mb-3 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">Qual é o seu Ministério?</h2>
                 <p className="text-muted-foreground text-lg max-w-lg mx-auto">Selecione uma área abaixo para visualizar o calendário com as escalas de serviço.</p>
               </div>
