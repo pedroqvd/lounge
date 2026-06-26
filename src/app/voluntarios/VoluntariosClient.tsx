@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Compass, Download, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import html2canvas from 'html2canvas'
@@ -32,7 +32,7 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
 
   const [selectedMonth, setSelectedMonth] = useState<string>('')
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedMonth && months.length > 0) {
       setSelectedMonth(months[0])
     }
