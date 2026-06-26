@@ -272,16 +272,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
               {isSeeding ? 'Importando...' : 'Importar Planilha Inicial'}
             </button>
           )}
-          {!hideMassImport && (
-          <button 
-            onClick={handleImport}
-            disabled={isImporting}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-500 text-white font-medium rounded-md hover:bg-purple-600 transition-colors shadow-md"
-          >
-            <UploadCloud className="w-5 h-5" />
-            {isImporting ? 'Inserindo...' : 'Importação em Massa'}
-          </button>
-        )}
+          
           <button 
             onClick={() => openModal()}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
@@ -308,7 +299,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
+            className="px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
           >
             <option value="TODOS">Qualquer Status</option>
             <option value="VISITANTE">Visitantes</option>
@@ -319,7 +310,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
           <select 
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium max-w-[150px] truncate"
+            className="px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium max-w-[150px] truncate"
           >
             <option value="TODOS">Todos Grupos</option>
             <option value="SEM_GRUPO">Sem Grupo</option>
@@ -328,7 +319,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
           <select 
             value={inviteStatusFilter}
             onChange={(e) => setInviteStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-transparent focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
+            className="px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-sm font-medium"
           >
             <option value="TODOS">Qualquer Convite</option>
             <option value="PENDENTE">Pendentes</option>
