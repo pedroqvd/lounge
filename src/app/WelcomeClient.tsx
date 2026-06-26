@@ -118,7 +118,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
       <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Image src="/custom-logo-login.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain" priority />
+            <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain dark:brightness-200" priority />
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
             {navItems.map(item => (
@@ -176,9 +176,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           </div>
 
           <div className="container mx-auto px-6 py-24 md:py-32 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm font-bold text-sm mb-8 shadow-sm border border-border/50 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ color: primaryColor }}>
-              <Star className="w-4 h-4 fill-current" /> Bem-vindo à sua nova casa
-            </div>
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-[1.05] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
               {settings?.title || `Bem-vindo à ${churchName}`}
             </h1>
@@ -416,6 +413,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               </div>
             </div>
           </div>
+        </AnimatedSection>
+
         {/* NOSSAS UNIDADES & MAPA */}
         <AnimatedSection className="py-24 bg-background">
           <div className="container mx-auto px-6 max-w-5xl">
@@ -558,9 +557,9 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         <div className="container mx-auto px-6 py-16">
           <div className="grid md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2">
-            <Image src="/custom-logo-login.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain" priority />
-          </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain dark:brightness-200" priority />
+              </div>
               <p className="text-muted-foreground max-w-sm leading-relaxed mb-6">Uma igreja apaixonada por Jesus e focada em amar as pessoas. Seja muito bem-vindo à nossa família.</p>
               <div className="flex items-center gap-3">
                 {settings?.whatsappGroupUrl && (
