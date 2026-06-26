@@ -90,11 +90,10 @@ export default function SobreClient({ globalSettings, settings }: any) {
             Nossa História e Essência
           </span>
           <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-            A Igreja do Futuro.
+            Lounge Millenium.
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-            Conectar com Deus, despertar potenciais e transformar realidades. 
-            Uma igreja urbana, contextualizada em sua cultura e conectada com a nossa geração.
+            O ministério de jovens da Igreja Millenium. Uma comunidade urbana, contextualizada em sua cultura e conectada com a nossa geração.
           </p>
         </div>
       </section>
@@ -128,7 +127,7 @@ export default function SobreClient({ globalSettings, settings }: any) {
             <TimelineItem 
               year="15 de Abril de 2017" 
               title="A Fundação" 
-              text="A primeira reunião pública aconteceu no dia 1º de janeiro. Mas foi em 15 de abril que a Millenium foi organizada oficialmente por 40 membros fundadores. Nasceu o desejo de ser uma igreja 'fora das quatro paredes'." 
+              text="A primeira reunião pública aconteceu no dia 1º de janeiro. Mas foi em 15 de abril que a Millenium foi organizada oficialmente por 40 membros fundadores. Nasceu o desejo de ser uma comunidade 'fora das quatro paredes'." 
               align="left" 
               color="#ec4899" 
             />
@@ -149,7 +148,7 @@ export default function SobreClient({ globalSettings, settings }: any) {
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">A Geração Millenium</h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Decidimos chamar a igreja de Millenium porque a Geração Y (1980 - 2000) representará 75% da força de trabalho. Queremos ser a resposta de Deus e a igreja preferida dessa geração.
+              Decidimos chamar o projeto de Millenium porque a Geração Y (1980 - 2000) representará 75% da força de trabalho. Queremos ser a resposta de Deus e a comunidade preferida dessa geração.
             </p>
           </div>
 
@@ -200,7 +199,7 @@ export default function SobreClient({ globalSettings, settings }: any) {
                <div className="absolute bottom-0 left-0 w-full h-2" style={{ backgroundColor: primaryColor }} />
                <h3 className="text-lg font-bold text-muted-foreground uppercase tracking-widest mb-4">A Visão 2050</h3>
                <p className="text-3xl md:text-4xl font-extrabold leading-tight mb-8">
-                 Ser reconhecida como uma das Igrejas mais relevantes da cidade, que atende com qualidade todas as gerações, mas é a Igreja preferida da geração Millenium.
+                 Ser reconhecida como uma das Igrejas mais relevantes da cidade, que atende com qualidade todas as gerações, mas é a comunidade preferida da geração Millenium.
                </p>
                <div className="text-left bg-background/50 backdrop-blur-md p-8 rounded-3xl border border-border/50 italic text-muted-foreground">
                  "A Millenium que eu vejo é viva, cheia do Espírito Santo, atuante, influenciadora, santa, bonita e contextualizada no tempo e na cultura. É uma embaixada do Reino de Deus no mundo."
@@ -222,9 +221,9 @@ export default function SobreClient({ globalSettings, settings }: any) {
           <div className="grid md:grid-cols-2 gap-8">
             {[
               { icon: BookOpen, title: 'Vida no Secreto', desc: 'Intimidade com Deus. Oração, jejum e leitura da Palavra. Nada é mais importante do que estar na Presença.' },
-              { icon: Users, title: 'Vida Comunitária', desc: 'No templo e nas casas. A Igreja é o Corpo. Esperamos relacionamento verdadeiro no dia a dia e comunhão nos Happy Hours (HHs).' },
+              { icon: Users, title: 'Vida Comunitária', desc: 'No templo e nas casas. O Ministério é o Corpo. Esperamos relacionamento verdadeiro no dia a dia e comunhão nos Happy Hours (HHs).' },
               { icon: CloudLightning, title: 'Vida de Testemunho', desc: 'Não abrimos mão de uma vida sobrenatural em AMOR e PODER. O sobrenatural deve ser o nosso natural.' },
-              { icon: HandHeart, title: 'Vida de Generosidade', desc: 'Amamos e por isso doamos. Sustentamos a igreja, a obra missionária e os mais necessitados com o nosso melhor.' },
+              { icon: HandHeart, title: 'Vida de Generosidade', desc: 'Amamos e por isso doamos. Sustentamos a visão, a obra missionária e os mais necessitados com o nosso melhor.' },
             ].map((v, i) => (
               <div key={i} className="p-10 rounded-[2.5rem] bg-background/5 border border-white/10 hover:bg-background/10 transition-colors group">
                 <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6">

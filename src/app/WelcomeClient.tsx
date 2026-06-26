@@ -30,7 +30,7 @@ const TYPE_COLORS: Record<string, string> = { CULTO: '#8b5cf6', CELULA: '#10b981
 
 export default function WelcomeClient({ settings, globalSettings, upcomingEvents, hhs = [] }: { settings: any, globalSettings: any, upcomingEvents?: any[], hhs?: any[] }) {
   const primaryColor = globalSettings?.primaryColor || '#6366f1'
-  const churchName = globalSettings?.defaultChurchName || 'Nossa Igreja'
+  const churchName = globalSettings?.defaultChurchName || 'Lounge'
 
   const [formData, setFormData] = useState({ name: '', phone: '', birthDate: '', sourceType: '', sourceFriend: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -113,7 +113,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
   const navItems = [
     { label: 'Início', href: '#inicio' },
-    { label: 'Nossa Igreja', href: '#dna' },
+    { label: 'Nossa Essência', href: '#dna' },
     { label: 'Células', href: '#celulas' },
     { label: 'Próximos Eventos', href: '#eventos' },
     { label: 'Conectar', href: '#cadastro' },
@@ -202,7 +202,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
             <div className="container mx-auto px-4 md:px-6 py-16 md:py-32 relative z-10 text-center">
               <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-4 md:mb-6 leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                {settings?.title || `Bem-vindo à ${churchName}`}
+                {settings?.title || `Bem-vindo ao ${churchName}`}
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
               {settings?.heroSubtitle || 'Estamos felizes em ter você aqui. Uma comunidade que ama, acolhe e transforma vidas.'}
@@ -341,7 +341,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               <div>
                 <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Comunidade</span>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Onde nos encontramos</h2>
-                <p className="text-muted-foreground text-lg">A igreja acontece nas casas e nas celebrações.</p>
+                <p className="text-muted-foreground text-lg">Nossa comunidade acontece nas casas e nas celebrações.</p>
               </div>
               {settings?.hhsInfo && (
                 <div className="p-6 bg-card border border-border/50 rounded-3xl shadow-sm">
@@ -606,7 +606,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               <div className="flex items-center gap-2 mb-4">
                 <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain dark:brightness-200" priority />
               </div>
-              <p className="text-muted-foreground max-w-sm leading-relaxed mb-6">Uma igreja apaixonada por Jesus e focada em amar as pessoas. Seja muito bem-vindo à nossa família.</p>
+              <p className="text-muted-foreground max-w-sm leading-relaxed mb-6">Um ministério apaixonado por Jesus e focado em amar as pessoas. Seja muito bem-vindo à nossa família.</p>
               <div className="flex items-center gap-3">
                 {settings?.whatsappGroupUrl && (
                   <a href={settings.whatsappGroupUrl} target="_blank" className="w-10 h-10 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all hover:scale-110">
