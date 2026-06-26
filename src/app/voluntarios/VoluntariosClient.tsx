@@ -247,34 +247,36 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                           })
 
                           return positionsArray.map((position, idx) => {
-                            return (
-                              <tr key={position} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                <td className="py-4 px-4 border-2 border-[#1e3a8a] bg-[#1e3a8a] text-white font-bold text-lg align-middle">
-                                  {position}
-                                </td>
-                                {ministryEvents.map((event) => {
-                                  // Find members scheduled for this event
-                                  const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
-                                  
-                                  // Filter members who have this position
-                                  const scheduledMembersForPosition = slots.filter((slot: any) => {
-                                    const minMember = selectedMinistry?.members?.find((mm: any) => mm.memberId === slot.member.id)
-                                    if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true // Show all if no positions defined
-                                    if (!minMember || !minMember.position) return false
-                                    const memberPositions = minMember.position.split(',').map((p: string) => p.trim())
-                                    return memberPositions.includes(position)
-                                  })
+                            // Find the max number of people scheduled for this position across all events
+                            const scheduledPerEvent = ministryEvents.map(event => {
+                              const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
+                              return slots.filter((slot: any) => {
+                                const minMember = selectedMinistry?.members?.find((mm: any) => mm.memberId === slot.member.id)
+                                if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true
+                                if (!minMember || !minMember.position) return false
+                                const memberPositions = minMember.position.split(',').map((p: string) => p.trim())
+                                return memberPositions.includes(position)
+                              })
+                            })
+
+                            const maxRows = Math.max(1, ...scheduledPerEvent.map(arr => arr.length))
+
+                            // We need to render `maxRows` number of <tr> elements
+                            return Array.from({ length: maxRows }).map((_, rowIndex) => (
+                              <tr key={`${position}-${rowIndex}`} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                {rowIndex === 0 && (
+                                  <td rowSpan={maxRows} className="py-2 px-4 border-2 border-[#1e3a8a] bg-[#1e3a8a] text-white font-bold text-lg align-middle">
+                                    {position}
+                                  </td>
+                                )}
+                                {ministryEvents.map((event, eventIdx) => {
+                                  const membersForThisEvent = scheduledPerEvent[eventIdx]
+                                  const memberSlot = membersForThisEvent[rowIndex]
 
                                   return (
-                                    <td key={event.id} className="py-2 px-2 border-2 border-[#1e3a8a] align-top">
-                                      {scheduledMembersForPosition.length > 0 ? (
-                                        <div className="flex flex-col gap-1">
-                                          {scheduledMembersForPosition.map((slot: any) => (
-                                            <div key={slot.id} className="font-semibold text-base py-1 border-b border-gray-200 last:border-0">
-                                              {slot.member.name.split(' ')[0]} {slot.member.name.split(' ').length > 1 ? slot.member.name.split(' ').pop()?.charAt(0) + '.' : ''}
-                                            </div>
-                                          ))}
-                                        </div>
+                                    <td key={`${event.id}-${rowIndex}`} className="py-2 px-2 border-2 border-[#1e3a8a] font-semibold text-base align-middle h-12">
+                                      {memberSlot ? (
+                                        `${memberSlot.member.name.split(' ')[0]} ${memberSlot.member.name.split(' ').length > 1 ? memberSlot.member.name.split(' ').pop()?.charAt(0) + '.' : ''}`
                                       ) : (
                                         <span className="text-gray-400 font-bold">-</span>
                                       )}
@@ -282,7 +284,7 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                                   )
                                 })}
                               </tr>
-                            )
+                            ))
                           })
                         })()}
                       </tbody>
