@@ -71,20 +71,32 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
     else toast.error(res.error || 'Erro')
   }
 
-  // Obter todas as funções únicas do ministério
-  const allPositions = new Set<string>()
+  const LOUVOR_MAPPING: Record<string, string> = {
+    'Ministro(a) de Louvor': 'Vocal', 'Vocalista': 'Vocal', 'Back-vocal': 'Vocal', 'Vocal': 'Vocal',
+    'Tecladista': 'Teclado', 'Teclado': 'Teclado', 'Teclado 1': 'Teclado', 'Teclado 2': 'Teclado',
+    'Violinista': 'Violão', 'Violonista': 'Violão', 'Violão': 'Violão',
+    'Guitarrista': 'Guitarra', 'Guitarra': 'Guitarra', 'Guitarra 1': 'Guitarra', 'Guitarra 2': 'Guitarra',
+    'Baixista': 'Baixo', 'Baixo': 'Baixo',
+    'Baterista': 'Bateria', 'Bateria': 'Bateria'
+  }
+  const STANDARD_ORDER = ['Vocal', 'Teclado', 'Violão', 'Guitarra', 'Baixo', 'Bateria']
+
+  // Obter todas as funções únicas do ministério, agrupadas
+  const allCategories = new Set<string>()
   ministryMembers.forEach((mm: any) => {
     if (mm.position) {
-      mm.position.split(',').forEach((p: string) => allPositions.add(p.trim()))
+      mm.position.split(',').forEach((p: string) => {
+        const trimP = p.trim()
+        allCategories.add(LOUVOR_MAPPING[trimP] || trimP)
+      })
     }
   })
-  let positionsArray = Array.from(allPositions).filter(Boolean)
-  if (positionsArray.length === 0) positionsArray = ['Equipe'] // Fallback if no positions
+  let categoriesArray = Array.from(allCategories).filter(Boolean)
+  if (categoriesArray.length === 0) categoriesArray = ['Equipe'] // Fallback if no positions
 
-  const standardOrder = ['Vocal', 'Teclado', 'Teclado 1', 'Teclado 2', 'Violão', 'Guitarra', 'Guitarra 1', 'Guitarra 2', 'Baixo', 'Bateria']
-  positionsArray.sort((a, b) => {
-    const idxA = standardOrder.indexOf(a)
-    const idxB = standardOrder.indexOf(b)
+  categoriesArray.sort((a, b) => {
+    const idxA = STANDARD_ORDER.indexOf(a)
+    const idxB = STANDARD_ORDER.indexOf(b)
     if (idxA !== -1 && idxB !== -1) return idxA - idxB
     if (idxA !== -1) return -1
     if (idxB !== -1) return 1
@@ -169,42 +181,53 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
               </tr>
             </thead>
             <tbody>
-              {positionsArray.map((position, pIdx) => {
-                // Find all members that have this position
-                const membersWithPosition = ministryMembers.filter((mm: any) => {
-                  if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true
+              {categoriesArray.map((category, pIdx) => {
+                // Find all members that have this mapped category
+                const membersWithCategory = ministryMembers.filter((mm: any) => {
+                  if (categoriesArray.length === 1 && categoriesArray[0] === 'Equipe') return true
                   if (!mm.position) return false
-                  const pArr = mm.position.split(',').map((p: string) => p.trim())
-                  return pArr.includes(position)
+                  const memberCategories = mm.position.split(',').map((p: string) => LOUVOR_MAPPING[p.trim()] || p.trim())
+                  return memberCategories.includes(category)
                 })
 
-                if (membersWithPosition.length === 0) return null
+                if (membersWithCategory.length === 0) return null
+
+                // Sort members so Ministers are first
+                membersWithCategory.sort((a: any, b: any) => {
+                  const aIsMin = (a.position || '').includes('Ministro')
+                  const bIsMin = (b.position || '').includes('Ministro')
+                  if (aIsMin && !bIsMin) return -1
+                  if (!aIsMin && bIsMin) return 1
+                  return 0
+                })
 
                 return (
-                  <React.Fragment key={position}>
+                  <React.Fragment key={category}>
                     {/* Position Header Row */}
                     <tr>
                       <td colSpan={events.length + 1} className="py-2 px-4 font-bold text-sm bg-muted/40 border-y border-border" style={{ color: ministry.color }}>
-                        {position}
+                        {category}
                       </td>
                     </tr>
                     
                     {/* Member Rows for this position */}
-                    {membersWithPosition.map((mm: any, mIdx: number) => {
-                      const isLastInPosition = mIdx === membersWithPosition.length - 1
+                    {membersWithCategory.map((mm: any, mIdx: number) => {
+                      const isLastInPosition = mIdx === membersWithCategory.length - 1
+                      const isMinister = (mm.position || '').includes('Ministro')
                       return (
-                        <tr key={`${position}-${mm.id}`} className="hover:bg-muted/10 transition-colors">
+                        <tr key={`${category}-${mm.id}`} className="hover:bg-muted/10 transition-colors">
                           <td className={`py-2 px-4 border-r border-border bg-background sticky left-0 z-10 shadow-[1px_0_0_0_var(--border)] ${!isLastInPosition ? 'border-b' : ''}`}>
                             <div className="flex items-center gap-2">
                               <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: ministry.color }}>
                                 {mm.member.name.charAt(0)}
                               </div>
-                              <span className="text-sm font-semibold truncate" title={mm.member.name}>{mm.member.name}</span>
+                              <span className={`text-sm truncate ${isMinister ? 'font-black text-foreground' : 'font-semibold'}`} title={mm.member.name}>{mm.member.name}</span>
                             </div>
                           </td>
                           {events.map((event: any) => {
-                            // Find if this specific member is scheduled for this specific position in this event
-                            const slot = event.scheduleSlots?.find((s: any) => s.memberId === mm.memberId && s.position === position)
+                            // Encontra as slots marcadas
+                            const slots = event.scheduleSlots?.filter((s: any) => s.memberId === mm.memberId) || []
+                            const slot = slots.find((s: any) => s.position ? (LOUVOR_MAPPING[s.position] || s.position) === category : true)
                             const isScheduled = !!slot
                             const isPending = isScheduled && slot.status === 'PENDENTE'
                             const isConfirmed = isScheduled && slot.status === 'CONFIRMADO'
@@ -214,7 +237,7 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
                               <td key={`${event.id}-${mm.id}`} className={`p-1.5 text-center ${!isLastInPosition ? 'border-b border-border' : ''}`}>
                                 <button 
                                   disabled={isSaving}
-                                  onClick={() => handleToggleScale(event.id, mm.memberId, position, isScheduled, slot?.id)}
+                                  onClick={() => handleToggleScale(event.id, mm.memberId, category, isScheduled, slot?.id)}
                                   className={`w-full h-10 rounded-xl flex items-center justify-center transition-all ${
                                     isScheduled 
                                       ? isConfirmed 

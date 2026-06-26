@@ -263,62 +263,106 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
                       </thead>
                       <tbody className="text-black bg-white">
                         {(() => {
-                          // Extract all unique positions from the members of this ministry
-                          const allPositions = new Set<string>()
+                          const LOUVOR_MAPPING: Record<string, string> = {
+                            'Ministro(a) de Louvor': 'Vocal',
+                            'Vocalista': 'Vocal',
+                            'Back-vocal': 'Vocal',
+                            'Vocal': 'Vocal',
+                            'Tecladista': 'Teclado',
+                            'Teclado': 'Teclado',
+                            'Teclado 1': 'Teclado',
+                            'Teclado 2': 'Teclado',
+                            'Violinista': 'Violão',
+                            'Violonista': 'Violão',
+                            'Violão': 'Violão',
+                            'Guitarrista': 'Guitarra',
+                            'Guitarra': 'Guitarra',
+                            'Guitarra 1': 'Guitarra',
+                            'Guitarra 2': 'Guitarra',
+                            'Baixista': 'Baixo',
+                            'Baixo': 'Baixo',
+                            'Baterista': 'Bateria',
+                            'Bateria': 'Bateria'
+                          }
+                          const STANDARD_ORDER = ['Vocal', 'Teclado', 'Violão', 'Guitarra', 'Baixo', 'Bateria']
+
+                          // Extract all unique categories from the members of this ministry
+                          const allCategories = new Set<string>()
                           selectedMinistry?.members?.forEach((mm: any) => {
                             if (mm.position) {
-                              mm.position.split(',').forEach((p: string) => allPositions.add(p.trim()))
+                              mm.position.split(',').forEach((p: string) => {
+                                const trimP = p.trim()
+                                allCategories.add(LOUVOR_MAPPING[trimP] || trimP)
+                              })
                             }
                           })
                           
-                          let positionsArray = Array.from(allPositions).filter(Boolean)
-                          if (positionsArray.length === 0) positionsArray = ['Equipe'] // Fallback if no positions
+                          let categoriesArray = Array.from(allCategories).filter(Boolean)
+                          if (categoriesArray.length === 0) categoriesArray = ['Equipe'] // Fallback if no positions
 
-                          // Order positions based on standard Louvor order if applicable
-                          const standardOrder = ['Vocal', 'Teclado', 'Teclado 1', 'Teclado 2', 'Violão', 'Guitarra', 'Guitarra 1', 'Guitarra 2', 'Baixo', 'Bateria']
-                          positionsArray.sort((a, b) => {
-                            const idxA = standardOrder.indexOf(a)
-                            const idxB = standardOrder.indexOf(b)
+                          // Order categories based on standard Louvor order if applicable
+                          categoriesArray.sort((a, b) => {
+                            const idxA = STANDARD_ORDER.indexOf(a)
+                            const idxB = STANDARD_ORDER.indexOf(b)
                             if (idxA !== -1 && idxB !== -1) return idxA - idxB
                             if (idxA !== -1) return -1
                             if (idxB !== -1) return 1
                             return a.localeCompare(b)
                           })
 
-                          return positionsArray.map((position, idx) => {
-                            // Find the max number of people scheduled for this position across all events
+                          return categoriesArray.map((category, idx) => {
+                            // Find the max number of people scheduled for this category across all events
                             const scheduledPerEvent = ministryEvents.map(event => {
                               const slots = event.scheduleSlots.filter((s: any) => s.ministryId === selectedMinistryId)
-                              return slots.filter((slot: any) => {
-                                if (positionsArray.length === 1 && positionsArray[0] === 'Equipe') return true
+                              
+                              // Sort slots within the same category so that 'Ministro(a) de Louvor' appears first
+                              const matchingSlots = slots.filter((slot: any) => {
+                                if (categoriesArray.length === 1 && categoriesArray[0] === 'Equipe') return true
                                 
                                 // Use explicit slot position if available
-                                if (slot.position) return slot.position === position
+                                if (slot.position) return (LOUVOR_MAPPING[slot.position] || slot.position) === category
                                 
                                 // Fallback for old data
                                 const minMember = selectedMinistry?.members?.find((mm: any) => mm.memberId === slot.member.id)
                                 if (!minMember || !minMember.position) return false
-                                const memberPositions = minMember.position.split(',').map((p: string) => p.trim())
-                                return memberPositions.includes(position)
+                                const memberCategories = minMember.position.split(',').map((p: string) => LOUVOR_MAPPING[p.trim()] || p.trim())
+                                return memberCategories.includes(category)
                               })
-                            })
 
+                              matchingSlots.sort((a: any, b: any) => {
+                                const aPos = a.position || selectedMinistry?.members?.find((mm: any) => mm.memberId === a.member.id)?.position || ''
+                                const bPos = b.position || selectedMinistry?.members?.find((mm: any) => mm.memberId === b.member.id)?.position || ''
+                                const aIsMin = aPos.includes('Ministro')
+                                const bIsMin = bPos.includes('Ministro')
+                                if (aIsMin && !bIsMin) return -1
+                                if (!aIsMin && bIsMin) return 1
+                                return 0
+                              })
+
+                              return matchingSlots
+                            })
                             const maxRows = Math.max(1, ...scheduledPerEvent.map(arr => arr.length))
 
                             // We need to render `maxRows` number of <tr> elements
                             return Array.from({ length: maxRows }).map((_, rowIndex) => (
-                              <tr key={`${position}-${rowIndex}`} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <tr key={`${category}-${rowIndex}`} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                 {rowIndex === 0 && (
                                   <td rowSpan={maxRows} className="py-2 px-4 border-2 border-[#1e3a8a] bg-[#1e3a8a] text-white font-bold text-lg align-middle">
-                                    {position}
+                                    {category}
                                   </td>
                                 )}
                                 {ministryEvents.map((event, eventIdx) => {
                                   const membersForThisEvent = scheduledPerEvent[eventIdx]
                                   const memberSlot = membersForThisEvent[rowIndex]
+                                  
+                                  let isMinister = false
+                                  if (memberSlot) {
+                                    const pos = memberSlot.position || selectedMinistry?.members?.find((mm: any) => mm.memberId === memberSlot.member.id)?.position || ''
+                                    isMinister = pos.includes('Ministro')
+                                  }
 
                                   return (
-                                    <td key={`${event.id}-${rowIndex}`} className="py-2 px-2 border-2 border-[#1e3a8a] font-semibold text-base align-middle h-12">
+                                    <td key={`${event.id}-${rowIndex}`} className={`py-2 px-2 border-2 border-[#1e3a8a] text-base align-middle h-12 ${isMinister ? 'font-black' : 'font-semibold'}`}>
                                       {memberSlot ? (
                                         `${memberSlot.member.name.split(' ')[0]} ${memberSlot.member.name.split(' ').length > 1 ? memberSlot.member.name.split(' ').pop()?.charAt(0) + '.' : ''}`
                                       ) : (
