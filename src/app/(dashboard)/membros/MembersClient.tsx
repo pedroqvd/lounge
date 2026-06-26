@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud, User as UserIcon, Phone, Activity, Users, LayoutGrid, AlignLeft, Trash, RotateCcw, Clock, ArrowRight, UserPlus } from 'lucide-react'
-import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus, restoreMember, hardDeleteMember } from '@/app/actions/members'
+import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus, restoreMember, hardDeleteMember, getDeletedMembers } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
 import { executeImport } from '@/app/actions/importData'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -311,8 +311,11 @@ export default function MembersClient({ initialMembers, groups, templates, userR
   useEffect(() => {
     if (viewMode === 'trash' && userRole === 'ADMIN') {
       setIsLoadingTrash(true)
-      import('@/app/actions/members').then(m => m.getDeletedMembers()).then(data => {
-        setDeletedMembers(data)
+      getDeletedMembers().then(data => {
+        setDeletedMembers(data || [])
+        setIsLoadingTrash(false)
+      }).catch(err => {
+        setDeletedMembers([])
         setIsLoadingTrash(false)
       })
     }
@@ -375,7 +378,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
       
       <div className="flex items-center gap-2 p-1 bg-card border border-border rounded-xl w-fit mb-4">
         <button onClick={() => setViewMode('table')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'table' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><AlignLeft className="w-4 h-4"/> Tabela</button>
-        <button onClick={() => setViewMode('pipeline')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'pipeline' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><LayoutGrid className="w-4 h-4"/> Funil CRM</button>
+        <button onClick={() => setViewMode('pipeline')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'pipeline' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><LayoutGrid className="w-4 h-4"/> Jornada</button>
         {userRole === 'ADMIN' && <button onClick={() => setViewMode('trash')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${viewMode === 'trash' ? 'bg-destructive text-destructive-foreground shadow' : 'text-muted-foreground hover:bg-muted'}`}><Trash className="w-4 h-4"/> Lixeira</button>}
       </div>
 
