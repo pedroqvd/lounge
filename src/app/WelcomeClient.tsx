@@ -168,29 +168,20 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
       <main className="flex-1">
 
-        {/* HERO & DNA CONTAINER (Video Background spans both mas fica sticky para não distorcer) */}
-        <div className="relative overflow-hidden">
-          {/* Shared Video Background */}
-          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-            <div className="sticky top-0 w-full h-screen">
-              <div 
-                className="absolute inset-0 w-full h-full opacity-60 dark:opacity-70"
-                dangerouslySetInnerHTML={{ __html: `
-                  <video 
-                    src="/bg-hero.mp4" 
-                    autoplay 
-                    loop 
-                    muted 
-                    playsinline 
-                    style="width: 100%; height: 100%; object-fit: cover;"
-                  ></video>
-                `}} 
-              />
-              {/* Top Fade (Hero top) */}
-              <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent" />
-              {/* Bottom Fade (DNA bottom) */}
-              <div className="absolute inset-x-0 bottom-0 h-[40vh] bg-gradient-to-t from-transparent via-background/90 to-background" />
-            </div>
+        {/* HERO & DNA CONTAINER */}
+        <div className="relative">
+          {/* Video Background - fixed to viewport, behind everything */}
+          <div className="fixed inset-0 w-full h-full z-0 pointer-events-none">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              preload="auto"
+              className="w-full h-full object-cover opacity-40 dark:opacity-50"
+            >
+              <source src="/bg-hero.mp4" type="video/mp4" />
+            </video>
           </div>
 
           {/* Background color accents (shared) */}
@@ -297,6 +288,12 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           </AnimatedSection>
         )}
         </div>
+        
+        {/* Solid background cover - hides the fixed video for sections below */}
+        <div className="relative z-10 bg-background">
+        
+        {/* Smooth transition from video to solid background */}
+        <div className="h-32 bg-gradient-to-b from-transparent to-background -mt-32 relative z-10" />
         {/* UPCOMING EVENTS */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <AnimatedSection id="eventos" className="bg-secondary/20 border-y border-border/30">
@@ -686,6 +683,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </a>
           </div>
         </div>
+        </div> {/* End bg-background cover */}
       </footer>
     </div>
   )
