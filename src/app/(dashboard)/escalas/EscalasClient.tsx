@@ -44,8 +44,7 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
   const [memberSearch, setMemberSearch] = useState('')
   const [selectedMemberId, setSelectedMemberId] = useState('')
   const [memberRole, setMemberRole] = useState<'VOLUNTARIO' | 'LIDER_MINISTERIO'>('VOLUNTARIO')
-  const [memberPosition, setMemberPosition] = useState('')
-  const [memberInstrument, setMemberInstrument] = useState('')
+  const [memberPositions, setMemberPositions] = useState<string[]>([])
 
   const [newForm, setNewForm] = useState({ name: '', description: '', color: '#6366f1', icon: 'music' })
 
@@ -77,8 +76,7 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
     setSelectedMinistry(ministry)
     setSelectedMemberId('')
     setMemberRole('VOLUNTARIO')
-    setMemberPosition('')
-    setMemberInstrument('')
+    setMemberPositions([])
     setIsAddMemberOpen(true)
   }
 
@@ -86,7 +84,8 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
     e.preventDefault()
     if (!selectedMinistry || !selectedMemberId) return
     setIsSaving(true)
-    const res = await addMemberToMinistry(selectedMinistry.id, selectedMemberId, memberRole, memberInstrument || undefined, memberPosition || undefined)
+    const posString = memberPositions.length > 0 ? memberPositions.join(', ') : undefined
+    const res = await addMemberToMinistry(selectedMinistry.id, selectedMemberId, memberRole, undefined, posString)
     if (res.success) { toast.success('Voluntário adicionado!'); setIsAddMemberOpen(false); window.location.reload() }
     else toast.error(res.error || 'Erro')
     setIsSaving(false)
@@ -273,18 +272,24 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
                 </select>
               </div>
               {positionOptions.length > 0 && (
-                <div className="space-y-1">
-                  <label className="text-sm font-bold">Posição / Instrumento</label>
-                  <select value={memberPosition} onChange={e => setMemberPosition(e.target.value)} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    <option value="">Selecione...</option>
-                    {positionOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                </div>
-              )}
-              {(!positionOptions.length || selectedMinistry?.name === 'Louvor') && (
-                <div className="space-y-1">
-                  <label className="text-sm font-bold">Instrumento (opcional)</label>
-                  <input value={memberInstrument} onChange={e => setMemberInstrument(e.target.value)} placeholder="Ex: Violão, Bateria..." className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                <div className="space-y-2">
+                  <label className="text-sm font-bold">Funções (Selecione uma ou mais)</label>
+                  <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                    {positionOptions.map(p => (
+                      <label key={p} className="flex items-center gap-2 bg-muted/50 px-3 py-2 rounded-xl cursor-pointer hover:bg-muted transition-colors border border-transparent has-[:checked]:border-primary/50 has-[:checked]:bg-primary/10">
+                        <input
+                          type="checkbox"
+                          checked={memberPositions.includes(p)}
+                          onChange={(e) => {
+                            if (e.target.checked) setMemberPositions(prev => [...prev, p]);
+                            else setMemberPositions(prev => prev.filter(x => x !== p));
+                          }}
+                          className="rounded border-input text-primary focus:ring-primary w-4 h-4 accent-primary"
+                        />
+                        <span className="text-sm font-medium">{p}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
               <div className="flex gap-3 pt-2 border-t border-border">
