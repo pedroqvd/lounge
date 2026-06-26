@@ -78,11 +78,13 @@ model Member {
   deletedAt    DateTime?
 
   // Relations
-  group       Group?           @relation(fields: [groupId], references: [id])
-  histories   ContactHistory[]
-  attendances Attendance[]
-  audits      MemberAudit[]
-  tasks       Task[]
+  group         Group?           @relation(fields: [groupId], references: [id])
+  histories     ContactHistory[]
+  attendances   Attendance[]
+  audits        MemberAudit[]
+  tasks         Task[]
+  ministries    MinistryMember[]
+  scheduleSlots ScheduleSlot[]
 }
 
 model MemberAudit {
@@ -108,7 +110,8 @@ model Event {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  attendances Attendance[]
+  attendances   Attendance[]
+  scheduleSlots ScheduleSlot[]
 }
 
 model Attendance {
@@ -197,12 +200,73 @@ model Task {
 model HubSettings {
   id               String   @id @default("global")
   title            String   @default("Bem-vindo!")
-  heroSubtitle     String   @default("Estamos muito felizes em ter vocÃª aqui. Queremos te conhecer melhor!")
-  mission          String   @default("Preencha a MissÃ£o da Igreja nas configuraÃ§Ãµes.") @db.Text
-  vision           String   @default("Preencha a VisÃ£o da Igreja nas configuraÃ§Ãµes.") @db.Text
-  values           String   @default("Preencha os Valores nas configuraÃ§Ãµes.") @db.Text
-  hhsInfo          String   @default("InformaÃ§Ãµes sobre as CÃ©lulas / HHs.") @db.Text
+  heroSubtitle     String   @default("Estamos muito felizes em ter voce aqui.")
+  mission          String   @default("Preencha a Missao da Igreja nas configuracoes.") @db.Text
+  vision           String   @default("Preencha a Visao da Igreja nas configuracoes.") @db.Text
+  values           String   @default("Preencha os Valores nas configuracoes.") @db.Text
+  hhsInfo          String   @default("Informacoes sobre as Celulas / HHs.") @db.Text
   whatsappGroupUrl String?
   instagramUrl     String?
+  cultoSchedule    String?
+  celulaSchedule   String?
+  address          String?
+  mapsEmbedUrl     String?
+  galleryUrls      String[] @default([])
+  youtubeUrl       String?
   updatedAt        DateTime @updatedAt
+}
+
+enum MinistryRole {
+  VOLUNTARIO
+  LIDER_MINISTERIO
+}
+
+enum SlotStatus {
+  PENDENTE
+  CONFIRMADO
+  RECUSADO
+}
+
+model Ministry {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color       String   @default("#6366f1")
+  icon        String   @default("music")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members   MinistryMember[]
+  schedules ScheduleSlot[]
+}
+
+model MinistryMember {
+  id         String       @id @default(uuid())
+  ministryId String
+  memberId   String
+  role       MinistryRole @default(VOLUNTARIO)
+  instrument String?
+  position   String?
+  createdAt  DateTime     @default(now())
+
+  ministry Ministry @relation(fields: [ministryId], references: [id], onDelete: Cascade)
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([ministryId, memberId])
+}
+
+model ScheduleSlot {
+  id         String     @id @default(uuid())
+  ministryId String
+  eventId    String
+  memberId   String
+  status     SlotStatus @default(PENDENTE)
+  notes      String?
+  createdAt  DateTime   @default(now())
+
+  ministry Ministry @relation(fields: [ministryId], references: [id], onDelete: Cascade)
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([ministryId, eventId, memberId])
 }

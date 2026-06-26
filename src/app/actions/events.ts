@@ -76,6 +76,34 @@ export async function deleteEvent(id: string) {
   }
 }
 
+
+export async function updateEvent(id: string, data: {
+  title: string
+  date: string
+  type: string
+  time?: string
+  location?: string
+  description?: string
+}) {
+  try {
+    await prisma.event.update({
+      where: { id },
+      data: {
+        title: data.title,
+        date: new Date(data.date),
+        type: data.type,
+        time: data.time || null,
+        location: data.location || null,
+        description: data.description || null,
+      }
+    })
+    revalidatePath('/calendario')
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
 export async function updateAttendance(eventId: string, memberId: string, isPresent: boolean) {
   try {
     await prisma.attendance.upsert({
