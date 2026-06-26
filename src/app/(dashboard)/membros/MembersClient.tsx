@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud } from 'lucide-react'
+import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud, User as UserIcon, Phone, Activity, Users } from 'lucide-react'
 import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
 import { executeImport } from '@/app/actions/importData'
 import * as Dialog from '@radix-ui/react-dialog'
+import * as Avatar from '@radix-ui/react-avatar'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { MoreVertical } from 'lucide-react'
 import Link from 'next/link'
 
 type Member = any 
