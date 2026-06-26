@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-card border-r border-border shadow-xl lg:shadow-none transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static ${sidebarWidth} ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className={`flex items-center h-20 border-b border-border transition-all duration-300 ${sidebarMinimized ? 'justify-center px-0' : 'justify-between px-6'}`}>
-          <Link href="/" className="hover:scale-105 transition-transform" onClick={() => setSidebarOpen(false)}>
+          <Link href="/painel" className="hover:scale-105 transition-transform" onClick={() => setSidebarOpen(false)}>
             <Logo minimized={sidebarMinimized} />
           </Link>
           {!sidebarMinimized && (
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="px-4">
             {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Visão Geral</p>}
             <div className="flex flex-col gap-1">
-              <NavItem href="/" icon={LayoutDashboard} label="Painel" isActive={pathname === '/'} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+              <NavItem href="/painel" icon={LayoutDashboard} label="Painel" isActive={pathname === '/'} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
             </div>
           </div>
 

@@ -174,7 +174,7 @@ export async function executeImport() {
   }
 
   revalidatePath('/membros')
-  revalidatePath('/')
+  revalidatePath('/painel')
   
   return { success: true, added, skipped }
 }

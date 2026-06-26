@@ -33,7 +33,7 @@ export async function createContactHistory(data: { memberId: string, templateId?
     })
     
     // Revalidate dashboard to update the 'Mensagens Enviadas' counter
-    revalidatePath('/')
+    revalidatePath('/painel')
     
     return { success: true }
   } catch (error: any) {

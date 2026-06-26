@@ -48,7 +48,7 @@ export async function updateSettings(data: { inactivityDays: number, defaultChur
       }
     })
     
-    revalidatePath('/')
+    revalidatePath('/painel')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -93,7 +93,7 @@ export async function updateHubSettings(data: any) {
         instagramUrl: data.instagramUrl
       }
     })
-    revalidatePath('/')
+    revalidatePath('/painel')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }

@@ -62,7 +62,7 @@ export async function seedMembers() {
     }
 
     revalidatePath('/membros')
-    revalidatePath('/')
+    revalidatePath('/painel')
     return { success: true, count }
   } catch (error: any) {
     console.error('Failed to seed:', error)
@@ -175,7 +175,7 @@ export async function createMember(data: { name: string, phone?: string, status:
     }
 
     revalidatePath('/membros')
-    revalidatePath('/')
+    revalidatePath('/painel')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -207,7 +207,7 @@ export async function updateMember(id: string, data: { name: string, phone?: str
     }
 
     revalidatePath('/membros')
-    revalidatePath('/')
+    revalidatePath('/painel')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -227,7 +227,7 @@ export async function deleteMember(id: string) {
       where: { id }
     })
     revalidatePath('/membros')
-    revalidatePath('/')
+    revalidatePath('/painel')
     return { success: true }
   } catch (error: any) {
     return { success: false, error: error.message }

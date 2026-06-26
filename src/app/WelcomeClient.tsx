@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { useState } from 'react'
-import { CheckCircle2, MessageCircle, Instagram, MapPin, Heart, Target, Users, Sparkles } from 'lucide-react'
+import { CheckCircle2, MessageCircle, Instagram, MapPin, Heart, Target, Users, Sparkles, Lock } from 'lucide-react'
 
 export default function WelcomeClient({ settings, globalSettings }: { settings: any, globalSettings: any }) {
   const primaryColor = globalSettings?.primaryColor || '#6366f1'
@@ -237,6 +237,8 @@ export default function WelcomeClient({ settings, globalSettings }: { settings: 
         </div>
       </div>
 
+
+      <a href="/acesso" className="absolute bottom-6 right-6 opacity-5 hover:opacity-50 transition-opacity"><Lock className="w-4 h-4" /></a>
     </div>
   )
 }
