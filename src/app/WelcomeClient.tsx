@@ -483,7 +483,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
                 <div className="w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-background ring-1 ring-border/50 relative">
                   <iframe 
-                    src={settings?.mapsEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3838.7494488346617!2d-47.90487442398555!3d-15.817140084824707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935a3b2b8c54db0b%3A0xc3b83c51ef67e2a4!2sIgreja%20Millenium!5e0!3m2!1spt-BR!2sbr!4v1719280000000!5m2!1spt-BR!2sbr"} 
+                    src={settings?.mapsEmbedUrl || "https://maps.google.com/maps?q=-15.8035088,-47.8956179&t=&z=17&ie=UTF8&iwloc=&output=embed"} 
                     width="100%" 
                     height="100%" 
                     style={{ border: 0 }} 
