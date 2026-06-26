@@ -40,7 +40,14 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
   const [mapTab, setMapTab] = useState<'SEDE' | 'HH'>('SEDE')
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const videoRef = useRef<HTMLVideoElement>(null)
+  
+  useEffect(() => {
+    setMounted(true)
+    if (videoRef.current) {
+      videoRef.current.play().catch(console.error)
+    }
+  }, [])
   const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://lounge.com'
 
 
@@ -166,13 +173,15 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           {/* Shared Video Background */}
           <div className="absolute inset-0 w-full h-full z-0">
             <video 
-              src="/bg-hero.mp4" 
+              ref={videoRef}
               autoPlay 
               loop 
               muted 
               playsInline 
               className="w-full h-full object-cover opacity-30 dark:opacity-40" 
-            />
+            >
+              <source src="/bg-hero.mp4" type="video/mp4" />
+            </video>
             {/* Top Fade (Hero top) */}
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent" />
             {/* Bottom Fade (DNA bottom) */}
