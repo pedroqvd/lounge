@@ -252,12 +252,9 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           </div>
         </section>
 
-        {/* Smooth transition from Hero video to DNA */}
-        <div className="relative h-32 -mt-32 z-20 bg-gradient-to-b from-transparent via-background/80 to-background pointer-events-none" />
-
         {/* DNA SECTION */}
         {(settings?.mission || settings?.vision || settings?.values) && (
-          <AnimatedSection id="dna" className="container mx-auto px-4 md:px-6 py-16 md:py-32 relative z-10 bg-background">
+          <AnimatedSection id="dna" className="container mx-auto px-4 md:px-6 py-16 md:py-32 relative z-10">
             <div className="text-center mb-12 md:mb-20">
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Nossa Essência</span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">O que nos move</h2>
