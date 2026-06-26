@@ -41,14 +41,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
         <div className="p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold tracking-tight mb-2">
-              <span className="text-foreground">LO</span>
-              <span className="text-primary bg-primary/10 px-1 rounded">U</span>
-              <span className="text-foreground">NGE</span>
-            </h1>
-            <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">For You</p>
-            <p className="mt-4 text-sm text-muted-foreground">Faça login para acessar o sistema.</p>
+          <div className="text-center mb-8 flex flex-col items-center">
+            <img src="/custom-logo-login.PNG" alt="Lounge For You" className="h-24 object-contain mb-4" />
+            <p className="mt-4 text-sm text-muted-foreground">Fa�a login para acessar o sistema.</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
