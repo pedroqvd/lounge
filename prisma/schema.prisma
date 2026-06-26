@@ -38,6 +38,7 @@ model User {
   
   // Relations
   sentHistories ContactHistory[]
+  tasks         Task[]
 }
 
 model Group {
@@ -77,6 +78,7 @@ model Member {
   histories    ContactHistory[]
   attendances  Attendance[]
   audits       MemberAudit[]
+  tasks        Task[]
 }
 
 model MemberAudit {
@@ -157,4 +159,34 @@ model Settings {
   themeMode         String?  @default("system")
   webhookUrl        String?
   updatedAt         DateTime @updatedAt
+}
+
+
+enum TaskType {
+  BIRTHDAY
+  INACTIVITY
+  FOLLOW_UP
+  OTHER
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?    @db.Text
+  type        TaskType   @default(OTHER)
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime?
+  memberId    String?
+  assignedTo  String?    
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  member      Member?    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
 }

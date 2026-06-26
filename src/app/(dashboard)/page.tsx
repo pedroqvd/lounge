@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { Users, UserPlus, Cake, MessageCircle, AlertCircle, BookOpen, UserCheck } from 'lucide-react'
 import { getSettings } from '@/app/actions/settings'
 import Link from 'next/link'
+import { DashboardTasksClient } from '@/components/DashboardTasksClient'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 const prisma = globalForPrisma.prisma || new PrismaClient()
@@ -41,6 +42,11 @@ export default async function DashboardPage() {
     select: { id: true, name: true, birthDate: true, phone: true }
   })
 
+  const pendingTasks = await prisma.task.findMany({
+    where: { status: 'PENDING' },
+    include: { member: true },
+    orderBy: { dueDate: 'asc' }
+  })
   const today = new Date()
   today.setHours(0,0,0,0)
   
@@ -116,29 +122,7 @@ export default async function DashboardPage() {
         <p className="text-muted-foreground mt-2">Visão geral do Ministério de Jovens.</p>
       </div>
 
-      {birthdaysToday.length > 0 && (
-        <div className="p-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-2xl shadow-lg flex items-center justify-between animate-in fade-in slide-in-from-top-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/20 rounded-full animate-bounce">
-              <Cake className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-extrabold">Temos aniversariante hoje! 🎉</h2>
-              <p className="font-medium opacity-90">{birthdaysToday.map(m => m.name).join(', ')}</p>
-            </div>
-          </div>
-          {birthdaysToday[0].phone && (
-            <a 
-              href={`https://wa.me/${birthdaysToday[0].phone.replace(/\D/g, '')}?text=Parabéns pelo seu dia, ${birthdaysToday[0].name}! Deus te abençoe rica e abundantemente!`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-white text-pink-600 font-extrabold rounded-xl hover:scale-105 transition-transform shadow-md"
-            >
-              Mandar Parabéns Agora
-            </a>
-          )}
-        </div>
-      )}
+      <DashboardTasksClient initialTasks={pendingTasks} />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {stats.map((stat) => (
