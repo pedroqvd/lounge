@@ -115,16 +115,35 @@ export async function executeImport() {
   let added = 0
   let skipped = 0
 
+  const uniqueMembersMap = new Map();
+
   for (const line of lines) {
     if (!line.trim()) continue
-
     const parts = line.split('\t')
     const name = parts[0]?.trim()
     let phone = parts.length > 1 ? parts[1]?.trim() : null
-
     if (!name) continue
+    
+    if (phone && phone.startsWith('@')) {
+      // keep instagram username
+    } else if (phone) {
+      const digits = phone.replace(/\D/g, '')
+      if (digits.length >= 10) phone = digits
+    }
 
-    // check if exists by name
+    const key = (phone || name.toLowerCase()).trim();
+    if (!uniqueMembersMap.has(key)) {
+      uniqueMembersMap.set(key, { name, phone });
+    } else {
+      skipped++; // Duplicate in raw data
+    }
+  }
+  
+  const uniqueMembers = Array.from(uniqueMembersMap.values());
+
+  for (const member of uniqueMembers) {
+    const { name, phone } = member;
+
     const existingByName = await prisma.member.findFirst({
       where: { name: { equals: name, mode: 'insensitive' } }
     })
@@ -134,18 +153,6 @@ export async function executeImport() {
       continue
     }
 
-    // format phone if possible
-    if (phone && phone.startsWith('@')) {
-      // keep instagram username
-    } else if (phone) {
-      // clean phone
-      const digits = phone.replace(/\\D/g, '')
-      if (digits.length >= 10) {
-        phone = digits
-      }
-    }
-
-    // check by phone
     if (phone) {
       const existingByPhone = await prisma.member.findFirst({
         where: { phone }
@@ -156,12 +163,11 @@ export async function executeImport() {
       }
     }
 
-    // add to db
     await prisma.member.create({
       data: {
         name,
         phone: phone || null,
-        status: 'VISITANTE', // default status
+        status: 'VISITANTE',
       }
     })
     added++

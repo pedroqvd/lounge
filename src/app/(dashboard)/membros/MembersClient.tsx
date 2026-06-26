@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Search, MessageCircle, Filter, ChevronDown, Edit2, Trash2, Database, Send, UploadCloud } from 'lucide-react'
 import { seedMembers, deleteMember, createMember, updateMember, updateMemberInviteStatus } from '@/app/actions/members'
 import { createContactHistory } from '@/app/actions/history'
@@ -21,6 +21,13 @@ export default function MembersClient({ initialMembers, groups, templates, userR
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
   const [isSeeding, setIsSeeding] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [hideMassImport, setHideMassImport] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('hide_mass_import') === 'true') {
+      setHideMassImport(true)
+    }
+  }, [])
 
   // Member Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -262,6 +269,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
               {isSeeding ? 'Importando...' : 'Importar Planilha Inicial'}
             </button>
           )}
+          {!hideMassImport && (
           <button 
             onClick={handleImport}
             disabled={isImporting}
@@ -270,6 +278,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
             <UploadCloud className="w-5 h-5" />
             {isImporting ? 'Inserindo...' : 'Importação em Massa'}
           </button>
+        )}
           <button 
             onClick={() => openModal()}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
