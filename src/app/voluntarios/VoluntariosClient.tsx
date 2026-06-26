@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Music, DoorOpen, Baby, Camera, Heart, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Sparkles, Download } from 'lucide-react'
+import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Compass, Download } from 'lucide-react'
 import Link from 'next/link'
 import html2canvas from 'html2canvas'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const MINISTRY_ICONS: Record<string, any> = {
-  music: Music, 'door-open': DoorOpen, baby: Baby, camera: Camera, heart: Heart, users: Users, mic: Mic2, sparkles: Sparkles
+  music: AudioWaveform, 'door-open': UserCheck, baby: BookOpen, camera: Aperture, heart: Flame, users: Users, mic: Mic2, sparkles: Compass
 }
 
 export default function VoluntariosClient({ ministries, events }: { ministries: any[], events: any[] }) {

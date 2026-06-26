@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronRight, Trash2, Crown, Mic2, Settings2, ClipboardList, Sparkles } from 'lucide-react'
+import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Plus, Users, ChevronRight, Trash2, Crown, Mic2, Settings2, ClipboardList, Compass, Sparkles } from 'lucide-react'
 import { createMinistry, deleteMinistry, seedMinistries, addMemberToMinistry, removeMemberFromMinistry, updateMinistryMember } from '@/app/actions/ministries'
 import * as Dialog from '@radix-ui/react-dialog'
 import { toast } from 'sonner'
@@ -11,17 +11,17 @@ type Ministry = any
 type Member = any
 
 const MINISTRY_ICONS: Record<string, any> = {
-  music: Music, 'door-open': DoorOpen, baby: Baby, camera: Camera, heart: Heart, users: Users, mic: Mic2, sparkles: Sparkles
+  music: AudioWaveform, 'door-open': UserCheck, baby: BookOpen, camera: Aperture, heart: Flame, users: Users, mic: Mic2, sparkles: Compass
 }
 const ICON_OPTIONS = [
-  { value: 'music', label: 'Música' },
-  { value: 'mic', label: 'Microfone' },
-  { value: 'door-open', label: 'Porta' },
-  { value: 'baby', label: 'Criança' },
-  { value: 'camera', label: 'Câmera' },
-  { value: 'heart', label: 'Coração' },
-  { value: 'users', label: 'Grupo' },
-  { value: 'sparkles', label: 'Estrelas' },
+  { value: 'music', label: 'Ondas Sonoras (Louvor)' },
+  { value: 'mic', label: 'Microfone (Vocal)' },
+  { value: 'door-open', label: 'Check (Recepção)' },
+  { value: 'baby', label: 'Livro (Ensino/Kids)' },
+  { value: 'camera', label: 'Lente (Mídia)' },
+  { value: 'heart', label: 'Chama (Intercessão)' },
+  { value: 'users', label: 'Grupo de Pessoas' },
+  { value: 'sparkles', label: 'Bússola (Direção)' },
 ]
 const COLOR_PRESETS = ['#8b5cf6', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#ec4899', '#f97316', '#6366f1']
 
