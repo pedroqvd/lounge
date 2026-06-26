@@ -441,7 +441,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
                   onClick={() => setMapTab('HH')}
                   className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${mapTab === 'HH' ? 'bg-background shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
                 >
-                  Holy Homes (Células)
+                  Happy Hours (Células)
                 </button>
               </div>
             </div>
