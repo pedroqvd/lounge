@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
 const loginSchema = z.object({
-  email: z.string().email('Digite um e-mail v�lido.'),
-  password: z.string().min(6, 'A senha deve ter no m�nimo 6 caracteres.'),
+  email: z.string().email('Digite um e-mail válido.'),
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.'),
 })
 
 export default function LoginPage() {
@@ -37,7 +37,7 @@ export default function LoginPage() {
       const buildUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'vazia'
       const isFetchError = error.message.includes('Failed to fetch')
       const extraInfo = isFetchError 
-        ? `\n\nDetalhe T�cnico: O build atual da Vercel est� usando a URL: "${buildUrl}".` 
+        ? `\n\nDetalhe Técnico: O build atual da Vercel está usando a URL: "${buildUrl}".` 
         : ''
       
       toast.error('Falha ao entrar', {
@@ -56,8 +56,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8 flex flex-col items-center">
-            <img src="/custom-logo-login.PNG" alt="Lounge For You" className="h-24 object-contain mb-4" />
-            <p className="mt-4 text-sm text-muted-foreground">Fa�a login para acessar o sistema.</p>
+            <img src="/custom-logo-login.PNG" alt="Lounge For You" className="w-48 h-auto object-contain mb-4" />
+            <p className="mt-4 text-sm text-muted-foreground">Faça login para acessar o sistema.</p>
           </div>
 
           <Form {...form}>
