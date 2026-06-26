@@ -168,27 +168,24 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
       <main className="flex-1">
 
-        {/* HERO & DNA CONTAINER (Video Background spans both) */}
+        {/* HERO & DNA CONTAINER (Video Background spans both mas fica sticky para não distorcer) */}
         <div className="relative overflow-hidden">
           {/* Shared Video Background */}
           <div className="absolute inset-0 w-full h-full z-0">
-            <div 
-              className="absolute inset-0 w-full h-full z-0 opacity-30 dark:opacity-40"
-              dangerouslySetInnerHTML={{ __html: `
-                <video 
-                  src="/bg-hero.mp4" 
-                  autoplay 
-                  loop 
-                  muted 
-                  playsinline 
-                  style="width: 100%; height: 100%; object-fit: cover;"
-                ></video>
-              `}} 
-            />
-            {/* Top Fade (Hero top) */}
-            <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent" />
-            {/* Bottom Fade (DNA bottom) */}
-            <div className="absolute inset-x-0 bottom-0 h-[40vh] bg-gradient-to-t from-background via-background/90 to-transparent" />
+            <div className="sticky top-0 w-full h-screen">
+              <video 
+                src="/bg-hero.mp4"
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                className="w-full h-full object-cover opacity-30 dark:opacity-40" 
+              />
+              {/* Top Fade (Hero top) */}
+              <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent" />
+              {/* Bottom Fade (DNA bottom) */}
+              <div className="absolute inset-x-0 bottom-0 h-[40vh] bg-gradient-to-t from-transparent via-background/90 to-background" />
+            </div>
           </div>
 
           {/* Background color accents (shared) */}
