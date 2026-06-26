@@ -182,7 +182,8 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           {/* Background color accents (shared) */}
           <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 70% at 50% -20%, ${primaryColor}15, transparent)` }} />
           <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-30" style={{ backgroundColor: primaryColor }} />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full blur-[80px] pointer-events-none opacity-20" style={{ backgroundColor: primaryColor }} />
+          <div className="absolute top-[80vh] left-0 w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none opacity-20" style={{ backgroundColor: primaryColor }} />
+          <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] rounded-full blur-[80px] pointer-events-none opacity-15" style={{ backgroundColor: primaryColor }} />
 
           {/* HERO */}
           <section id="inicio" className="relative min-h-[92vh] flex items-center z-10">
