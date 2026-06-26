@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Montserrat } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import ThemeInjector from '@/components/ThemeInjector'
+import { Toaster } from '@/components/ui/sonner'
 import { prisma } from '@/lib/prisma'
 
 const montserrat = Montserrat({ subsets: ['latin'] })
@@ -24,23 +26,9 @@ export default async function RootLayout({
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <style dangerouslySetInnerHTML={{__html: `
-          :root {
-            --primary: ${primaryColor} !important;
-            --sidebar-primary: ${primaryColor} !important;
-            --ring: ${primaryColor} !important;
-            --sidebar-ring: ${primaryColor} !important;
-          }
-          .dark {
-            --primary: ${primaryColor} !important;
-            --sidebar-primary: ${primaryColor} !important;
-            --ring: ${primaryColor} !important;
-            --sidebar-ring: ${primaryColor} !important;
-          }
-        `}} />
-      </head>
+      
       <body className={montserrat.className}>
+        <ThemeInjector primaryColor={primaryColor} />
         <ThemeProvider attribute="class" defaultTheme={themeMode} enableSystem={themeMode === 'system'} forcedTheme={themeMode !== 'system' ? themeMode : undefined} disableTransitionOnChange>
           {children}
         </ThemeProvider>

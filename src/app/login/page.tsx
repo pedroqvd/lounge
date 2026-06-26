@@ -3,35 +3,49 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+
+const loginSchema = z.object({
+  email: z.string().email('Digite um e-mail v�lido.'),
+  password: z.string().min(6, 'A senha deve ter no m�nimo 6 caracteres.'),
+})
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  })
 
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: values.email,
+      password: values.password,
     })
 
     if (error) {
-      const buildUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'vazia';
-      const isFetchError = error.message.includes('Failed to fetch');
+      const buildUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'vazia'
+      const isFetchError = error.message.includes('Failed to fetch')
       const extraInfo = isFetchError 
-        ? `\n\nDetalhe Técnico: O build atual da Vercel está usando a URL do Supabase: "${buildUrl}". Se estiver vazia, você precisa fazer um novo Deploy na Vercel (Redeploy).` 
-        : '';
+        ? `\n\nDetalhe T�cnico: O build atual da Vercel est� usando a URL: "${buildUrl}".` 
+        : ''
       
-      setError(`${error.message} ${extraInfo}`);
+      toast.error('Falha ao entrar', {
+        description: `${error.message}${extraInfo}`
+      })
       setLoading(false)
     } else {
+      toast.success('Login efetuado com sucesso!')
       router.push('/')
       router.refresh()
     }
@@ -46,52 +60,39 @@ export default function LoginPage() {
             <p className="mt-4 text-sm text-muted-foreground">Fa�a login para acessar o sistema.</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            {error && (
-              <div className="p-3 text-sm text-destructive-foreground bg-destructive/10 border border-destructive/20 rounded-lg">
-                {error}
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground" htmlFor="email">
-                E-mail
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="nome@lounge.com"
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input placeholder="nome@lounge.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground" htmlFor="password">
-                  Senha
-                </label>
-              </div>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                required
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="��������" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 w-full"
-            >
-              {loading ? 'Entrando...' : 'Entrar'}
-            </button>
-          </form>
+              <Button type="submit" className="w-full" isLoading={loading}>
+                Entrar
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
