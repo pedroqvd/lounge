@@ -38,7 +38,9 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
   const [ministries, setMinistries] = useState(initialMinistries)
   const [isNewMinistryOpen, setIsNewMinistryOpen] = useState(false)
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
+  const [isManageMembersOpen, setIsManageMembersOpen] = useState(false)
   const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null)
+  const [editingMinistryMember, setEditingMinistryMember] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isSeeding, setIsSeeding] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
@@ -91,10 +93,34 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
     setIsSaving(false)
   }
 
+  const handleUpdateMember = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingMinistryMember) return
+    setIsSaving(true)
+    const posString = memberPositions.length > 0 ? memberPositions.join(', ') : undefined
+    const res = await updateMinistryMember(editingMinistryMember.id, { role: memberRole, position: posString })
+    if (res.success) { toast.success('Atualizado!'); setEditingMinistryMember(null); window.location.reload() }
+    else toast.error(res.error || 'Erro')
+    setIsSaving(false)
+  }
+
   const handleRemoveMember = async (ministryMemberId: string) => {
+    if (!confirm('Remover este membro do ministério?')) return
     const res = await removeMemberFromMinistry(ministryMemberId)
     if (res.success) { toast.success('Removido!'); window.location.reload() }
     else toast.error(res.error || 'Erro')
+  }
+
+  const openManageMembers = (ministry: Ministry) => {
+    setSelectedMinistry(ministry)
+    setEditingMinistryMember(null)
+    setIsManageMembersOpen(true)
+  }
+
+  const startEditMember = (mm: any) => {
+    setEditingMinistryMember(mm)
+    setMemberRole(mm.role)
+    setMemberPositions(mm.position ? mm.position.split(',').map((p: string) => p.trim()) : [])
   }
 
   const filteredMembers = members.filter(m =>
@@ -208,7 +234,7 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
 
                   {/* Volunteer avatars */}
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="flex -space-x-2">
+                    <button onClick={() => openManageMembers(ministry)} className="flex -space-x-2 hover:opacity-80 transition-opacity">
                       {ministry.members.slice(0, 5).map((mm: any) => (
                         <div key={mm.id} className="w-7 h-7 rounded-full border-2 border-card flex items-center justify-center text-xs font-bold text-white shadow-sm" style={{ backgroundColor: ministry.color }}>
                           {mm.member.name.charAt(0)}
@@ -219,7 +245,13 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
                           +{ministry.members.length - 5}
                         </div>
                       )}
-                    </div>
+                      {ministry.members.length === 0 && (
+                        <span className="text-xs text-muted-foreground ml-2">Nenhum membro</span>
+                      )}
+                    </button>
+                    {ministry.members.length > 0 && (
+                      <button onClick={() => openManageMembers(ministry)} className="text-xs font-medium text-primary hover:underline ml-2">Gerenciar</button>
+                    )}
                   </div>
 
                   <div className="flex gap-2">
@@ -299,6 +331,91 @@ export default function EscalasClient({ initialMinistries, members, events }: { 
                 </button>
               </div>
             </form>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Manage Members Modal */}
+      <Dialog.Root open={isManageMembersOpen} onOpenChange={(open) => { setIsManageMembersOpen(open); if(!open) setEditingMinistryMember(null); }}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
+          <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] bg-background border border-border rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <Dialog.Title className="text-xl font-extrabold mb-4">
+              Membros do {selectedMinistry?.name}
+            </Dialog.Title>
+            
+            {editingMinistryMember ? (
+              <form onSubmit={handleUpdateMember} className="space-y-4">
+                <div className="mb-4">
+                  <p className="text-sm text-muted-foreground mb-1">Editando:</p>
+                  <p className="font-bold text-lg">{editingMinistryMember.member.name}</p>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold">Função</label>
+                  <select value={memberRole} onChange={e => setMemberRole(e.target.value as any)} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <option value="VOLUNTARIO">Voluntário</option>
+                    <option value="LIDER_MINISTERIO">Líder do Ministério</option>
+                  </select>
+                </div>
+                {positionOptions.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Funções (Selecione uma ou mais)</label>
+                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+                      {positionOptions.map(p => (
+                        <label key={p} className="flex items-center gap-2 bg-muted/50 px-3 py-2 rounded-xl cursor-pointer hover:bg-muted transition-colors border border-transparent has-[:checked]:border-primary/50 has-[:checked]:bg-primary/10">
+                          <input
+                            type="checkbox"
+                            checked={memberPositions.includes(p)}
+                            onChange={(e) => {
+                              if (e.target.checked) setMemberPositions(prev => [...prev, p]);
+                              else setMemberPositions(prev => prev.filter(x => x !== p));
+                            }}
+                            className="rounded border-input text-primary focus:ring-primary w-4 h-4 accent-primary"
+                          />
+                          <span className="text-sm font-medium">{p}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex gap-3 pt-4 border-t border-border">
+                  <button type="button" onClick={() => setEditingMinistryMember(null)} className="flex-1 h-11 font-bold text-sm bg-secondary rounded-xl hover:bg-secondary/80">Voltar</button>
+                  <button type="submit" disabled={isSaving} className="flex-1 h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50">
+                    {isSaving ? 'Salvando...' : 'Salvar'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <div className="divide-y divide-border border border-border rounded-xl">
+                  {selectedMinistry?.members.map((mm: any) => (
+                    <div key={mm.id} className="flex items-center justify-between p-4">
+                      <div>
+                        <p className="font-bold text-sm">{mm.member.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {mm.role === 'LIDER_MINISTERIO' && <span className="text-[10px] font-bold bg-amber-500/20 text-amber-600 px-1.5 py-0.5 rounded uppercase">Líder</span>}
+                          {mm.position && <span className="text-xs text-muted-foreground">{mm.position}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => startEditMember(mm)} className="text-sm font-semibold text-primary hover:underline">Editar</button>
+                        <button onClick={() => handleRemoveMember(mm.id)} className="text-muted-foreground hover:text-destructive p-2 rounded-lg hover:bg-destructive/10 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {selectedMinistry?.members.length === 0 && (
+                    <div className="p-8 text-center text-muted-foreground text-sm">Nenhum membro neste ministério.</div>
+                  )}
+                </div>
+                <div className="pt-2 border-t border-border">
+                  <Dialog.Close asChild>
+                    <button className="w-full h-11 font-bold text-sm bg-secondary rounded-xl hover:bg-secondary/80">Fechar</button>
+                  </Dialog.Close>
+                </div>
+              </div>
+            )}
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
