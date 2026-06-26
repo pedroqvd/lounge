@@ -550,42 +550,113 @@ export default function MembersClient({ initialMembers, groups, templates, userR
 
       {/* Pipeline View */}
       {viewMode === 'pipeline' && (
-        <div className="flex gap-6 overflow-x-auto pb-4 snap-x">
-          {['VISITANTE', 'DISCIPULADO', 'ATIVO', 'INATIVO'].map(colStatus => (
-            <div key={colStatus} className="min-w-[320px] max-w-[320px] bg-muted/30 rounded-2xl p-4 flex flex-col gap-4 border border-border/50 snap-center">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="font-bold text-sm text-muted-foreground">{colStatus}</h3>
-                <span className="text-xs font-bold px-2 py-1 bg-background rounded-full border border-border">{filteredMembers.filter(m => m.status === colStatus).length}</span>
-              </div>
-              <div className="flex flex-col gap-3">
-                {filteredMembers.filter(m => m.status === colStatus).map(m => (
-                  <div key={m.id} className="bg-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-all group relative cursor-pointer" onClick={() => openModal(m)}>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="font-bold text-foreground line-clamp-1">{m.name}</div>
-                      <div onClick={e => e.stopPropagation()}>
-                        <DropdownMenu.Root>
-                          <DropdownMenu.Trigger asChild>
-                            <button className="text-muted-foreground hover:text-primary"><ArrowRight className="w-4 h-4"/></button>
-                          </DropdownMenu.Trigger>
-                          <DropdownMenu.Portal>
-                            <DropdownMenu.Content className="bg-popover text-popover-foreground rounded-xl shadow-lg border border-border p-2 z-50">
-                              {['VISITANTE', 'DISCIPULADO', 'ATIVO', 'INATIVO'].filter(s => s !== colStatus).map(s => (
-                                <DropdownMenu.Item key={s} onSelect={() => movePipelineStage(m, s)} className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-md cursor-pointer outline-none">
-                                  Mover para {s}
-                                </DropdownMenu.Item>
-                              ))}
-                            </DropdownMenu.Content>
-                          </DropdownMenu.Portal>
-                        </DropdownMenu.Root>
-                      </div>
+        <div className="flex gap-6 overflow-x-auto pb-6 snap-x p-2">
+          {(() => {
+            const columns = [
+              { id: 'VISITANTE', label: 'Visitantes', color: 'bg-amber-500', border: 'border-amber-500/30', light: 'bg-amber-500/10' },
+              { id: 'DISCIPULADO', label: 'Em Discipulado', color: 'bg-blue-500', border: 'border-blue-500/30', light: 'bg-blue-500/10' },
+              { id: 'ATIVO', label: 'Membros Ativos', color: 'bg-emerald-500', border: 'border-emerald-500/30', light: 'bg-emerald-500/10' },
+              { id: 'INATIVO', label: 'Inativos/Desgarrados', color: 'bg-slate-500', border: 'border-slate-500/30', light: 'bg-slate-500/10' }
+            ]
+
+            return columns.map(col => {
+              const colMembers = filteredMembers.filter(m => m.status === col.id)
+              return (
+                <div 
+                  key={col.id} 
+                  className={`min-w-[320px] max-w-[320px] rounded-2xl p-4 flex flex-col gap-4 border snap-center ${col.border} bg-card shadow-sm`}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const memberId = e.dataTransfer.getData('memberId')
+                    const member = members.find(m => m.id === memberId)
+                    if (member && member.status !== col.id) {
+                      movePipelineStage(member, col.id)
+                    }
+                  }}
+                >
+                  <div className="flex items-center justify-between px-2 pb-2 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${col.color}`} />
+                      <h3 className="font-bold text-sm text-foreground uppercase tracking-wider">{col.label}</h3>
                     </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-2 mb-2"><Phone className="w-3 h-3"/> {m.phone || 'Sem número'}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-2"><Users className="w-3 h-3"/> {m.group?.name || 'Sem grupo'}</div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${col.light} text-foreground`}>
+                      {colMembers.length}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                  
+                  <div className="flex flex-col gap-3 min-h-[150px]">
+                    {colMembers.length === 0 ? (
+                      <div className="flex-1 flex items-center justify-center border-2 border-dashed border-border/60 rounded-xl text-muted-foreground text-xs font-medium bg-muted/20">
+                        Arraste para cá
+                      </div>
+                    ) : (
+                      colMembers.map(m => (
+                        <div 
+                          key={m.id} 
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('memberId', m.id)
+                            e.currentTarget.style.opacity = '0.5'
+                          }}
+                          onDragEnd={(e) => {
+                            e.currentTarget.style.opacity = '1'
+                          }}
+                          className="bg-background p-4 rounded-xl shadow-sm border border-border hover:border-primary/50 hover:shadow-md transition-all group relative cursor-grab active:cursor-grabbing flex flex-col gap-3" 
+                          onClick={() => openModal(m)}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-3 overflow-hidden">
+                              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-sm">
+                                {m.name.charAt(0)}
+                              </div>
+                              <div className="font-bold text-foreground line-clamp-1 leading-tight">{m.name}</div>
+                            </div>
+                            
+                            <div onClick={e => e.stopPropagation()} className="shrink-0">
+                              <DropdownMenu.Root>
+                                <DropdownMenu.Trigger asChild>
+                                  <button className="text-muted-foreground hover:text-primary w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+                                    <ArrowRight className="w-4 h-4"/>
+                                  </button>
+                                </DropdownMenu.Trigger>
+                                <DropdownMenu.Portal>
+                                  <DropdownMenu.Content className="bg-popover text-popover-foreground rounded-xl shadow-lg border border-border p-2 z-50 min-w-[200px]">
+                                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Mover para...</div>
+                                    {columns.filter(c => c.id !== col.id).map(c => (
+                                      <DropdownMenu.Item 
+                                        key={c.id} 
+                                        onSelect={() => movePipelineStage(m, c.id)} 
+                                        className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-md cursor-pointer outline-none flex items-center gap-2"
+                                      >
+                                        <div className={`w-2 h-2 rounded-full ${c.color}`} />
+                                        {c.label}
+                                      </DropdownMenu.Item>
+                                    ))}
+                                  </DropdownMenu.Content>
+                                </DropdownMenu.Portal>
+                              </DropdownMenu.Root>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {m.phone && (
+                              <div className="px-2 py-1 bg-muted/50 rounded-md text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 border border-border/50">
+                                <Phone className="w-3 h-3"/> {m.phone}
+                              </div>
+                            )}
+                            <div className="px-2 py-1 bg-muted/50 rounded-md text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 border border-border/50">
+                              <Users className="w-3 h-3"/> {m.group?.name || 'Sem grupo'}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )
+            })
+          })()}
         </div>
       )}
 
