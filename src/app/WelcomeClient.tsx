@@ -172,7 +172,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm font-bold text-sm mb-8 shadow-sm border border-border/50 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ color: primaryColor }}>
               <Star className="w-4 h-4 fill-current" /> Bem-vindo à sua nova casa
             </div>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-[1.05] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 leading-[1.05] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
               {settings?.title || `Bem-vindo à ${churchName}`}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
@@ -181,9 +181,9 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
             {/* Horários de culto */}
             {(settings?.cultoSchedule || settings?.celulaSchedule) && (
-              <div className="flex flex-wrap items-center justify-center gap-4 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+              <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 mb-10 w-full px-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                 {settings?.cultoSchedule && (
-                  <div className="flex items-center gap-2.5 px-5 py-3 bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2.5 px-5 py-3 bg-card/80 w-full sm:w-auto justify-center backdrop-blur-sm border border-border/50 rounded-2xl shadow-sm">
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: primaryColor + '20', color: primaryColor }}>
                       <Users className="w-4 h-4" />
                     </div>
@@ -194,7 +194,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
                   </div>
                 )}
                 {settings?.celulaSchedule && (
-                  <div className="flex items-center gap-2.5 px-5 py-3 bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-2.5 px-5 py-3 bg-card/80 w-full sm:w-auto justify-center backdrop-blur-sm border border-border/50 rounded-2xl shadow-sm">
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: primaryColor + '20', color: primaryColor }}>
                       <Heart className="w-4 h-4" />
                     </div>
@@ -207,17 +207,17 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
               </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
-              <a href="#cadastro" className="flex items-center gap-2 px-8 py-4 text-white font-bold rounded-2xl shadow-2xl transition-all hover:scale-105 hover:shadow-primary/40 text-lg" style={{ backgroundColor: primaryColor }}>
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
+              <a href="#cadastro" className="flex items-center justify-center gap-2 px-8 py-4 text-white font-bold rounded-2xl shadow-2xl transition-all hover:scale-105 hover:shadow-primary/40 text-lg" style={{ backgroundColor: primaryColor }}>
                 Quero Me Conectar <ArrowRight className="w-5 h-5" />
               </a>
               {settings?.whatsappGroupUrl && (
-                <a href={settings.whatsappGroupUrl} target="_blank" className="flex items-center gap-2 px-6 py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#25D366]/20">
+                <a href={settings.whatsappGroupUrl} target="_blank" className="flex items-center justify-center gap-2 px-6 py-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#25D366]/20">
                   <MessageCircle className="w-5 h-5" /> Grupo de Avisos
                 </a>
               )}
               {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" className="flex items-center gap-2 px-6 py-4 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#dc2743]/20">
+                <a href={settings.instagramUrl} target="_blank" className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white font-bold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-[#dc2743]/20">
                   <Instagram className="w-5 h-5" /> Instagram
                 </a>
               )}
@@ -235,7 +235,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
           <AnimatedSection id="dna" className="container mx-auto px-6 py-24 md:py-32">
             <div className="text-center mb-20">
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Nossa Essência</span>
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">O que nos move</h2>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">O que nos move</h2>
               <p className="text-muted-foreground text-lg max-w-xl mx-auto">Conheça os pilares que sustentam a nossa visão do Reino.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
@@ -266,7 +266,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             <div className="container mx-auto px-6 py-24">
               <div className="text-center mb-16">
                 <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Agenda</span>
-                <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">Próximos Eventos</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Próximos Eventos</h2>
                 <p className="text-muted-foreground text-lg">Venha participar! Todos são bem-vindos.</p>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -305,7 +305,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             <div className="space-y-8">
               <div>
                 <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Comunidade</span>
-                <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">Onde nos encontramos</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Onde nos encontramos</h2>
                 <p className="text-muted-foreground text-lg">A igreja acontece nas casas e nas celebrações.</p>
               </div>
               {settings?.hhsInfo && (
