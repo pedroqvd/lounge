@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
@@ -108,6 +108,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
     { label: 'Nossa Igreja', href: '#dna' },
     { label: 'Células', href: '#celulas' },
     { label: 'Próximos Eventos', href: '#eventos' },
+    { label: 'Escalas', href: '/voluntarios' },
     { label: 'Conectar', href: '#cadastro' },
   ]
   return (
