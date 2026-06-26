@@ -18,7 +18,8 @@ import {
   ChevronRight,
   Sun,
   Moon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  ClipboardList
 } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 
@@ -80,29 +81,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-6 flex flex-col gap-8">
           
-          {/* Categoria: Visão Geral */}
-          <div className="px-4">
-            {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Visão Geral</p>}
-            <div className="flex flex-col gap-1">
-              <NavItem href="/painel" icon={LayoutDashboard} label="Painel" isActive={pathname === '/'} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
-            </div>
-          </div>
-
-          {/* Categoria: Membros */}
-          <div className="px-4">
-            {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Pessoas</p>}
-            <div className="flex flex-col gap-1">
-              <NavItem href="/membros" icon={Users} label="Membros" isActive={pathname.startsWith('/membros')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
-              <NavItem href="/templates" icon={MessageSquare} label="Templates" isActive={pathname.startsWith('/templates')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
-            </div>
-          </div>
-
-          {/* Categoria: Calendário */}
-          <div className="px-4">
-            {!sidebarMinimized && <p className="px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Eventos</p>}
-            <div className="flex flex-col gap-1">
-              <NavItem href="/calendario" icon={Calendar} label="Agenda & Eventos" isActive={pathname.startsWith('/calendario')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
-            </div>
+          <div className="px-4 flex flex-col gap-1">
+            <NavItem href="/painel" icon={LayoutDashboard} label="Painel" isActive={pathname === '/' || pathname === '/painel'} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+            <NavItem href="/membros" icon={Users} label="Membros" isActive={pathname.startsWith('/membros')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+            <NavItem href="/templates" icon={MessageSquare} label="Templates" isActive={pathname.startsWith('/templates')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+            <NavItem href="/calendario" icon={Calendar} label="Agenda & Eventos" isActive={pathname.startsWith('/calendario')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+            <NavItem href="/escalas" icon={ClipboardList} label="Escalas" isActive={pathname.startsWith('/escalas')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
           </div>
 
         </div>
