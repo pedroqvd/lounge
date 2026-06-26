@@ -47,7 +47,7 @@ export default function LoginPage() {
       setLoading(false)
     } else {
       toast.success('Login efetuado com sucesso!')
-      router.push('/')
+      router.push('/painel')
       router.refresh()
     }
   }
