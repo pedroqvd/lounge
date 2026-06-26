@@ -262,7 +262,12 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             <div className="text-center mb-12 md:mb-20">
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>Nossa Essência</span>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">O que nos move</h2>
-              <p className="text-muted-foreground text-lg max-w-xl mx-auto">Conheça os pilares que sustentam a nossa visão do Reino.</p>
+              <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">Conheça os pilares que sustentam a nossa visão do Reino.</p>
+              
+              <a href="/sobre" className="inline-flex items-center justify-center gap-2 px-6 py-3 font-bold rounded-2xl shadow-sm border border-border/50 hover:bg-card transition-all hover:scale-105 group" style={{ color: primaryColor }}>
+                Conheça nossa História Completa
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {[
