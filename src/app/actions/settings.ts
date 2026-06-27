@@ -79,7 +79,7 @@ export async function updateHubSettings(data: any) {
         values: data.values,
         hhsInfo: data.hhsInfo,
         whatsappGroupUrl: data.whatsappGroupUrl,
-        instagramUrl: data.instagramUrl
+        instagramUrl: data.instagramUrl, cultoSchedule: data.cultoSchedule, celulaSchedule: data.celulaSchedule, address: data.address, mapsEmbedUrl: data.mapsEmbedUrl, galleryUrls: data.galleryUrls, youtubeUrl: data.youtubeUrl
       },
       create: {
         id: 'global',
@@ -90,7 +90,7 @@ export async function updateHubSettings(data: any) {
         values: data.values || "",
         hhsInfo: data.hhsInfo || "",
         whatsappGroupUrl: data.whatsappGroupUrl,
-        instagramUrl: data.instagramUrl
+        instagramUrl: data.instagramUrl, cultoSchedule: data.cultoSchedule, celulaSchedule: data.celulaSchedule, address: data.address, mapsEmbedUrl: data.mapsEmbedUrl, galleryUrls: data.galleryUrls, youtubeUrl: data.youtubeUrl
       }
     })
     revalidatePath('/painel')

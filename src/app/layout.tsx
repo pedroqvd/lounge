@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Um site do Ministério de Jovens da Igreja Millenium',
 }
 
+
+
 export const dynamic = 'force-dynamic'
 
 export default async function RootLayout({

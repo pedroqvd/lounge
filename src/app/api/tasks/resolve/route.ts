@@ -1,8 +1,11 @@
 ﻿import { NextResponse } from 'next/server';
+import { getCurrentUser } from '@/app/actions/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
+      const user = await getCurrentUser();
+      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const { taskId, memberId, feedbackText } = await request.json();
 
     // Mark task as completed

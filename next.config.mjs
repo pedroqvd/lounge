@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**', // Permite qualquer hostname para avatares temporariamente, otimizando todas as imagens
+        hostname: '*.supabase.co', // Permite qualquer hostname para avatares temporariamente, otimizando todas as imagens
       },
     ],
   },

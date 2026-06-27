@@ -89,6 +89,8 @@ model Member {
   tasks         Task[]
   ministries    MinistryMember[]
   scheduleSlots ScheduleSlot[]
+  @@index([status])
+  @@index([phone])
 }
 
 model MemberAudit {
@@ -116,6 +118,7 @@ model Event {
   // Relations
   attendances   Attendance[]
   scheduleSlots ScheduleSlot[]
+  @@index([date])
 }
 
 model Attendance {
@@ -199,6 +202,8 @@ model Task {
 
   member Member? @relation(fields: [memberId], references: [id], onDelete: Cascade)
   user   User?   @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+  @@index([type])
+  @@index([status])
 }
 
 model HubSettings {
@@ -274,4 +279,5 @@ model ScheduleSlot {
   member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@unique([ministryId, eventId, memberId])
+  @@index([eventId])
 }

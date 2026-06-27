@@ -1,11 +1,15 @@
 'use server'
 
+import { getCurrentUser } from '@/app/actions/auth';
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 // GET ALL TEMPLATES
 export async function getTemplates() {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     return await prisma.template.findMany({
       orderBy: { name: 'asc' }
     })
@@ -17,6 +21,9 @@ export async function getTemplates() {
 // CREATE TEMPLATE
 export async function createTemplate(data: { name: string, category: string, content: string }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.template.create({
       data: {
         name: data.name,
@@ -35,6 +42,9 @@ export async function createTemplate(data: { name: string, category: string, con
 // UPDATE TEMPLATE
 export async function updateTemplate(id: string, data: { name: string, category: string, content: string }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.template.update({
       where: { id },
       data: {
@@ -53,6 +63,9 @@ export async function updateTemplate(id: string, data: { name: string, category:
 // DELETE TEMPLATE
 export async function deleteTemplate(id: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.template.delete({
       where: { id }
     })

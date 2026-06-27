@@ -1,5 +1,6 @@
 'use server'
 
+import { getCurrentUser } from '@/app/actions/auth';
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
@@ -17,6 +18,9 @@ export async function createEvent(data: {
   recurrenceEnd?: string
 }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     const startDate = new Date(data.date)
     const eventsToCreate = []
     
@@ -66,6 +70,9 @@ export async function createEvent(data: {
 
 export async function deleteEvent(id: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.event.delete({
       where: { id }
     })
@@ -86,6 +93,9 @@ export async function updateEvent(id: string, data: {
   description?: string
 }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.event.update({
       where: { id },
       data: {
@@ -106,6 +116,9 @@ export async function updateEvent(id: string, data: {
 
 export async function updateAttendance(eventId: string, memberId: string, isPresent: boolean) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.attendance.upsert({
       where: {
         eventId_memberId: {
@@ -131,6 +144,9 @@ export async function updateAttendance(eventId: string, memberId: string, isPres
 
 export async function memberSelfCheckin(eventId: string, identifier: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     // Busca membro pelo nome (exato) ou telefone
     const member = await prisma.member.findFirst({
       where: {

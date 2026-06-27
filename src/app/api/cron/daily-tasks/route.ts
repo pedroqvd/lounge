@@ -3,6 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentDay = today.getDate();

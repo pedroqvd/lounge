@@ -1,10 +1,14 @@
 'use server'
 
+import { getCurrentUser } from '@/app/actions/auth';
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export async function getMinistries() {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     return await prisma.ministry.findMany({
       orderBy: { name: 'asc' },
       include: {
@@ -20,6 +24,9 @@ export async function getMinistries() {
 
 export async function getMinistryById(id: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     return await prisma.ministry.findUnique({
       where: { id },
       include: {
@@ -42,6 +49,9 @@ export async function getMinistryById(id: string) {
 
 export async function createMinistry(data: { name: string; description?: string; color: string; icon: string }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.ministry.create({ data })
     revalidatePath('/escalas')
     return { success: true }
@@ -50,6 +60,9 @@ export async function createMinistry(data: { name: string; description?: string;
 
 export async function updateMinistry(id: string, data: { name?: string; description?: string; color?: string; icon?: string }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.ministry.update({ where: { id }, data })
     revalidatePath('/escalas')
     return { success: true }
@@ -58,6 +71,9 @@ export async function updateMinistry(id: string, data: { name?: string; descript
 
 export async function deleteMinistry(id: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.ministry.delete({ where: { id } })
     revalidatePath('/escalas')
     return { success: true }
@@ -66,6 +82,9 @@ export async function deleteMinistry(id: string) {
 
 export async function addMemberToMinistry(ministryId: string, memberId: string, role: 'VOLUNTARIO' | 'LIDER_MINISTERIO', instrument?: string, position?: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.ministryMember.create({ data: { ministryId, memberId, role, instrument, position } })
     revalidatePath('/escalas')
     return { success: true }
@@ -77,6 +96,9 @@ export async function addMemberToMinistry(ministryId: string, memberId: string, 
 
 export async function updateMinistryMember(id: string, data: { role?: string; instrument?: string; position?: string }) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.ministryMember.update({ where: { id }, data: data as any })
     revalidatePath('/escalas')
     return { success: true }
@@ -85,6 +107,9 @@ export async function updateMinistryMember(id: string, data: { role?: string; in
 
 export async function removeMemberFromMinistry(ministryMemberId: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.ministryMember.delete({ where: { id: ministryMemberId } })
     revalidatePath('/escalas')
     return { success: true }
@@ -93,6 +118,9 @@ export async function removeMemberFromMinistry(ministryMemberId: string) {
 
 export async function createScheduleSlot(ministryId: string, eventId: string, memberId: string, position?: string, notes?: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.scheduleSlot.create({ data: { ministryId, eventId, memberId, position, notes } })
     revalidatePath('/escalas')
     revalidatePath('/calendario')
@@ -105,6 +133,9 @@ export async function createScheduleSlot(ministryId: string, eventId: string, me
 
 export async function updateSlotStatus(slotId: string, status: 'PENDENTE' | 'CONFIRMADO' | 'RECUSADO') {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.scheduleSlot.update({ where: { id: slotId }, data: { status } })
     revalidatePath('/escalas')
     return { success: true }
@@ -113,6 +144,9 @@ export async function updateSlotStatus(slotId: string, status: 'PENDENTE' | 'CON
 
 export async function removeScheduleSlot(slotId: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     await prisma.scheduleSlot.delete({ where: { id: slotId } })
     revalidatePath('/escalas')
     return { success: true }
@@ -121,6 +155,9 @@ export async function removeScheduleSlot(slotId: string) {
 
 export async function getScheduleForEvent(eventId: string) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     return await prisma.scheduleSlot.findMany({
       where: { eventId },
       include: { ministry: true, member: { select: { id: true, name: true } } }
@@ -130,6 +167,9 @@ export async function getScheduleForEvent(eventId: string) {
 
 export async function seedMinistries() {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
     const existing = await prisma.ministry.count()
     if (existing > 0) return { success: false, error: 'Ministerios ja existem.' }
     const ministries = [
@@ -150,6 +190,9 @@ export async function bulkUpdateScheduleSlots(
   removals: string[]
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) throw new Error('Unauthorized');
+
 
 
     await prisma.$transaction(async (tx) => {
