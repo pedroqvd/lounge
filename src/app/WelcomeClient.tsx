@@ -178,7 +178,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             preload="auto"
             className="w-full h-full object-cover opacity-30 dark:opacity-40"
           >
-            <source src="/bg-hero.mp4" type="video/mp4" />
+            <source src="https://unltgnznpvjfwiqioomh.supabase.co/storage/v1/object/public/video%20publico/bg-hero.mp4" type="video/mp4" />
           </video>
         </div>
 
