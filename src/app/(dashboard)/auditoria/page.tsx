@@ -1,5 +1,5 @@
 import { getAuditLogs } from '@/app/actions/audit'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ShieldAlert, Activity } from 'lucide-react'
@@ -32,21 +32,21 @@ export default async function AuditPage({
       </div>
 
       {errorMsg ? (
-        <Card className="border-destructive bg-destructive/10">
-          <CardContent className="pt-6 flex gap-3 text-destructive font-bold items-center">
+        <div className="border border-destructive bg-destructive/10 rounded-xl shadow-sm">
+          <div className="p-6">
             <ShieldAlert className="w-5 h-5" />
             Você não tem permissão para acessar esta página ou ocorreu um erro ({errorMsg}).
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex gap-2 items-center">
+        <div className="bg-card border border-border rounded-xl shadow-sm">
+          <div className="p-6 border-b border-border">
+            <h3 className="flex gap-2 items-center">
               <Activity className="w-5 h-5 text-primary" />
               Histórico do Sistema
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="p-6">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
@@ -92,8 +92,8 @@ export default async function AuditPage({
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   )

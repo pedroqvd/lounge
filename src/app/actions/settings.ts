@@ -1,7 +1,7 @@
 'use server'
 
-import { prisma }
-import { logAction } from './audit' from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
+import { logAction } from './audit'
 import { revalidatePath } from 'next/cache'
 
 export async function getSettings() {

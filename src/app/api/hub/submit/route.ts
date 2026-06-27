@@ -13,7 +13,6 @@ export async function POST(request: Request) {
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length < 10 || cleanPhone.length > 13) {
       return NextResponse.json({ error: 'Telefone inv�lido' }, { status: 400 });
-    }, { status: 400 });
     }
 
     // Check if phone already exists
