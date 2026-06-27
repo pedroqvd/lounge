@@ -1,6 +1,7 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
+import { prisma }
+import { logAction } from './audit' from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export async function getSettings() {
@@ -47,6 +48,7 @@ export async function updateSettings(data: { inactivityDays: number, defaultChur
         webhookUrl: data.webhookUrl || ''
       }
     })
+    await logAction('Atualizou as Configura��es Globais', 'SETTINGS')
     
     revalidatePath('/painel')
     return { success: true }
@@ -93,6 +95,7 @@ export async function updateHubSettings(data: any) {
         instagramUrl: data.instagramUrl, cultoSchedule: data.cultoSchedule, celulaSchedule: data.celulaSchedule, address: data.address, mapsEmbedUrl: data.mapsEmbedUrl, galleryUrls: data.galleryUrls, youtubeUrl: data.youtubeUrl
       }
     })
+    await logAction('Atualizou as Configura��es do Hub', 'HUB_SETTINGS')
     revalidatePath('/painel')
     return { success: true }
   } catch (error: any) {

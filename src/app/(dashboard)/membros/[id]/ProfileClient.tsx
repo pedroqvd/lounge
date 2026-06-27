@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AvatarUpload } from '@/components/ui/AvatarUpload'
+import { updateMemberPhoto } from '@/app/actions/members'
 import { updateMemberNotes, updateMemberMinisterial, updateMemberProfile } from '@/app/actions/crm'
 import { User as UserIcon, Calendar, MapPin, Save, MessageCircle, Clock, BookOpen, Edit2, History, Camera } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -94,16 +96,14 @@ export default function ProfileClient({ member, groups, currentUser }: { member:
           </button>
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-end gap-6 pt-12">
-            <div className="w-28 h-28 rounded-full bg-background border-4 border-card shadow-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative group/photo cursor-pointer" onClick={() => setIsEditProfileOpen(true)}>
-              {member.photoUrl ? (
-                <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
-              ) : (
-                <UserIcon className="w-12 h-12 text-muted-foreground" />
-              )}
-              <div className="absolute inset-0 bg-black/50 items-center justify-center hidden group-hover/photo:flex transition-all">
-                <Camera className="w-6 h-6 text-white" />
-              </div>
-            </div>
+            <AvatarUpload 
+              memberId={member.id} 
+              currentPhotoUrl={member.photoUrl} 
+              onUploadSuccess={async (url) => {
+                await updateMemberPhoto(member.id, url);
+                window.location.reload();
+              }}
+            />
             
             <div className="flex-1 pb-2">
               <h1 className="text-4xl font-extrabold">{member.name}</h1>

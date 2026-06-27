@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import {  useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -18,9 +18,9 @@ import {
   ChevronRight,
   Sun,
   Moon,
-  Settings as SettingsIcon,
+  Settings, Shield as SettingsIcon,
   ClipboardList
-} from 'lucide-react'
+ } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 
 import { getCurrentUser } from '@/app/actions/auth'

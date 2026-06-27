@@ -245,3 +245,20 @@ export async function updateGroup(id: string, data: { address?: string; neighbor
     return { success: false, error: e.message }
   }
 }
+
+export async function updateMemberPhoto(memberId: string, photoUrl: string) {
+  try {
+    const user = await getCurrentUser()
+    if (!user) throw new Error('Unauthorized')
+    
+    await prisma.member.update({
+      where: { id: memberId },
+      data: { photoUrl }
+    })
+    
+    await logAction('Atualizou a foto de perfil do membro', 'MEMBER', memberId, `Nova URL: ${photoUrl}`)
+  } catch (error) {
+    console.error('Error updating member photo:', error)
+    throw error
+  }
+}

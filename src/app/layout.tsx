@@ -9,8 +9,47 @@ import { prisma } from '@/lib/prisma'
 const montserrat = Montserrat({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Lounge For You',
-  description: 'Um site do Ministério de Jovens da Igreja Millenium',
+  title: {
+    default: 'Lounge | Conectando Vidas',
+    template: '%s | Lounge'
+  },
+  description: '�rea de Membros e Gest�o Ministerial da Igreja Millenium. Conecte-se com seu prop�sito.',
+  keywords: ['Igreja', 'Minist�rio', 'Jovens', 'Lounge', 'Membros', 'Gest�o', 'C�lula'],
+  authors: [{ name: 'Lounge For You' }],
+  creator: 'Lounge Team',
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    url: 'https://loungeforyou.com',
+    title: 'Lounge | Conectando Vidas',
+    description: '�rea de Membros e Gest�o Ministerial da Igreja Millenium.',
+    siteName: 'Lounge',
+    images: [
+      {
+        url: 'https://unltgnznpvjfwiqioomh.supabase.co/storage/v1/object/public/video%20publico/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Lounge For You',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lounge | Conectando Vidas',
+    description: '�rea de Membros e Gest�o Ministerial da Igreja Millenium.',
+    images: ['https://unltgnznpvjfwiqioomh.supabase.co/storage/v1/object/public/video%20publico/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 

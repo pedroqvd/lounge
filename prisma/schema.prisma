@@ -281,3 +281,17 @@ model ScheduleSlot {
   @@unique([ministryId, eventId, memberId])
   @@index([eventId])
 }
+
+
+model SystemAudit {
+  id          String   @id @default(uuid())
+  userName    String   
+  action      String   @db.Text
+  resource    String
+  resourceId  String?
+  details     String?  @db.Text
+  createdAt   DateTime @default(now())
+  
+  @@index([resource])
+  @@index([createdAt])
+}
