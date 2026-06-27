@@ -63,7 +63,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
     e.preventDefault()
     setErrorMsg('')
     const cleanPhone = formData.phone.replace(/\D/g, '')
-    if (cleanPhone.length !== 11) { setErrorMsg('Preencha o telefone com DDD e 9 dígitos.'); return }
+    if (cleanPhone.length < 10) { setErrorMsg('Preencha um telefone com DDD v�lido.'); return }
     if (!formData.sourceType) { setErrorMsg('Informe como nos conheceu.'); return }
     if (formData.sourceType === 'Amigo' && !formData.sourceFriend.trim()) { setErrorMsg('Informe o nome do amigo que te convidou.'); return }
     const finalSource = formData.sourceType === 'Amigo' ? `Amigo: ${formData.sourceFriend}` : formData.sourceType

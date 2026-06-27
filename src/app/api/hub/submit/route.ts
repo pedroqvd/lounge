@@ -11,8 +11,9 @@ export async function POST(request: Request) {
 
     // Mathematical sanitization of the phone (keep only digits)
     const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length !== 11) {
-      return NextResponse.json({ error: 'Telefone inválido' }, { status: 400 });
+    if (cleanPhone.length < 10 || cleanPhone.length > 13) {
+      return NextResponse.json({ error: 'Telefone inv�lido' }, { status: 400 });
+    }, { status: 400 });
     }
 
     // Check if phone already exists
