@@ -298,8 +298,6 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         {/* Solid background cover - hides the fixed video for sections below */}
         <div className="relative z-10 bg-background">
         
-        {/* Smooth transition from video to solid background */}
-        <div className="h-48 md:h-64 bg-gradient-to-b from-transparent to-background -mt-48 md:-mt-64 relative z-10 pointer-events-none" />
         {/* UPCOMING EVENTS */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <AnimatedSection id="eventos" className="bg-secondary/20 border-y border-border/30">
