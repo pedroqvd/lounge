@@ -184,8 +184,11 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
         {/* HERO & DNA CONTAINER */}
         <div className="relative overflow-hidden z-10">
+          {/* Smooth transition from header to video */}
+          <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-background to-transparent z-[1] pointer-events-none" />
+          
           {/* Smooth fade to background at the very bottom of the DNA section */}
-          <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent z-[1] pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-background to-transparent z-[1] pointer-events-none" />
 
           {/* Background color accents (shared) */}
           <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 70% at 50% -20%, ${primaryColor}15, transparent)` }} />
@@ -296,7 +299,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
         <div className="relative z-10 bg-background">
         
         {/* Smooth transition from video to solid background */}
-        <div className="h-32 bg-gradient-to-b from-transparent to-background -mt-32 relative z-10" />
+        <div className="h-48 md:h-64 bg-gradient-to-b from-transparent to-background -mt-48 md:-mt-64 relative z-10 pointer-events-none" />
         {/* UPCOMING EVENTS */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <AnimatedSection id="eventos" className="bg-secondary/20 border-y border-border/30">
@@ -602,7 +605,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-card border-t border-border mt-auto">
+      <footer className="relative z-10 bg-background border-t border-border mt-auto">
         <div className="container mx-auto px-4 md:px-6 py-12 md:py-16">
           <div className="grid md:grid-cols-4 gap-10 mb-10 md:mb-12">
             <div className="md:col-span-2">
