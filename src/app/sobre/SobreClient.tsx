@@ -132,6 +132,20 @@ export default function SobreClient({ globalSettings, settings }: any) {
               color="#ec4899" 
             />
             <TimelineItem 
+              year="Janeiro de 2025" 
+              title="O Nascimento do Start Life" 
+              text="Demos um passo importante no cuidado com as novas gerações. Iniciamos oficialmente o trabalho focado 100% nos nossos adolescentes, preparando uma base sólida para o futuro da comunidade." 
+              align="right" 
+              color="#10b981" 
+            />
+            <TimelineItem 
+              year="Maio de 2026" 
+              title="O Encerramento de um Ciclo" 
+              text="O ML Club cumpriu maravilhosamente bem o seu propósito na nossa história. Encerramos este ciclo com muita gratidão para darmos espaço a uma nova estrutura, focada em atender cada faixa com ainda mais excelência." 
+              align="left" 
+              color="#f59e0b" 
+            />
+            <TimelineItem 
               year="Hoje e o Futuro" 
               title="Expansão Global e Nacional" 
               text="Adotamos projetos em Guiné Bissau (África) construindo uma escola para 250 crianças, na Índia apoiando viúvas, e na Turquia com refugiados. No Brasil, plantamos campus em Bom Jesus (PI) e no Gama (DF). O sonho é impactar cada continente do globo." 
@@ -141,6 +155,73 @@ export default function SobreClient({ globalSettings, settings }: any) {
           </div>
         </div>
       </section>
+
+      {/* NOSSA ESTRUTURA (AS FAIXAS) */}
+      <AnimatedSection className="py-24 relative overflow-hidden bg-background border-y border-border/30">
+        <div className="absolute inset-0 opacity-30" style={{ background: `radial-gradient(ellipse at 50% 50%, ${primaryColor}10, transparent 70%)` }} />
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
+          <div className="text-center mb-16 md:mb-20">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4 border" style={{ color: primaryColor, borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }}>
+              Nossa Estrutura Hoje
+            </span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">As Nossas Faixas</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              Organizamos nossa comunidade para atender cada geração com profundidade, linguagem contextualizada e muito amor.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+            {/* KIDS */}
+            <div className="bg-card border border-border p-8 md:p-10 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden flex flex-col h-full">
+              <div className="absolute top-0 left-0 w-full h-2 bg-[#f59e0b]" />
+              <div className="absolute -top-12 -right-12 w-40 h-40 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Heart className="w-full h-full text-[#f59e0b]" />
+              </div>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 relative z-10 bg-[#f59e0b]/10 text-[#f59e0b]">
+                <Heart className="w-8 h-8 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-3xl font-black mb-2 text-foreground relative z-10">Millenium Kids</h3>
+              <p className="text-sm font-bold text-[#f59e0b] mb-4 uppercase tracking-wider relative z-10">[IDADE DO KIDS]</p>
+              <p className="text-muted-foreground leading-relaxed text-lg flex-1 relative z-10">
+                [TEXTO DO PROPÓSITO DO KIDS] Onde tudo começa. Um ambiente seguro e divertido para os pequenos crescerem amando Jesus e a Igreja desde os primeiros passos.
+              </p>
+            </div>
+
+            {/* START LIFE */}
+            <div className="bg-card border border-border p-8 md:p-10 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden flex flex-col h-full">
+              <div className="absolute top-0 left-0 w-full h-2 bg-[#10b981]" />
+              <div className="absolute -top-12 -right-12 w-40 h-40 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Zap className="w-full h-full text-[#10b981]" />
+              </div>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 relative z-10 bg-[#10b981]/10 text-[#10b981]">
+                <Zap className="w-8 h-8 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-3xl font-black mb-2 text-foreground relative z-10">Start Life</h3>
+              <p className="text-sm font-bold text-[#10b981] mb-4 uppercase tracking-wider relative z-10">[IDADE DO START LIFE]</p>
+              <p className="text-muted-foreground leading-relaxed text-lg flex-1 relative z-10">
+                [TEXTO DO PROPÓSITO DO START LIFE] Direcionado aos adolescentes. Energia, descoberta de identidade e a base bíblica necessária para enfrentar os desafios da juventude.
+              </p>
+            </div>
+
+            {/* LOUNGE */}
+            <div className="bg-card border border-border p-8 md:p-10 rounded-[2.5rem] shadow-xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden flex flex-col h-full" style={{ borderColor: primaryColor + '40' }}>
+              <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: primaryColor }} />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `linear-gradient(135deg, ${primaryColor}10, transparent)` }} />
+              <div className="absolute -top-12 -right-12 w-40 h-40 opacity-5 group-hover:opacity-10 transition-opacity" style={{ color: primaryColor }}>
+                <Target className="w-full h-full" />
+              </div>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-8 relative z-10 shadow-lg" style={{ backgroundColor: primaryColor + '20', color: primaryColor }}>
+                <Target className="w-8 h-8 group-hover:scale-110 transition-transform" />
+              </div>
+              <h3 className="text-3xl font-black mb-2 text-foreground relative z-10">Lounge</h3>
+              <p className="text-sm font-bold mb-4 uppercase tracking-wider relative z-10" style={{ color: primaryColor }}>[IDADE DO LOUNGE]</p>
+              <p className="text-muted-foreground leading-relaxed text-lg flex-1 relative z-10">
+                [TEXTO DO PROPÓSITO DO LOUNGE] O nosso novo momento. Para os jovens e jovens adultos que querem profundidade, conexão verdadeira e estão prontos para ser a resposta no mundo real.
+              </p>
+            </div>
+          </div>
+        </div>
+      </AnimatedSection>
 
       {/* GERAÇÃO MILLENIUM */}
       <AnimatedSection className="py-24 bg-secondary/10 relative overflow-hidden">
