@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { logAction } from './audit'
 import { revalidatePath } from 'next/cache'
 import fs from 'fs'
 import path from 'path'
