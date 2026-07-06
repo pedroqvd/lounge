@@ -68,6 +68,16 @@ export default function AtasClient({ initialAtas, users }: { initialAtas: any[],
     }
   }
 
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'REUNIAO': return 'Reunião'
+      case 'DESPACHO': return 'Despacho'
+      case 'TRAMITACAO': return 'Tramitação'
+      case 'FEEDBACK': return 'Feedback'
+      default: return category
+    }
+  }
+
   return (
     <div className="space-y-8">
       {/* HEADER */}
@@ -98,7 +108,7 @@ export default function AtasClient({ initialAtas, users }: { initialAtas: any[],
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
             >
-              {tab === 'TODAS' ? 'Todas' : tab.charAt(0) + tab.slice(1).toLowerCase().replace('ao', 'ão')}
+              {tab === 'TODAS' ? 'Todas' : tab === 'REUNIAO' ? 'Reunião' : tab === 'DESPACHO' ? 'Despacho' : tab === 'TRAMITACAO' ? 'Tramitação' : 'Feedback'}
             </button>
           ))}
         </div>
@@ -131,7 +141,7 @@ export default function AtasClient({ initialAtas, users }: { initialAtas: any[],
                 <div className="space-y-3 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getCategoryColor(ata.category)}`}>
-                      {ata.category}
+                      {getCategoryLabel(ata.category)}
                     </span>
                     <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(ata.status)}`}>
                       {ata.status.replace('_', ' ')}

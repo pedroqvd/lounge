@@ -6,6 +6,16 @@ import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
 
 export function DashboardAtasClient({ myAssignments, globalAssignments, role }: { myAssignments: any[], globalAssignments: any[], role: string }) {
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'REUNIAO': return 'Reunião'
+      case 'DESPACHO': return 'Despacho'
+      case 'TRAMITACAO': return 'Tramitação'
+      case 'FEEDBACK': return 'Feedback'
+      default: return category
+    }
+  }
+
   const renderList = (atas: any[], title: string, subtitle: string, icon: any, colorClass: string) => {
     if (!atas || atas.length === 0) return null
     
@@ -29,7 +39,7 @@ export function DashboardAtasClient({ myAssignments, globalAssignments, role }: 
               <div key={ata.id} className={`flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 rounded-xl border ${isOverdue ? 'bg-red-500/5 border-red-500/20' : 'bg-secondary/30 border-border/50'}`}>
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-background border border-border">{ata.category}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-background border border-border">{getCategoryLabel(ata.category)}</span>
                     <h4 className="font-bold">{ata.title}</h4>
                   </div>
                   {role === 'ADMIN' && ata.assignee && (
