@@ -284,24 +284,24 @@ export default function ProfileClient({ member, groups, currentUser }: { member:
           </button>
         </div>
         
-        <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+        <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
           
           {filteredEvents.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center relative z-10 bg-card py-4">Nenhum evento registrado nesta aba.</p>
           ) : (
             filteredEvents.map((event: any) => (
-              <div key={event.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-md z-10 ${event.color}`}>
+              <div key={event.id} className="relative flex items-start gap-4 group">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card shrink-0 shadow-md z-10 ${event.color}`}>
                   <event.icon className="w-4 h-4" />
                 </div>
-                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md group-hover:border-primary/30 transition-all">
+                <div className="flex-1 p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md group-hover:border-primary/30 transition-all">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      {new Date(event.date).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                      {new Date(event.date).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric'})} • {new Date(event.date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
                     </span>
                     {event.user && (
-                      <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                        Por: {event.user}
+                      <span className="text-[10px] font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {event.user}
                       </span>
                     )}
                   </div>
