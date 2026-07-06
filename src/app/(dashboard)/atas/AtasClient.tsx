@@ -87,7 +87,7 @@ export default function AtasClient({ initialAtas, users }: { initialAtas: any[],
             <FileText className="w-8 h-8 text-primary" />
             Atas & Atribuições
           </h1>
-          <p className="text-muted-foreground mt-2">Registre reuniões, despachos e atribua tarefas para a equipe.</p>
+          <p className="text-muted-foreground mt-2">Registre reuniões, despachos, tramitações, feedbacks e atribua tarefas para a equipe.</p>
         </div>
         
         <button 
