@@ -209,8 +209,7 @@ export async function bulkUpdateScheduleSlots(
             memberId: add.memberId,
             ministryId,
             position: add.position,
-            status: 'CONFIRMADO',
-            notified: false
+            status: 'CONFIRMADO'
           }))
         })
       }
