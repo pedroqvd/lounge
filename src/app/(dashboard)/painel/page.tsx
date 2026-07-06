@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { Users, UserPlus, Cake, MessageCircle, AlertCircle, BookOpen, UserCheck } from 'lucide-react'
 import { getSettings } from '@/app/actions/settings'
+import { getCurrentUser } from '@/app/actions/auth'
 import Link from 'next/link'
 import { DashboardTasksClient } from '@/components/DashboardTasksClient'
+import { DashboardAtasClient } from '@/components/DashboardAtasClient'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 const prisma = globalForPrisma.prisma || new PrismaClient()
@@ -12,6 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const settings = await getSettings()
+  const user = await getCurrentUser()
   
   const [totalAtivos, visitantes, discipulado, batizados, historicoCount] = await Promise.all([
     prisma.member.count({ where: { status: 'ATIVO' } }),
@@ -47,6 +50,20 @@ export default async function DashboardPage() {
     include: { member: true },
     orderBy: { dueDate: 'asc' }
   })
+
+  // Atribuições (Atas)
+  const myAssignments = user ? await prisma.ata.findMany({
+    where: { assignedTo: user.id, status: { not: 'CONCLUIDO' } },
+    orderBy: { dueDate: 'asc' },
+    include: { assignee: { select: { name: true } } }
+  }) : []
+
+  const globalAssignments = user?.role === 'ADMIN' ? await prisma.ata.findMany({
+    where: { assignedTo: { not: null }, status: { not: 'CONCLUIDO' } },
+    orderBy: { dueDate: 'asc' },
+    include: { assignee: { select: { name: true } } }
+  }) : []
+
   const today = new Date()
   today.setHours(0,0,0,0)
   
@@ -121,6 +138,14 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight">Painel de Resumo</h1>
         <p className="text-muted-foreground mt-2">Visão geral do Ministério de Jovens.</p>
       </div>
+
+      {user && (
+        <DashboardAtasClient 
+          myAssignments={myAssignments} 
+          globalAssignments={globalAssignments} 
+          role={user.role} 
+        />
+      )}
 
       <DashboardTasksClient initialTasks={pendingTasks} />
 

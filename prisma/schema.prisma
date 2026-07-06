@@ -40,6 +40,8 @@ model User {
   // Relations
   sentHistories ContactHistory[]
   tasks         Task[]
+  atasCreated   Ata[]            @relation("AtaAuthor")
+  atasAssigned  Ata[]            @relation("AtaAssignee")
 }
 
 model Group {
@@ -294,4 +296,42 @@ model SystemAudit {
   
   @@index([resource])
   @@index([createdAt])
+}
+
+enum AtaCategory {
+  REUNIAO
+  DESPACHO
+  TRAMITACAO
+  FEEDBACK
+}
+
+enum AtaStatus {
+  ABERTO
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+}
+
+model Ata {
+  id          String      @id @default(uuid())
+  title       String
+  content     String      @db.Text
+  category    AtaCategory
+  status      AtaStatus   @default(ABERTO)
+  
+  date        DateTime    @default(now())
+  dueDate     DateTime?
+  
+  authorId    String?
+  assignedTo  String?
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  author      User?       @relation("AtaAuthor", fields: [authorId], references: [id])
+  assignee    User?       @relation("AtaAssignee", fields: [assignedTo], references: [id])
+  
+  @@index([category])
+  @@index([status])
+  @@index([assignedTo])
 }

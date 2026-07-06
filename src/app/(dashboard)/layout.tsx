@@ -19,7 +19,8 @@ import {
   Sun,
   Moon,
   Settings, Shield as SettingsIcon,
-  ClipboardList
+  ClipboardList,
+  FileText
  } from 'lucide-react'
 import { Logo } from '@/components/Logo'
 
@@ -87,6 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavItem href="/templates" icon={MessageSquare} label="Templates" isActive={pathname.startsWith('/templates')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
             <NavItem href="/calendario" icon={Calendar} label="Agenda & Eventos" isActive={pathname.startsWith('/calendario')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
             <NavItem href="/escalas" icon={ClipboardList} label="Escalas" isActive={pathname.startsWith('/escalas')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
+            <NavItem href="/atas" icon={FileText} label="Atas & Atribuições" isActive={pathname.startsWith('/atas')} minimized={sidebarMinimized} onClick={() => setSidebarOpen(false)} />
           </div>
 
         </div>
