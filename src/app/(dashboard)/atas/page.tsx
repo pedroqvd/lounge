@@ -1,6 +1,6 @@
 import { getAtas } from '@/app/actions/atas'
 import AtasClient from './AtasClient'
-import { prisma } from '@/utils/prisma'
+import { prisma } from '@/lib/prisma'
 
 export default async function AtasPage() {
   const atas = await getAtas()
