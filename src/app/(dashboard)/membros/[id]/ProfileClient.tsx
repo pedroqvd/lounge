@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { AvatarUpload } from '@/components/ui/AvatarUpload'
 import { updateMemberPhoto } from '@/app/actions/members'
 import { updateMemberNotes, updateMemberMinisterial, updateMemberProfile } from '@/app/actions/crm'
-import { User as UserIcon, Calendar, MapPin, Save, MessageCircle, Clock, BookOpen, Edit2, History, Camera } from 'lucide-react'
+import { User as UserIcon, Calendar, MapPin, Save, MessageCircle, Clock, BookOpen, Edit2, History, Camera, Droplets, Heart, UserPlus } from 'lucide-react'
 import * as Dialog from '@radix-ui/react-dialog'
 
 export default function ProfileClient({ member, groups, currentUser }: { member: any, groups: any[], currentUser?: any }) {
@@ -55,7 +55,63 @@ export default function ProfileClient({ member, groups, currentUser }: { member:
   const [isSavingMin, setIsSavingMin] = useState(false)
 
   // Timeline Tab State
-  const [activeTab, setActiveTab] = useState<'contatos' | 'auditoria' | 'cultos'>('contatos')
+  const [activeTab, setActiveTab] = useState<'jornada' | 'contatos' | 'cultos' | 'auditoria'>('jornada')
+
+  const timelineEvents: any[] = []
+
+  if (member.createdAt) {
+    timelineEvents.push({
+      id: 'created', type: 'jornada', date: new Date(member.createdAt).getTime(),
+      title: 'Membro Cadastrado', description: 'Data em que o perfil foi criado no sistema.',
+      icon: UserPlus, color: 'bg-blue-500 text-white', user: 'Sistema'
+    })
+  }
+
+  if (minData.joinDate) {
+    timelineEvents.push({
+      id: 'join', type: 'jornada', date: new Date(minData.joinDate).getTime(),
+      title: 'Decisão / Chegada', description: 'Data informada de chegada à igreja.',
+      icon: MapPin, color: 'bg-indigo-500 text-white'
+    })
+  }
+
+  if (minData.baptizeDate) {
+    timelineEvents.push({
+      id: 'baptize', type: 'jornada', date: new Date(minData.baptizeDate).getTime(),
+      title: 'Batismo', description: 'Celebração do batismo nas águas.',
+      icon: Droplets, color: 'bg-cyan-500 text-white'
+    })
+  }
+
+  member.histories?.forEach((hist: any) => {
+    timelineEvents.push({
+      id: `hist-${hist.id}`, type: 'contatos', date: new Date(hist.sentAt).getTime(),
+      title: hist.template ? `Mensagem: ${hist.template.name}` : 'Mensagem Avulsa',
+      description: hist.template ? hist.template.content : hist.customText,
+      user: hist.user?.name || 'Sistema', icon: MessageCircle, color: 'bg-whatsapp text-whatsapp-foreground'
+    })
+  })
+
+  member.attendances?.forEach((att: any) => {
+    timelineEvents.push({
+      id: `att-${att.id}`, type: 'cultos', date: new Date(att.event?.date || att.createdAt).getTime(),
+      title: att.event?.title || 'Culto', description: att.isPresent ? 'Esteve presente no culto' : 'Presença registrada',
+      icon: Calendar, color: 'bg-green-500 text-white'
+    })
+  })
+
+  member.audits?.forEach((audit: any) => {
+    timelineEvents.push({
+      id: `audit-${audit.id}`, type: 'auditoria', date: new Date(audit.createdAt).getTime(),
+      title: 'Atualização de Cadastro', description: audit.action,
+      user: audit.userName, icon: History, color: 'bg-secondary text-secondary-foreground'
+    })
+  })
+
+  timelineEvents.sort((a, b) => b.date - a.date)
+
+  const filteredEvents = timelineEvents.filter(e => activeTab === 'jornada' ? true : e.type === activeTab)
+
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -203,104 +259,61 @@ export default function ProfileClient({ member, groups, currentUser }: { member:
         {/* Tabs */}
         <div className="flex items-center gap-4 border-b border-border mb-6">
           <button 
+            onClick={() => setActiveTab('jornada')}
+            className={`pb-3 font-bold text-sm border-b-2 transition-colors ${activeTab === 'jornada' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          >
+            Jornada Completa
+          </button>
+          <button 
             onClick={() => setActiveTab('contatos')}
             className={`pb-3 font-bold text-sm border-b-2 transition-colors ${activeTab === 'contatos' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
           >
-            Contatos WhatsApp
+            WhatsApp
           </button>
           <button 
             onClick={() => setActiveTab('cultos')}
             className={`pb-3 font-bold text-sm border-b-2 transition-colors ${activeTab === 'cultos' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
           >
-            Histórico de Cultos
+            Cultos
           </button>
           <button 
             onClick={() => setActiveTab('auditoria')}
             className={`pb-3 font-bold text-sm border-b-2 transition-colors ${activeTab === 'auditoria' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
           >
-            Histórico de Edições
+            Auditoria
           </button>
         </div>
         
         <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
           
-          {activeTab === 'contatos' && (
-            member.histories.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center relative z-10 bg-card py-4">Nenhum contato registrado.</p>
-            ) : (
-              member.histories.map((hist: any) => (
-                <div key={hist.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-primary text-primary-foreground shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-md z-10">
-                    <MessageCircle className="w-4 h-4" />
-                  </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md group-hover:border-primary/30 transition-all">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        {new Date(hist.sentAt).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'})}
-                      </span>
+          {filteredEvents.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center relative z-10 bg-card py-4">Nenhum evento registrado nesta aba.</p>
+          ) : (
+            filteredEvents.map((event: any) => (
+              <div key={event.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-md z-10 ${event.color}`}>
+                  <event.icon className="w-4 h-4" />
+                </div>
+                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md group-hover:border-primary/30 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      {new Date(event.date).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                    </span>
+                    {event.user && (
                       <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                        Por: {hist.user?.name || 'Sistema'}
+                        Por: {event.user}
                       </span>
-                    </div>
-                    <p className="text-sm font-semibold mb-1">{hist.template ? hist.template.name : 'Mensagem Livre'}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-3">
-                      {hist.template ? hist.template.content : hist.customText}
-                    </p>
+                    )}
                   </div>
+                  <p className="text-sm font-semibold mb-1">{event.title}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-3">
+                    {event.description}
+                  </p>
                 </div>
-              ))
-            )
+              </div>
+            ))
           )}
 
-          {activeTab === 'cultos' && (
-            member.attendances?.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center relative z-10 bg-card py-4">Nenhuma presença registrada.</p>
-            ) : (
-              member.attendances?.map((att: any) => (
-                <div key={att.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-green-500 text-white shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-md z-10">
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        {new Date(att.event?.date || att.createdAt).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric'})}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold mb-1">{att.event?.title || 'Culto'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Status: {att.isPresent ? 'Presente' : 'Registrado'}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )
-          )}
-
-          {activeTab === 'auditoria' && (
-            member.audits?.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center relative z-10 bg-card py-4">Nenhuma edição registrada.</p>
-            ) : (
-              member.audits?.map((audit: any) => (
-                <div key={audit.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-secondary text-secondary-foreground shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-md z-10">
-                    <History className="w-4 h-4" />
-                  </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background shadow-sm group-hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                        {new Date(audit.createdAt).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'})}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold mb-1">{audit.userName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {audit.action}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )
-          )}
 
         </div>
       </div>
