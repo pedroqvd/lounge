@@ -77,7 +77,7 @@ export async function createAta(data: {
       status: data.status || 'ABERTO',
       date: data.date || new Date(),
       dueDate: data.dueDate,
-      assignedTo: data.assignedTo,
+      assignedTo: data.assignedTo || null,
       authorId: user.id
     }
   })
@@ -109,7 +109,10 @@ export async function updateAta(id: string, data: {
 
   const ata = await prisma.ata.update({
     where: { id },
-    data
+    data: {
+      ...data,
+      assignedTo: data.assignedTo === '' ? null : data.assignedTo
+    }
   })
 
   revalidatePath('/atas')
