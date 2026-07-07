@@ -548,15 +548,14 @@ export default function MembersClient({ initialMembers, groups, templates, userR
             </>
       )}
 
-      {/* Pipeline View */}
       {viewMode === 'pipeline' && (
-        <div className="flex gap-6 overflow-x-auto pb-6 snap-x p-2">
+        <div className="flex gap-6 overflow-x-auto pb-8 pt-4 px-2 snap-x">
           {(() => {
             const columns = [
-              { id: 'VISITANTE', label: 'Visitantes', color: 'bg-amber-500', border: 'border-amber-500/30', light: 'bg-amber-500/10' },
-              { id: 'DISCIPULADO', label: 'Em Discipulado', color: 'bg-blue-500', border: 'border-blue-500/30', light: 'bg-blue-500/10' },
-              { id: 'ATIVO', label: 'Membros Ativos', color: 'bg-emerald-500', border: 'border-emerald-500/30', light: 'bg-emerald-500/10' },
-              { id: 'INATIVO', label: 'Inativos/Desgarrados', color: 'bg-slate-500', border: 'border-slate-500/30', light: 'bg-slate-500/10' }
+              { id: 'VISITANTE', label: 'Visitantes', color: 'bg-amber-500', border: 'border-amber-500/40', light: 'bg-amber-500/20', gradient: 'from-amber-500/5 to-background' },
+              { id: 'DISCIPULADO', label: 'Em Discipulado', color: 'bg-blue-500', border: 'border-blue-500/40', light: 'bg-blue-500/20', gradient: 'from-blue-500/5 to-background' },
+              { id: 'ATIVO', label: 'Membros Ativos', color: 'bg-emerald-500', border: 'border-emerald-500/40', light: 'bg-emerald-500/20', gradient: 'from-emerald-500/5 to-background' },
+              { id: 'INATIVO', label: 'Inativos', color: 'bg-slate-500', border: 'border-slate-500/40', light: 'bg-slate-500/20', gradient: 'from-slate-500/5 to-background' }
             ]
 
             return columns.map(col => {
@@ -564,7 +563,7 @@ export default function MembersClient({ initialMembers, groups, templates, userR
               return (
                 <div 
                   key={col.id} 
-                  className={`min-w-[320px] max-w-[320px] rounded-2xl p-4 flex flex-col gap-4 border snap-center ${col.border} bg-card shadow-sm`}
+                  className={`min-w-[340px] max-w-[340px] rounded-[2rem] p-5 flex flex-col gap-5 border-2 snap-center ${col.border} bg-gradient-to-b ${col.gradient} shadow-xl relative overflow-hidden backdrop-blur-xl transition-all`}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault()
@@ -575,19 +574,20 @@ export default function MembersClient({ initialMembers, groups, templates, userR
                     }
                   }}
                 >
-                  <div className="flex items-center justify-between px-2 pb-2 border-b border-border/50">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${col.color}`} />
-                      <h3 className="font-bold text-sm text-foreground uppercase tracking-wider">{col.label}</h3>
+                  <div className="flex items-center justify-between px-2 pb-3 border-b-2 border-border/40">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3.5 h-3.5 rounded-full ${col.color} shadow-[0_0_10px_rgba(0,0,0,0.5)]`} style={{ boxShadow: '0 0 12px var(--tw-shadow-color)' }} />
+                      <h3 className="font-extrabold text-sm text-foreground uppercase tracking-widest">{col.label}</h3>
                     </div>
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${col.light} text-foreground`}>
+                    <span className={`text-xs font-black px-3 py-1.5 rounded-full ${col.light} text-foreground shadow-sm`}>
                       {colMembers.length}
                     </span>
                   </div>
                   
-                  <div className="flex flex-col gap-3 min-h-[150px]">
+                  <div className="flex flex-col gap-3 min-h-[250px]">
                     {colMembers.length === 0 ? (
-                      <div className="flex-1 flex items-center justify-center border-2 border-dashed border-border/60 rounded-xl text-muted-foreground text-xs font-medium bg-muted/20">
+                      <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-border/60 rounded-2xl text-muted-foreground text-xs font-bold bg-background/40 hover:bg-background/60 transition-colors p-6">
+                        <LayoutGrid className="w-8 h-8 mb-3 opacity-30" />
                         Arraste para cá
                       </div>
                     ) : (
@@ -598,38 +598,40 @@ export default function MembersClient({ initialMembers, groups, templates, userR
                           onDragStart={(e) => {
                             e.dataTransfer.setData('memberId', m.id)
                             e.currentTarget.style.opacity = '0.5'
+                            e.currentTarget.style.transform = 'scale(0.95)'
                           }}
                           onDragEnd={(e) => {
                             e.currentTarget.style.opacity = '1'
+                            e.currentTarget.style.transform = 'scale(1)'
                           }}
-                          className="bg-background p-4 rounded-xl shadow-sm border border-border hover:border-primary/50 hover:shadow-md transition-all group relative cursor-grab active:cursor-grabbing flex flex-col gap-3" 
+                          className={`bg-background/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-border/80 hover:border-${col.color.split('-')[1]}-500/50 hover:shadow-lg hover:-translate-y-1 transition-all group relative cursor-grab active:cursor-grabbing flex flex-col gap-3`} 
                           onClick={() => openModal(m)}
                         >
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-3 overflow-hidden">
-                              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 text-sm">
+                              <div className={`w-10 h-10 rounded-full ${col.light} ${col.color.replace('bg-', 'text-')} font-extrabold flex items-center justify-center shrink-0 text-sm shadow-inner`}>
                                 {m.name.charAt(0)}
                               </div>
-                              <div className="font-bold text-foreground line-clamp-1 leading-tight">{m.name}</div>
+                              <div className="font-extrabold text-foreground line-clamp-1 leading-tight">{m.name}</div>
                             </div>
                             
-                            <div onClick={e => e.stopPropagation()} className="shrink-0">
+                            <div onClick={e => e.stopPropagation()} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                               <DropdownMenu.Root>
                                 <DropdownMenu.Trigger asChild>
-                                  <button className="text-muted-foreground hover:text-primary w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
-                                    <ArrowRight className="w-4 h-4"/>
+                                  <button className="text-muted-foreground hover:text-primary w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-all">
+                                    <ArrowRight className="w-5 h-5"/>
                                   </button>
                                 </DropdownMenu.Trigger>
                                 <DropdownMenu.Portal>
-                                  <DropdownMenu.Content className="bg-popover text-popover-foreground rounded-xl shadow-lg border border-border p-2 z-50 min-w-[200px]">
-                                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Mover para...</div>
+                                  <DropdownMenu.Content className="bg-popover/95 backdrop-blur-md text-popover-foreground rounded-2xl shadow-2xl border border-border/50 p-2 z-50 min-w-[220px]">
+                                    <div className="px-3 py-2 text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-1">Mover para...</div>
                                     {columns.filter(c => c.id !== col.id).map(c => (
                                       <DropdownMenu.Item 
                                         key={c.id} 
                                         onSelect={() => movePipelineStage(m, c.id)} 
-                                        className="px-4 py-2 text-sm font-semibold hover:bg-muted rounded-md cursor-pointer outline-none flex items-center gap-2"
+                                        className="px-4 py-2.5 text-sm font-bold hover:bg-muted rounded-xl cursor-pointer outline-none flex items-center gap-3 transition-colors"
                                       >
-                                        <div className={`w-2 h-2 rounded-full ${c.color}`} />
+                                        <div className={`w-2.5 h-2.5 rounded-full ${c.color}`} />
                                         {c.label}
                                       </DropdownMenu.Item>
                                     ))}
@@ -641,12 +643,12 @@ export default function MembersClient({ initialMembers, groups, templates, userR
                           
                           <div className="flex flex-wrap gap-2 mt-1">
                             {m.phone && (
-                              <div className="px-2 py-1 bg-muted/50 rounded-md text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 border border-border/50">
-                                <Phone className="w-3 h-3"/> {m.phone}
+                              <div className="px-2.5 py-1.5 bg-muted/30 rounded-lg text-[10px] font-bold text-muted-foreground flex items-center gap-1.5 border border-border/40">
+                                <Phone className="w-3.5 h-3.5"/> {m.phone}
                               </div>
                             )}
-                            <div className="px-2 py-1 bg-muted/50 rounded-md text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 border border-border/50">
-                              <Users className="w-3 h-3"/> {m.group?.name || 'Sem grupo'}
+                            <div className="px-2.5 py-1.5 bg-muted/30 rounded-lg text-[10px] font-bold text-muted-foreground flex items-center gap-1.5 border border-border/40">
+                              <Users className="w-3.5 h-3.5"/> {m.group?.name || 'Sem grupo'}
                             </div>
                           </div>
                         </div>
