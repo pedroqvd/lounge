@@ -13,6 +13,8 @@ const MINISTRY_ICONS: Record<string, any> = {
 
 export default function VoluntariosClient({ ministries, events }: { ministries: any[], events: any[] }) {
   const { theme, setTheme } = useTheme()
+  const [selectedMinistryId, setSelectedMinistryId] = useState<string | null>(null)
+  
   const selectedMinistry = ministries.find(m => m.id === selectedMinistryId)
 
   // Filtra eventos que tem Pelo Menos 1 escalado deste ministério
