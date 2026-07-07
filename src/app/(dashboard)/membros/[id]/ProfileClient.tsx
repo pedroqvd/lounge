@@ -193,15 +193,15 @@ export default function ProfileClient({ member, groups, currentUser }: { member:
           <form onSubmit={handleSaveMinisterial} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground">Endereço</label>
-                <input type="text" value={minData.address} onChange={e => setMinData({...minData, address: e.target.value})} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-muted-foreground">Bairro / Cidade</label>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Bairro" value={minData.neighborhood} onChange={e => setMinData({...minData, neighborhood: e.target.value})} className="flex h-11 w-1/2 rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-                  <input type="text" placeholder="Cidade" value={minData.city} onChange={e => setMinData({...minData, city: e.target.value})} className="flex h-11 w-1/2 rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
-                </div>
+                <label className="text-sm font-semibold text-muted-foreground">Onde mora? (Região Administrativa)</label>
+                <select value={minData.city || ''} onChange={e => setMinData({...minData, city: e.target.value})} className="flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground appearance-none">
+                  <option value="">(Não informado)</option>
+                  {[
+                    "Água Quente", "Águas Claras", "Arapoanga", "Arniqueira", "Brazlândia", "Candangolândia", "Ceilândia", "Cruzeiro", "Estrutural/SCIA", "Fercal", "Gama", "Guará", "Itapoã", "Jardim Botânico", "Lago Norte", "Lago Sul", "Núcleo Bandeirante", "Paranoá", "Park Way", "Planaltina", "Plano Piloto", "Recanto das Emas", "Riacho Fundo", "Riacho Fundo II", "SIA", "Samambaia", "Santa Maria", "Sobradinho", "Sobradinho II", "Sol Nascente/Pôr do Sol", "Sudoeste/Octogonal", "São Sebastião", "Taguatinga", "Varjão", "Vicente Pires"
+                  ].map(ra => (
+                    <option key={ra} value={ra}>{ra}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-muted-foreground">Data da Decisão (Chegada)</label>
