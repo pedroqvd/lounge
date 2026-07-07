@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { AudioWaveform, UserCheck, BookOpen, Aperture, Flame, Users, Calendar, MapPin, Clock, ChevronLeft, Mic2, Compass, Download, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
-import html2canvas from 'html2canvas'
+import * as htmlToImage from 'html-to-image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 
@@ -47,16 +47,33 @@ export default function VoluntariosClient({ ministries, events }: { ministries: 
     if (!captureRef.current || !selectedMinistry) return
     try {
       setIsDownloading(true)
-      const canvas = await html2canvas(captureRef.current, {
-        scale: 3, // Alta resolução
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false
+
+      // Temporariamente exibir elementos exclusivos para print (cabeçalho)
+      const printElements = captureRef.current.querySelectorAll('.print\\:flex')
+      printElements.forEach(el => {
+        el.classList.remove('hidden')
+        el.classList.add('flex')
       })
-      const url = canvas.toDataURL('image/png')
+
+      // Aguardar renderização do DOM
+      await new Promise(r => setTimeout(r, 50))
+
+      // html-to-image lida muito melhor com filtros (blur) e SVGs do que html2canvas
+      const dataUrl = await htmlToImage.toPng(captureRef.current, {
+        quality: 1.0,
+        pixelRatio: 2, // Escala de 2 para alta definição sem estourar limite do canvas no mobile
+        backgroundColor: '#ffffff',
+      })
+      
+      // Esconder elementos novamente
+      printElements.forEach(el => {
+        el.classList.add('hidden')
+        el.classList.remove('flex')
+      })
+
       const link = document.createElement('a')
       link.download = `escala-${selectedMinistry.name.toLowerCase().replace(/\s+/g, '-')}.png`
-      link.href = url
+      link.href = dataUrl
       link.click()
     } catch (error) {
       console.error('Erro ao gerar imagem:', error)
