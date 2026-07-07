@@ -377,7 +377,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
             </div>
 
             {/* FORM */}
-            <div id="cadastro" className="p-6 sm:p-8 md:p-10 bg-card border border-border rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+            <div id="cadastro" className="p-6 sm:p-8 md:p-10 bg-card border border-border rounded-3xl md:rounded-[2.5rem] shadow-2xl relative overflow-hidden">
               <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-50" style={{ backgroundColor: primaryColor }} />
               <div className="relative z-10">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg" style={{ backgroundColor: primaryColor + '20', color: primaryColor }}>
@@ -399,7 +399,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-foreground/80">WhatsApp *</label>
-                      <input required type="text" value={formData.phone} onChange={handlePhoneChange}
+                      <input required type="tel" inputMode="tel" value={formData.phone} onChange={handlePhoneChange}
                         className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium"
                         placeholder="(XX) XXXXX-XXXX" />
                     </div>
@@ -413,7 +413,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-foreground/80">Onde você mora? (Região Administrativa) *</label>
                     <select required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})}
-                      className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-foreground appearance-none">
+                      className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 pr-10 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-foreground">
                       <option value="" disabled>Selecione sua região</option>
                       {[
                         "Água Quente", "Águas Claras", "Arapoanga", "Arniqueira", "Brazlândia", "Candangolândia", "Ceilândia", "Cruzeiro", "Estrutural/SCIA", "Fercal", "Gama", "Guará", "Itapoã", "Jardim Botânico", "Lago Norte", "Lago Sul", "Núcleo Bandeirante", "Paranoá", "Park Way", "Planaltina", "Plano Piloto", "Recanto das Emas", "Riacho Fundo", "Riacho Fundo II", "SIA", "Samambaia", "Santa Maria", "Sobradinho", "Sobradinho II", "Sol Nascente/Pôr do Sol", "Sudoeste/Octogonal", "São Sebastião", "Taguatinga", "Varjão", "Vicente Pires"
@@ -426,7 +426,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-foreground/80">Como nos conheceu? *</label>
                     <select required value={formData.sourceType} onChange={e => setFormData({...formData, sourceType: e.target.value, sourceFriend: ''})}
-                      className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-foreground appearance-none">
+                      className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 pr-10 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-foreground">
                       <option value="" disabled>Selecione uma opção</option>
                       <option value="Instagram">Instagram</option>
                       <option value="WhatsApp">Grupo de WhatsApp</option>
