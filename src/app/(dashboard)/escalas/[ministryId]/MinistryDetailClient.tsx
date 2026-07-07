@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Check, Save } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Music, DoorOpen, Baby, Camera, Heart, Plus, Users, ChevronLeft, Check, Save, Download } from 'lucide-react'
 import { removeMemberFromMinistry, bulkUpdateScheduleSlots } from '@/app/actions/ministries'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import * as htmlToImage from 'html-to-image'
+import PrintableSchedule from '@/components/PrintableSchedule'
 
 type Ministry = any
 type Member = any
@@ -28,7 +30,9 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
   const [selectedEventId, setSelectedEventId] = useState('')
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [edits, setEdits] = useState<Record<string, SlotEdit>>({})
+  const captureRef = useRef<HTMLDivElement>(null)
 
   const hasUnsavedChanges = Object.keys(edits).length > 0
 
@@ -70,6 +74,43 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
       toast.error(res.error || 'Erro ao salvar escala')
     }
     setIsSaving(false)
+  }
+
+  const handleDownloadImage = async () => {
+    if (!captureRef.current) return
+    try {
+      setIsDownloading(true)
+      
+      const printElements = captureRef.current.querySelectorAll('.print\\:flex')
+      printElements.forEach(el => {
+        el.classList.remove('hidden')
+        el.classList.add('flex')
+      })
+
+      await new Promise(r => setTimeout(r, 50))
+
+      const dataUrl = await htmlToImage.toPng(captureRef.current, {
+        quality: 1.0,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+      })
+      
+      printElements.forEach(el => {
+        el.classList.add('hidden')
+        el.classList.remove('flex')
+      })
+
+      const link = document.createElement('a')
+      link.download = `escala-${ministry.name.toLowerCase().replace(/\s+/g, '-')}.png`
+      link.href = dataUrl
+      link.click()
+      toast.success('Imagem gerada com sucesso!')
+    } catch (error) {
+      console.error('Erro ao gerar imagem:', error)
+      toast.error('Não foi possível gerar a imagem.')
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   // Compute available months
@@ -199,6 +240,22 @@ export default function MinistryDetailClient({ ministry, members, upcomingEvents
               + Criar Evento no Calendário
             </Link>
           )}
+          {events.length > 0 && !hasUnsavedChanges && (
+            <button
+              onClick={handleDownloadImage}
+              disabled={isDownloading}
+              className="px-5 py-2 rounded-xl text-white font-bold bg-[#1e3a8a] hover:bg-[#1e3a8a]/90 transition-colors flex items-center gap-2 shadow-sm text-sm ml-auto"
+            >
+              <Download className="w-4 h-4" />
+              {isDownloading ? 'Gerando Imagem...' : 'Baixar Imagem'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="fixed top-[-9999px] left-[-9999px] opacity-0 pointer-events-none w-[1200px]">
+        <div ref={captureRef}>
+          <PrintableSchedule selectedMinistry={ministry} ministryEvents={events} />
         </div>
       </div>
 
