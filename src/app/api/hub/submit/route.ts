@@ -1,18 +1,18 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
-    const { name, phone, birthDate, source } = await request.json();
+    const { name, phone, birthDate, source, city } = await request.json();
 
-    if (!name || !phone || !birthDate || !source) {
+    if (!name || !phone || !birthDate || !source || !city) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
 
     // Mathematical sanitization of the phone (keep only digits)
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length < 10 || cleanPhone.length > 13) {
-      return NextResponse.json({ error: 'Telefone inv�lido' }, { status: 400 });
+      return NextResponse.json({ error: 'Telefone inválido' }, { status: 400 });
     }
 
     // Check if phone already exists
@@ -32,6 +32,7 @@ export async function POST(request: Request) {
         phone: cleanPhone,
         birthDate: new Date(birthDate),
         source,
+        city,
         status: 'VISITANTE',
         inviteStatus: 'PENDENTE',
         notes: finalNotes || null

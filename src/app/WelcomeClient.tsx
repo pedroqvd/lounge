@@ -32,7 +32,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
   const primaryColor = globalSettings?.primaryColor || '#6366f1'
   const churchName = globalSettings?.defaultChurchName || 'Lounge'
 
-  const [formData, setFormData] = useState({ name: '', phone: '', birthDate: '', sourceType: '', sourceFriend: '' })
+  const [formData, setFormData] = useState({ name: '', phone: '', birthDate: '', sourceType: '', sourceFriend: '', city: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -72,7 +72,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
       const res = await fetch('/api/hub/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name, phone: formData.phone, birthDate: formData.birthDate, source: finalSource })
+        body: JSON.stringify({ name: formData.name, phone: formData.phone, birthDate: formData.birthDate, source: finalSource, city: formData.city })
       })
       const data = await res.json()
       if (res.ok) setIsSuccess(true)
@@ -411,13 +411,26 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
                   </div>
 
                   <div className="space-y-2">
+                    <label className="text-sm font-bold text-foreground/80">Onde você mora? (Região Administrativa) *</label>
+                    <select required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})}
+                      className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-foreground appearance-none">
+                      <option value="" disabled>Selecione sua região</option>
+                      {[
+                        "Água Quente", "Águas Claras", "Arapoanga", "Arniqueira", "Brazlândia", "Candangolândia", "Ceilândia", "Cruzeiro", "Estrutural/SCIA", "Fercal", "Gama", "Guará", "Itapoã", "Jardim Botânico", "Lago Norte", "Lago Sul", "Núcleo Bandeirante", "Paranoá", "Park Way", "Planaltina", "Plano Piloto", "Recanto das Emas", "Riacho Fundo", "Riacho Fundo II", "SIA", "Samambaia", "Santa Maria", "Sobradinho", "Sobradinho II", "Sol Nascente/Pôr do Sol", "Sudoeste/Octogonal", "São Sebastião", "Taguatinga", "Varjão", "Vicente Pires"
+                      ].map(ra => (
+                        <option key={ra} value={ra}>{ra}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
                     <label className="text-sm font-bold text-foreground/80">Como nos conheceu? *</label>
                     <select required value={formData.sourceType} onChange={e => setFormData({...formData, sourceType: e.target.value, sourceFriend: ''})}
                       className="flex h-14 w-full rounded-2xl border-2 border-input bg-background/50 px-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-foreground appearance-none">
                       <option value="" disabled>Selecione uma opção</option>
                       <option value="Instagram">Instagram</option>
                       <option value="WhatsApp">Grupo de WhatsApp</option>
-                      <option value="Amigo">Um amigo me convidou</option>
+                      <option value="Amigo">Um amigo ou parente me convidou</option>
                       <option value="Andando na rua">Passei na porta / Moro perto</option>
                       <option value="Outros">Outros</option>
                     </select>
@@ -425,7 +438,7 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
 
                   {formData.sourceType === 'Amigo' && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <label className="text-sm font-bold" style={{ color: primaryColor }}>Qual o nome do amigo? *</label>
+                      <label className="text-sm font-bold" style={{ color: primaryColor }}>Quem é essa pessoa que te convidou? *</label>
                       <input required type="text" value={formData.sourceFriend} onChange={e => setFormData({...formData, sourceFriend: e.target.value})}
                         className="flex h-14 w-full rounded-2xl border-2 bg-background/50 px-4 focus:ring-2 outline-none transition-all font-medium"
                         style={{ borderColor: primaryColor + '40' }}
