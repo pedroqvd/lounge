@@ -49,6 +49,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* LIGHT MODE - PREMIUM BRANDING */
   --background: #F0EDFF; /* Névoa */
   --foreground: #1A1030; /* Profundo */
@@ -94,6 +95,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   /* DARK MODE - PREMIUM BRANDING */
   --background: #0D0D14; /* Noite */
   --foreground: #F0EDFF; /* Névoa */
