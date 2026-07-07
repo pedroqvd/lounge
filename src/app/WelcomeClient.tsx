@@ -618,70 +618,93 @@ export default function WelcomeClient({ settings, globalSettings, upcomingEvents
       {/* FOOTER */}
       <footer className="relative z-10 bg-background border-t border-border mt-auto">
         <div className="container mx-auto px-4 md:px-6 py-12 md:py-16">
-          <div className="grid md:grid-cols-4 gap-10 mb-10 md:mb-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 mb-10 md:mb-12">
+            
+            {/* BRANDING & SOCIAL */}
+            <div className="md:col-span-5 flex flex-col items-start">
+              <div className="flex items-center gap-2 mb-6">
                 <Image src="/custom-logo-login-trimmed.PNG" alt="Lounge" width={160} height={56} className="h-10 w-auto object-contain dark:brightness-200" priority />
               </div>
-              <p className="text-muted-foreground max-w-sm leading-relaxed mb-6">Um ministério apaixonado por Jesus e focado em amar as pessoas. Seja muito bem-vindo à nossa família.</p>
-              <div className="flex items-center gap-3">
-                {settings?.whatsappGroupUrl && (
-                  <a href={settings.whatsappGroupUrl} target="_blank" className="w-10 h-10 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all hover:scale-110">
-                    <MessageCircle className="w-5 h-5" />
-                  </a>
-                )}
-                {settings?.instagramUrl && (
-                  <a href={settings.instagramUrl} target="_blank" className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center hover:bg-gradient-to-tr hover:from-[#f09433] hover:to-[#bc1888] hover:text-white transition-all hover:scale-110">
-                    <Instagram className="w-5 h-5" />
-                  </a>
-                )}
-                {settings?.youtubeUrl && (
-                  <a href={settings.youtubeUrl} target="_blank" className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all hover:scale-110">
-                    <Youtube className="w-5 h-5" />
-                  </a>
-                )}
+              <p className="text-muted-foreground leading-relaxed mb-8 max-w-sm">Um ministério apaixonado por Jesus e focado em amar as pessoas. Seja muito bem-vindo à nossa família.</p>
+              
+              <div className="flex flex-wrap items-center gap-5">
+                <div className="p-2 bg-white rounded-xl shadow-sm border border-black/5 shrink-0">
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(currentUrl)}`} alt="QR Code" className="w-14 h-14" />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs font-bold text-foreground/50 uppercase tracking-widest flex items-center gap-1.5"><QrCode className="w-3.5 h-3.5"/> Compartilhe</p>
+                  <div className="flex items-center gap-2.5">
+                    {settings?.whatsappGroupUrl && (
+                      <a href={settings.whatsappGroupUrl} target="_blank" className="w-10 h-10 rounded-xl bg-[#25D366]/10 text-[#25D366] flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all hover:scale-110" title="WhatsApp">
+                        <MessageCircle className="w-5 h-5" />
+                      </a>
+                    )}
+                    {settings?.instagramUrl && (
+                      <a href={settings.instagramUrl} target="_blank" className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center hover:bg-gradient-to-tr hover:from-[#f09433] hover:to-[#bc1888] hover:text-white transition-all hover:scale-110" title="Instagram">
+                        <Instagram className="w-5 h-5" />
+                      </a>
+                    )}
+                    {settings?.youtubeUrl && (
+                      <a href={settings.youtubeUrl} target="_blank" className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all hover:scale-110" title="YouTube">
+                        <Youtube className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <h4 className="font-bold text-lg mb-4">Acesso Rápido</h4>
-              <div className="mb-6">
-                <div className="p-3 bg-white rounded-xl inline-block shadow-sm">
-                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(currentUrl)}`} alt="QR Code" className="w-20 h-20" />
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1"><QrCode className="w-3 h-3"/> Escaneie para compartilhar</p>
-              </div>
-              <ul className="space-y-2.5 text-muted-foreground font-medium">
+
+            {/* LINKS RÁPIDOS */}
+            <div className="md:col-span-3 pt-2">
+              <h4 className="font-extrabold text-lg mb-6">Navegação</h4>
+              <ul className="space-y-4 text-muted-foreground font-medium">
                 {navItems.map(item => (
-                  <li key={item.href}><a href={item.href} className="hover:text-primary transition-colors flex items-center gap-1.5"><ChevronRight className="w-3.5 h-3.5" /> {item.label}</a></li>
+                  <li key={item.href}>
+                    <a href={item.href} className="hover:text-primary transition-colors flex items-center gap-3 group">
+                      <span className="w-2 h-2 rounded-full bg-primary/20 group-hover:bg-primary transition-colors"></span>
+                      {item.label}
+                    </a>
+                  </li>
                 ))}
               </ul>
             </div>
-            <div>
-              <h4 className="font-bold text-lg mb-4">Horários</h4>
-              <div className="space-y-3 text-muted-foreground">
-                {settings?.cultoSchedule && (
-                  <div className="flex items-start gap-2">
-                    <Users className="w-4 h-4 mt-0.5 shrink-0" style={{ color: primaryColor }} />
-                    <div>
-                      <p className="font-bold text-foreground text-sm">Culto</p>
-                      <p className="text-sm">{settings.cultoSchedule}</p>
-                    </div>
-                  </div>
-                )}
-                {settings?.celulaSchedule && (
-                  <div className="flex items-start gap-2">
-                    <Heart className="w-4 h-4 mt-0.5 shrink-0" style={{ color: primaryColor }} />
-                    <div>
-                      <p className="font-bold text-foreground text-sm">Células / HH</p>
-                      <p className="text-sm">{settings.celulaSchedule}</p>
-                    </div>
-                  </div>
-                )}
-                {settings?.address && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 mt-0.5 shrink-0" style={{ color: primaryColor }} />
-                    <p className="text-sm">{settings.address}</p>
-                  </div>
+
+            {/* HORÁRIOS */}
+            <div className="md:col-span-4 pt-2">
+              <h4 className="font-extrabold text-lg mb-6">Nossos Encontros</h4>
+              <div className="space-y-5 text-muted-foreground bg-card border border-border p-6 rounded-3xl shadow-sm">
+                {(!settings?.cultoSchedule && !settings?.celulaSchedule && !settings?.address) ? (
+                  <p className="text-sm leading-relaxed text-foreground/80 font-medium">Fale conosco pelas nossas redes sociais para saber os locais e horários dos próximos encontros. Esperamos por você!</p>
+                ) : (
+                  <>
+                    {settings?.cultoSchedule && (
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg shrink-0" style={{ color: primaryColor }}><Users className="w-4 h-4" /></div>
+                        <div>
+                          <p className="font-bold text-foreground text-sm mb-0.5">Culto</p>
+                          <p className="text-sm">{settings.cultoSchedule}</p>
+                        </div>
+                      </div>
+                    )}
+                    {settings?.celulaSchedule && (
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg shrink-0" style={{ color: primaryColor }}><Heart className="w-4 h-4" /></div>
+                        <div>
+                          <p className="font-bold text-foreground text-sm mb-0.5">Células / HH</p>
+                          <p className="text-sm">{settings.celulaSchedule}</p>
+                        </div>
+                      </div>
+                    )}
+                    {settings?.address && (
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg shrink-0" style={{ color: primaryColor }}><MapPin className="w-4 h-4" /></div>
+                        <div>
+                          <p className="font-bold text-foreground text-sm mb-0.5">Localização</p>
+                          <p className="text-sm">{settings.address}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
