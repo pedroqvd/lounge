@@ -109,7 +109,7 @@ export default async function DashboardPage() {
     { name: 'Total de Ativos', value: totalAtivos.toString(), icon: Users, color: 'text-primary' },
     { name: 'Visitantes', value: visitantes.toString(), icon: UserPlus, color: 'text-blue-500' },
     { name: 'Em Discipulado', value: discipulado.toString(), icon: BookOpen, color: 'text-orange-500' },
-    { name: 'Retenção Visitantes', value: `${taxaRetencao}%`, icon: UserCheck, color: 'text-green-500' },
+    { name: 'Consolidação (%)', value: `${taxaRetencao}%`, icon: UserCheck, color: 'text-green-500' },
     { name: 'Mensagens Enviadas', value: historicoCount.toString(), icon: MessageCircle, color: 'text-whatsapp' },
   ]
 
@@ -186,10 +186,10 @@ export default async function DashboardPage() {
                 <div key={i} className="flex flex-col items-center gap-2 group w-full">
                   <div className="text-xs font-bold text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{d.value}</div>
                   <div 
-                    className="w-full bg-primary/20 rounded-t-md relative overflow-hidden group-hover:bg-primary transition-colors"
-                    style={{ height: `${(d.value / maxAttendance) * 150}px`, minHeight: '4px' }}
+                    className="w-full bg-primary/10 rounded-t-xl relative overflow-hidden group-hover:bg-primary/20 transition-colors"
+                    style={{ height: `${(d.value / maxAttendance) * 150}px`, minHeight: '8px' }}
                   >
-                    <div className="absolute bottom-0 w-full bg-primary rounded-t-md" style={{ height: '100%' }}></div>
+                    <div className="absolute bottom-0 w-full bg-gradient-to-t from-primary/80 to-primary rounded-t-xl" style={{ height: '100%' }}></div>
                   </div>
                   <div className="text-xs font-bold text-muted-foreground mt-1 truncate">{d.name}</div>
                 </div>
@@ -208,10 +208,10 @@ export default async function DashboardPage() {
           </h2>
           <div className="flex-1 flex flex-col gap-3 justify-center">
             
-            <div className="flex flex-col items-center group relative">
-              <div className="w-full h-12 bg-blue-500/20 rounded-xl flex items-center justify-between px-4 border border-blue-500/30">
+            <div className="flex flex-col items-center group relative w-full cursor-default">
+              <div className="w-full h-12 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl flex items-center justify-between px-5 border border-blue-500/20 hover:border-blue-500/40 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-all duration-300 hover:scale-[1.02]">
                 <span className="font-bold text-blue-700 dark:text-blue-400">Visitantes</span>
-                <span className="font-extrabold text-blue-700 dark:text-blue-400">{visitantes}</span>
+                <span className="font-extrabold text-blue-700 dark:text-blue-400 text-lg">{visitantes}</span>
               </div>
             </div>
 
@@ -219,10 +219,10 @@ export default async function DashboardPage() {
               <div className="w-px h-4 bg-border"></div>
             </div>
 
-            <div className="flex flex-col items-center group relative">
-              <div className="w-[90%] h-12 bg-orange-500/20 rounded-xl flex items-center justify-between px-4 border border-orange-500/30">
+            <div className="flex flex-col items-center group relative w-full cursor-default">
+              <div className="w-[90%] h-12 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl flex items-center justify-between px-5 border border-orange-500/20 hover:border-orange-500/40 hover:shadow-[0_0_15px_rgba(249,115,22,0.2)] transition-all duration-300 hover:scale-[1.02]">
                 <span className="font-bold text-orange-700 dark:text-orange-400">Em Discipulado</span>
-                <span className="font-extrabold text-orange-700 dark:text-orange-400">{discipulado}</span>
+                <span className="font-extrabold text-orange-700 dark:text-orange-400 text-lg">{discipulado}</span>
               </div>
             </div>
 
@@ -230,10 +230,10 @@ export default async function DashboardPage() {
               <div className="w-px h-4 bg-border"></div>
             </div>
 
-            <div className="flex flex-col items-center group relative">
-              <div className="w-[80%] h-12 bg-teal-500/20 rounded-xl flex items-center justify-between px-4 border border-teal-500/30">
+            <div className="flex flex-col items-center group relative w-full cursor-default">
+              <div className="w-[80%] h-12 bg-teal-500/10 hover:bg-teal-500/20 rounded-xl flex items-center justify-between px-5 border border-teal-500/20 hover:border-teal-500/40 hover:shadow-[0_0_15px_rgba(20,184,166,0.2)] transition-all duration-300 hover:scale-[1.02]">
                 <span className="font-bold text-teal-700 dark:text-teal-400">Batizados</span>
-                <span className="font-extrabold text-teal-700 dark:text-teal-400">{batizados}</span>
+                <span className="font-extrabold text-teal-700 dark:text-teal-400 text-lg">{batizados}</span>
               </div>
             </div>
 
@@ -241,10 +241,10 @@ export default async function DashboardPage() {
               <div className="w-px h-4 bg-border"></div>
             </div>
 
-            <div className="flex flex-col items-center group relative">
-              <div className="w-[70%] h-12 bg-green-500/20 rounded-xl flex items-center justify-between px-4 border border-green-500/30">
+            <div className="flex flex-col items-center group relative w-full cursor-default">
+              <div className="w-[70%] h-12 bg-green-500/10 hover:bg-green-500/20 rounded-xl flex items-center justify-between px-5 border border-green-500/20 hover:border-green-500/40 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all duration-300 hover:scale-[1.02]">
                 <span className="font-bold text-green-700 dark:text-green-400">Membros Ativos</span>
-                <span className="font-extrabold text-green-700 dark:text-green-400">{totalAtivos}</span>
+                <span className="font-extrabold text-green-700 dark:text-green-400 text-lg">{totalAtivos}</span>
               </div>
             </div>
 
